@@ -27,11 +27,16 @@ pub fn parse_all(filename: &str) -> Pack {
         // not the header
         if i != 0{
             let line_split: Vec<&str> = l.split("\t").collect();
+            let h3: u16;
+            match line_split[3].parse::<u16>() {
+                Ok(n) => h3 = n ,
+                Err(_e) => h3 = u16::MAX,
+            };
 
             p.seq.push(line_split[0].parse().unwrap());
             p.node.push(line_split[1].parse().unwrap());
             p.offset.push(line_split[2].parse().unwrap());
-            p.cov.push(line_split[3].parse().unwrap());
+            p.cov.push(h3);
         }
         else {
             p.header = l;
@@ -64,7 +69,12 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 
             let node: u32  = line_split[1].parse().unwrap();       // Node
             let _h2: u32  = line_split[0].parse().unwrap();      // Off set
-            let h3: u16 = line_split[3].parse().unwrap();      // Coverage
+            //let h3: u16 = line_split[3].parse().unwrap();      // Coverage
+            let h3: u16;
+            match line_split[3].parse::<u16>() {
+                Ok(n) => h3 = n ,
+                Err(_e) => h3 = u16::MAX,
+            };
             if node != j{
                 let mm = mean_vec_u16(&o);
                 if mm >= thresh{

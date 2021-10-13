@@ -25,7 +25,7 @@ pub fn binary2dec_bed(vecc: &[bool]) -> u8{
     result
 }
 
-pub fn vec_u16_u8(vecc: Vec<u16>) -> Vec<u8>{
+pub fn vec_u16_u8(vecc: &Vec<u16>) -> Vec<u8>{
     let mut buff: Vec<u8> = Vec::new();
 
 

@@ -11,12 +11,17 @@ use crate::helper::{transform_u16_to_array_of_u8, transform_u32_to_array_of_u8};
 /// Output: 2 bytes (identifier), 4 byte (länge), 1(vec<u16>)
 /// To add, threshold yes no -> bit
 /// if not -> number threshold number (0 if nothing)
-pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str){
+pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     let s2:Vec<&str> = name.split("/").collect();
 
     let s = s2.last().unwrap().clone();
     // this is the identifier
     let mut buff: Vec<u8> = vec![1,1];
+    if b{
+        buff.push(1);
+    } else {
+        buff.push(0);
+    }
 
     // Length of the vector
     buff.extend(transform_u32_to_array_of_u8(vecc.len() as u32));

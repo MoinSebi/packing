@@ -1,3 +1,5 @@
+use crate::helper::{vec_u16_u8, binary2u8};
+
 pub struct Pack {
     pub header: String,
     pub name: String,
@@ -25,9 +27,28 @@ impl Pack {
             header: name2,
         }
     }
+    pub fn cov2u8(&self) -> Vec<u8>{
+        let h = vec_u16_u8(&self.cov);
+        h
+    }
+
+    pub fn cov2u8_thres(&self, thresh: &u16) -> Vec<u8>{
+        let mut j: Vec<bool> = Vec::new();
+        for x in self.cov.iter(){
+            if x >= thresh{
+                j.push(true)
+            } else {
+                j.push(false);
+            }
+        }
+        let h = binary2u8(j);
+        h
+    }
 
 
 }
+
+
 
 pub struct read_in{
     pub ty: String,
