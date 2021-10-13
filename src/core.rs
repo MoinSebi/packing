@@ -1,4 +1,4 @@
-pub struct pack{
+pub struct Pack {
     pub header: String,
     pub name: String,
     pub node: Vec<u32>,
@@ -7,7 +7,7 @@ pub struct pack{
     pub offset: Vec<u32>
 }
 
-impl pack{
+impl Pack {
     pub fn new() -> Self{
         let k = Vec::new();
         let k2 = Vec::new();
@@ -35,12 +35,6 @@ pub struct read_in{
     pub cc: Vec<u16>,
 }
 
-impl read_in{
-    pub fn from_bin(){
-
-    }
-
-}
 
 pub struct read_in2{
     pub ty: String,

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 
 pub fn binary2u8(vecc: Vec<bool>) -> Vec<u8>{
     let mut buff: Vec<u8> = Vec::new();

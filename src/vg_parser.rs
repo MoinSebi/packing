@@ -1,11 +1,11 @@
-use crate::core::pack;
+use crate::core::Pack;
 use std::fs::File;
-use std::io::{Write, BufReader, BufRead};
+use std::io::{BufReader, BufRead};
 use crate::helper::mean_vec_u16;
 
 /// Parsing a vg pack file COMPLETE
 /// Output as pack
-pub fn parse_all(filename: &str) -> pack{
+pub fn parse_all(filename: &str) -> Pack {
     // Reader basics
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
     let reader = BufReader::new(file);
@@ -17,7 +17,7 @@ pub fn parse_all(filename: &str) -> pack{
 
     let s = s2.last().unwrap().clone();
     //
-    let mut p = pack::new();
+    let mut p = Pack::new();
     p.name = s.to_string();
 
 
@@ -63,7 +63,7 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 
 
             let node: u32  = line_split[1].parse().unwrap();       // Node
-            let h2:u32  = line_split[0].parse().unwrap();      // Off set
+            let _h2: u32  = line_split[0].parse().unwrap();      // Off set
             let h3: u16 = line_split[3].parse().unwrap();      // Coverage
             if node != j{
                 let mm = mean_vec_u16(&o);
@@ -85,8 +85,11 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 }
 
 
+
 /// Node parser
 /// Return a boolean vector for all nodes
+///
+///
 pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
     let reader = BufReader::new(file);
@@ -107,8 +110,13 @@ pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
 
 
             let node: u32  = line_split[1].parse().unwrap();       // Node
-            let h2:u32  = line_split[0].parse().unwrap();      // Off set
-            let h3: u16 = line_split[3].parse().unwrap();      // Coverage
+            //let h2:u32  = line_split[0].parse().unwrap();      // Off set
+            //let h3: u16 = line_split[3].parse().unwrap();      // Coverage
+            let h3: u16;
+            match line_split[3].parse::<u16>() {
+                Ok(n) => h3 = n ,
+                Err(_e) => h3 = u16::MAX,
+            };
             if node != j{
                 let mm = mean_vec_u16(&o);
                 test1.push(mm);

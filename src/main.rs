@@ -4,13 +4,7 @@ mod vg_parser;
 mod helper;
 mod writer;
 
-use std::fs::File;
-use std::io::{Write, BufReader, BufRead, BufWriter};
-use std::collections::{HashSet, HashMap};
-use std::hash::Hash;
-use crate::reader::{get_file_as_byte_vec, get_meta, wrapper2};
 use clap::{App, Arg};
-use crate::core::pack;
 use crate::vg_parser::{parse_node_mean};
 use crate::writer::write_file;
 use crate::helper::vec_u16_u8;
@@ -52,12 +46,12 @@ fn main() {
 
         .get_matches();
 
-    println!("Hello, world!");
+    println!("Packing tool");
     let (name, mean_node): (String, Vec<u16>);
     let mean_node_out:Vec<u8>;
     if matches.is_present("vg"){
         let (name, mean_node) = parse_node_mean(matches.value_of("vg").unwrap());
-        let mean_node_out = vec_u16_u8(mean_node);
+        mean_node_out = vec_u16_u8(mean_node);
         write_file(&name, &mean_node_out, 0, matches.value_of("out").unwrap());
     }
 
