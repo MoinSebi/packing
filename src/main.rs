@@ -90,8 +90,10 @@ fn main() {
         let p =  parse_smart(matches.value_of("vg").unwrap());
         let buf = p.compress();
         let buf2 = p.compress2();
+        let buf4 = p.compress4();
         writer_compress(&buf, "testing/test.compress");
         writer_compress(&buf2, "testing/test2.compress");
+        writer_compress(&buf4, "testing/test4.compress");
 
 
     }

@@ -8,45 +8,44 @@ pub struct PackCompact {
 }
 
 impl PackCompact {
-
     /// Creating empty PackCompact struct
-    pub fn new()->Self{
+    pub fn new() -> Self {
         let node = Vec::new();
         let cov = Vec::new();
 
-        Self{
+        Self {
             node: node,
             coverage: cov,
         }
     }
 
     /// Read from vg pack file
-    pub fn read_complete(& mut self, filename: &str){
-
+    pub fn read_complete(&mut self, filename: &str) {
         let buffer = get_file_as_byte_vec(filename);
-        let chunks = buffer.chunks(4 );
-        for (i, x) in chunks.into_iter().enumerate(){
-            if i%2 == 0{
+        let chunks = buffer.chunks(4);
+        for (i, x) in chunks.into_iter().enumerate() {
+            if i % 2 == 0 {
                 self.node.push(u8_u322(x))
-            }
-            else{
+            } else {
                 self.coverage.push(u8_u322(x))
             }
         }
     }
 
 
-
     /// Coverage vector to byte vector
-    pub fn coverage2byte(&self) -> Vec<u8>{
+    /// Storing only u16 for max coverage
+    pub fn coverage2byte(&self) -> Vec<u8> {
         let h = vec_u16_u82(&self.coverage);
         h
     }
 
-    pub fn coverage2byte_thresh_bit(&self, thresh: &u16) -> Vec<u8>{
+    /// Coverage vector to byte vector
+    /// Storing only bits
+    pub fn coverage2byte_thresh_bit(&self, thresh: &u16) -> Vec<u8> {
         let mut j: Vec<bool> = Vec::new();
-        for x in self.coverage.iter(){
-            if *x as u16 >= *thresh{
+        for x in self.coverage.iter() {
+            if *x as u16 >= *thresh {
                 j.push(true)
             } else {
                 j.push(false);
@@ -56,6 +55,7 @@ impl PackCompact {
         h
     }
 
+    /// Compress file
     pub fn compress(&self) -> Vec<u8>{
         let mut buf: Vec<u8> = Vec::new();
         for x in 0..self.coverage.len(){
@@ -66,6 +66,29 @@ impl PackCompact {
 
         buf
     }
+
+    /// Only nodes
+    pub fn compress3(&self) -> Vec<u8> {
+        let mut buf: Vec<u8> = Vec::new();
+        for x in 0..self.coverage.len() {
+            buf.extend(transform_u32_to_array_of_u8(self.node[x]));
+        }
+        println!("1 {}", buf.len());
+
+        buf
+    }
+
+    /// Only coverage
+    pub fn compress4(&self) -> Vec<u8> {
+        let mut buf: Vec<u8> = Vec::new();
+        for x in 0..self.coverage.len() {
+            buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
+        }
+        println!("1 {}", buf.len());
+
+        buf
+    }
+
 
     // This might be overkill
     pub fn compress2(&self) -> Vec<u8>{
