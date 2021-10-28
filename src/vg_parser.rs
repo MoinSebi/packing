@@ -1,52 +1,32 @@
-use crate::core::Pack;
+use crate::core::{PackCompact};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use crate::helper::mean_vec_u16;
 
-/// Parsing a vg pack file COMPLETE
-/// Output as pack
-pub fn parse_all(filename: &str) -> Pack {
-    // Reader basics
+
+
+/// Reading full file - but smarter
+///
+pub fn parse_smart(filename: &str) -> PackCompact {
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
     let reader = BufReader::new(file);
-
-
-
-    let name = filename;
-    let s2:Vec<&str> = name.split("/").collect();
-
-    let s = s2.last().unwrap().clone();
-    //
-    let mut p = Pack::new();
-    p.name = s.to_string();
-
-
-
-    for (i, line) in reader.lines().enumerate() {
+    let mut pc: PackCompact = PackCompact::new();
+    for (i, line) in reader.lines().enumerate(){
         let l = line.unwrap();
-        // not the header
         if i != 0{
             let line_split: Vec<&str> = l.split("\t").collect();
-            let h3: u16;
-            match line_split[3].parse::<u16>() {
-                Ok(n) => h3 = n ,
-                Err(_e) => h3 = u16::MAX,
-            };
+            let h4: u32 = line_split[3].parse().unwrap();
+            let h5: u32 = line_split[1].parse().unwrap();
+            pc.node.push(h4);
+            pc.coverage.push(h5);
 
-            p.seq.push(line_split[0].parse().unwrap());
-            p.node.push(line_split[1].parse().unwrap());
-            p.offset.push(line_split[2].parse().unwrap());
-            p.cov.push(h3);
-        }
-        else {
-            p.header = l;
         }
     }
-    p
+    pc
 }
 
 
-/// Node parser
+/// Node only parser
 /// Return a boolean vector for all nodes
 pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
@@ -96,10 +76,8 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 
 
 
-/// Node parser
+/// Node only parser -> u16
 /// Return a boolean vector for all nodes
-///
-///
 pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
     let reader = BufReader::new(file);

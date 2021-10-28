@@ -2,77 +2,101 @@
 use std::fs::File;
 use std::io::Read;
 use std::fs;
-use std::convert::TryInto;
-use crate::core::read_in2;
+use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, transform_u32_to_array_of_u8, u8_u32, u8_u322, u8_u16};
+use std::error::Error;
+use crate::core::PackCompact;
 
+pub struct R2 {
+    pub ty: String,
+    pub name: String,
+    pub cc: Vec<bool>,
+}
 
-///
-/// TODO
-/// Read to data structure struct on main
-/// in gfa2bin main to vector
-///
-/// TODO today
-/// mapping 27 genomes to graph dont strore bam
-/// store gaf
-/// genome mapping
-/// 200  read sets
-/// cluster
-/// check mapping yeast
-/// basic GEMMA RUN
-///
-/// what to show
-/// project layout
-/// explain the extended reference princibale
-/// cooler gwas aufhaenger
-/// double smoothing
-/// qq plot
-/// flc lets go
-/// show difference to snps
-/// can i find nested variation, kmer comparsion
-/// yes i can
-/// now find cool stuff
+pub struct R3 {
+    pub ty: String,
+    pub name: String,
+    pub cc: Vec<u16>,
+}
 
-/// get shit byte by byte
-///
-pub fn get_file_as_byte_vec(filename: &String) -> Vec<u8> {
+/// Get files byte by byte
+pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
     let mut f = File::open(&filename).expect("no file found");
     let metadata = fs::metadata(&filename).expect("unable to read metadata");
+    println!("meta len {:?}", metadata.len());
     let mut buffer = vec![0; metadata.len() as usize];
-    f.read(&mut buffer).expect("buffer overflow");
+    // THIS IS A FUCKING JOKE
+    f.read_exact(&mut buffer).expect("buffer overflow");
+
 
 
     buffer
 }
 
-pub fn wrapper2(buffer: &Vec<u8>){
-    // total length 72 + len
-    let length = read_be_u32(&mut &buffer[2..6]);
-    let oo = buffer.chunks((length + 72) as usize );
-    let mut jo: Vec<read_in2> = Vec::new();
+
+pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<R2>{
+    // total length 73 + len
+    let length = u8_u322(&buffer[3..7]);
+    println!("{}", length);
+    let oo = buffer.chunks((length + 73) as usize );
+    println!("How many samples: {}", oo.len());
+    let mut jo: Vec<R2> = Vec::new();
     for x in oo.into_iter(){
+        println!("len is {}", x.len());
         let u = get_meta(x);
         let c = get_bin(x);
-        jo.push(read_in2{name: u.2, ty: "dunno".to_string(), cc: c});
+        jo.push(R2 {name: u.3, ty: "dunno".to_string(), cc: c});
     }
+    return jo
 
 }
 
+pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<R3>{
+    // total length 73 + len
+    let length = u8_u322(&mut &buffer[3..7]);
+    println!("{}", length);
+    let oo = buffer.chunks((length + 73) as usize );
 
-
-/// get the meta data
-/// see definition
-pub fn get_meta(buffer: & [u8]) -> (u32, u16, String){
-    let length = read_be_u32(&mut &buffer[2..6]);
-    let thresh = read_be_u16(&mut &buffer[6..8]);
-    let name = byte_to_string(&mut &buffer[8..72]);
-    (length, thresh, name)
+    println!("How many samples: {}", oo.len());
+    let mut jo: Vec<R3> = Vec::new();
+    for x in oo.into_iter(){
+        println!("len is {}", length + 73);
+        let u = get_meta(x);
+        let c = get_u16(x);
+        jo.push(R3 {name: u.3, ty: "dunno".to_string(), cc: c});
+    }
+    return jo
 
 }
 
+/// Get the meta data from the binary pack file (73 bytes)
+pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
+    let cov = buffer[3];
+    let length = u8_u322(&mut &buffer[3..7]);
+    let thresh = u8_u16(&mut &buffer[7..9]);
+    let name = byte_to_string(&mut &buffer[9..73]);
+
+
+    (cov == 1, length, thresh, name)
+
+}
+
+/// Get binary information from file
 pub fn get_bin(buffer: & [u8]) -> Vec<bool>{
     let mut j: Vec<bool> = Vec::new();
-    for x in buffer[72..].iter(){
+    for x in buffer[73..].iter(){
         j.extend(byte_to_bitvec(&x));
+    }
+    j
+}
+
+/// Get coverage from file
+pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
+    let mut j: Vec<u16> = Vec::new();
+    let g = buffer[73..].chunks(2);
+
+    for x in g.into_iter(){
+
+        j.push(byte2u16(& x));
     }
     j
 }
@@ -81,60 +105,4 @@ pub fn get_bin(buffer: & [u8]) -> Vec<bool>{
 
 
 
-fn byteitin2(buffer: Vec<u8>, b: bool){
-    let mut j = Vec::new();
-    for x in buffer.iter(){
-        j.extend(byte_to_bitvec(x));
 
-    }
-    // return j
-}
-
-fn byte_to_bitvec(buf: &u8) -> Vec<bool>{
-    let mut h: Vec<bool> = Vec::new();
-    let mut n = buf.clone();
-    while (n > 0){
-        h.push((n%2)  == 1);
-        n = n/2
-    }
-    for x in 0..(8-h.len()){
-        h.insert(0, false);
-    }
-    h
-}
-
-
-fn byte_to_u16vec(buf: &mut [u8]) -> Vec<u16>{
-    let mut h: Vec<u16> = Vec::new();
-    let mut j: Vec<&[u8]> = buf.chunks(2).collect();
-    for x in j{
-        h.push(test1(&mut &x));
-    }
-    h
-}
-
-fn read_be_u32(input: & mut &[u8]) -> u32 {
-    let (int_bytes, rest) = input.split_at(std::mem::size_of::<u32>());
-    *input = rest;
-    u32::from_be_bytes(int_bytes.try_into().unwrap())
-}
-
-fn read_be_u16(input: &mut &[u8]) -> u16 {
-    let (int_bytes, rest) = input.split_at(std::mem::size_of::<u16>());
-    *input = rest;
-    u16::from_be_bytes(int_bytes.try_into().unwrap())
-}
-
-
-fn byte_to_string(input: &[u8]) -> String {
-    let mut o = "".to_string();
-    for x in input.iter(){
-        o.push(x.clone() as char);
-    }
-    return o
-}
-
-fn test1(vector: &[u8]) -> u16{
-    let number = ((vector[0] as u16) << 8) | vector[1] as u16;
-    number
-}

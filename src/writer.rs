@@ -1,17 +1,14 @@
 use std::fs::File;
-use std::io::Write;
+use std::io::{Write, BufWriter};
 use crate::helper::{transform_u16_to_array_of_u8, transform_u32_to_array_of_u8};
+use crate::core::PackCompact;
 
 
-
-
-
-/// Write node to binary
-/// genereal writer for u8
+/// Writer for u8
 /// Output: 2 bytes (identifier), 4 byte (länge), 1(vec<u16>)
 /// To add, threshold yes no -> bit
 /// if not -> number threshold number (0 if nothing)
-pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
+pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     let s2:Vec<&str> = name.split("/").collect();
 
     let s = s2.last().unwrap().clone();
@@ -22,7 +19,8 @@ pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool)
     } else {
         buff.push(0);
     }
-
+    println!("{}", vecc.len());
+    println!("{:?}", transform_u32_to_array_of_u8(vecc.len() as u32));
     // Length of the vector
     buff.extend(transform_u32_to_array_of_u8(vecc.len() as u32));
     // Add threshold
@@ -38,7 +36,7 @@ pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool)
         buff.push(c.clone() as u8);
     }
 
-    for x in 0..(64 - char_vec.len()){
+    for _x in 0..(64 - char_vec.len()){
         buff.push(0);
     }
 
@@ -49,4 +47,53 @@ pub fn write_file(name: &String, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool)
     let mut file = File::create([out, "bin"].join(".")).expect("Not able to write ");
     file.write_all(&buff).expect("Not able to write ");
 
+}
+
+/// Just writing bytes to a file
+pub fn writer_compress(buf: &Vec<u8>, filename: &str){
+    let mut file = File::create(filename).expect("Not able to write ");
+    file.write_all(&buf).expect("Not able to write ");
+}
+
+
+/// Writing normal pack file using the PackCompact structure
+pub fn write_pack(pc: &PackCompact, filename: &str){
+    let f = File::create(filename).expect("Unable to create file");
+    let mut f = BufWriter::new(f);
+    write!(f, "{}\t{}\t{}\t{}", "seq.pos", "node.id", "node.offset", "coverage").expect("dashjkdhkaj");
+
+    let mut node = 0;
+    for x in 0..pc.coverage.len(){
+        if x == 0{
+            write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+        }else {
+            if pc.node[x] == pc.node[x - 1] {
+                node += 1;
+                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+            } else {
+                node = 0;
+                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+            }
+        }
+
+
+
+    }
+}
+
+
+
+
+#[cfg(test)]
+mod tests {
+    use crate::main;
+
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+
+    fn it1(){
+        main();
+    }
 }

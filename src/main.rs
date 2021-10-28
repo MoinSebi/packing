@@ -1,15 +1,27 @@
-mod reader;
+
 mod core;
 mod vg_parser;
 mod helper;
 mod writer;
+mod reader;
 
 use clap::{App, Arg};
-use crate::vg_parser::{parse_node_mean, parse_node_thresh, parse_all};
-use crate::writer::write_file;
-use crate::helper::{vec_u16_u8, binary2dec_bed, binary2u8};
+use crate::vg_parser::{parse_node_mean, parse_node_thresh, parse_smart};
+use crate::writer::{write_file, writer_compress};
+use crate::helper::{vec_u16_u8, binary2u8};
+use std::env;
+use getopts::Options;
+use crate::core::PackCompact;
+
+fn print_usage(program: &str, opts: Options) {
+    let brief = format!("Usage: {} FILE [options]", program);
+    print!("{}", opts.usage(&brief));
+}
+
 
 fn main() {
+
+
     let matches = App::new("panSV")
         .version("0.1.0")
         .author("Sebastian V")
@@ -41,57 +53,83 @@ fn main() {
             .short('c')
             .long("coverage")
             .about("Take coverage not nodes"))
+        .arg(Arg::new("compress")
+            .short('s'))
+        .arg(Arg::new("pb")
+            .short('p')
+            .takes_value(true)
+        )
 
 
         .get_matches();
 
+    /*
+    Input is  vg pack file
+    If you want the coverage, make result
+    if ou give a threshold, then the outcome is bitwise
+    esle it is in u16 -> two byte
+    For calculation:
+    - if coverage + no thres -> wc-l -1 x2
+    - if coverage + thresh - wc -l / 8
+    - if node = thresh = cut -f 2 uniq wc -l x2
+    - if node  tresh same as above but + 2
+     */
+
+
+
+    // Collect the name
+
+    let name: &str = matches.value_of("vg").unwrap();
+    let s2:Vec<&str> = name.split("/").collect();
+    let s = s2.last().unwrap().clone();
+
     println!("Packing tool");
-    let (name, mean_node): (String, Vec<u16>);
     let mean_node_out:Vec<u8>;
+    if matches.is_present("compress"){
+        eprintln!("dsakdjaskld");
+        let p =  parse_smart(matches.value_of("vg").unwrap());
+        let buf = p.compress();
+        let buf2 = p.compress2();
+        writer_compress(&buf, "testing/test.compress");
+        writer_compress(&buf2, "testing/test2.compress");
+
+
+    }
+
+    if matches.is_present("pb"){
+        let mut p = PackCompact::new();
+        p.read_complete(matches.value_of("pb").unwrap());
+    }
+
+
+
+
     if matches.is_present("vg"){
         if matches.is_present("coverage"){
             if matches.is_present("threshhold") {
                 let thresh: u16 = matches.value_of("threshhold").unwrap().parse().unwrap();
-                let p = parse_all(matches.value_of("vg").unwrap());
-                mean_node_out = p.cov2u8_thres(&thresh);
-                write_file(&p.name, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+                let p =  parse_smart(matches.value_of("vg").unwrap());
+                mean_node_out = p.coverage2byte_thresh_bit(&thresh);
+                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else {
-                let p = parse_all(matches.value_of("vg").unwrap());
-                mean_node_out = p.cov2u8();
-                write_file(&p.name, &mean_node_out, 0, matches.value_of("out").unwrap(), true);
+                let p = parse_smart(matches.value_of("vg").unwrap());
+                mean_node_out = p.coverage2byte();
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         }
-        else {
+        else { // this is for nodes
             if matches.is_present("threshhold") {
                 let thresh: u16 = matches.value_of("threshhold").unwrap().parse().unwrap();
                 let (name, mean_node) = parse_node_thresh(matches.value_of("vg").unwrap(), thresh);
-                mean_node_out = binary2u8(mean_node);
-                write_file(&name, &mean_node_out, thresh, matches.value_of("out").unwrap(), false);
+                mean_node_out = binary2u8(&mean_node);
+                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else {
                 let (name, mean_node) = parse_node_mean(matches.value_of("vg").unwrap());
                 mean_node_out = vec_u16_u8(&mean_node);
-                write_file(&name, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         }
     }
-
-
 }
 
 
-#[cfg(test)]
-mod tests {
-    use crate::vg_parser::parse_all;
-    use crate::writer::write_file;
-    use crate::core::Pack;
-
-    #[test]
-    fn it_works() {
-        let (name, mean_node): (String, Vec<u16>);
-        let mean_node_out:Vec<u8>;
-        let thresh: u16 = 10;
-        let p: Pack = parse_all("/home/svorbrugg_local/Rust/packing/9986.100k.txt");
-        mean_node_out = p.cov2u8_thres(&thresh);
-        write_file(&p.name, &mean_node_out, thresh, "test.cov", true);
-    }
-}
