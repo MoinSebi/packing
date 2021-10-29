@@ -5,6 +5,7 @@ use std::fs;
 use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, transform_u32_to_array_of_u8, u8_u32, u8_u322, u8_u16};
 use std::error::Error;
 use crate::core::PackCompact;
+use crate::writer::write_pack;
 
 pub struct R2 {
     pub ty: String,
@@ -99,6 +100,23 @@ pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
         j.push(byte2u16(& x));
     }
     j
+}
+
+pub fn read_simple(filename: &str) -> Vec<u32>{
+    let buf = get_file_as_byte_vec(filename);
+    let chunks = buf.chunks(4);
+    let mut vec_nodes: Vec<u32> = Vec::new();
+    for x in chunks.into_iter(){
+        vec_nodes.push(u8_u322(x));
+    }
+    return vec_nodes
+}
+
+pub fn wrapper_meta(filename1: &str, filename2: &str, filename3: &str){
+    let nodes = read_simple(filename1);
+    let cov = read_simple(filename2);
+    let pc: PackCompact = PackCompact{node: nodes, coverage: cov};
+    write_pack(&pc, filename3);
 }
 
 

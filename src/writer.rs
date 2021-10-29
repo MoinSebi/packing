@@ -60,19 +60,19 @@ pub fn writer_compress(buf: &Vec<u8>, filename: &str){
 pub fn write_pack(pc: &PackCompact, filename: &str){
     let f = File::create(filename).expect("Unable to create file");
     let mut f = BufWriter::new(f);
-    write!(f, "{}\t{}\t{}\t{}", "seq.pos", "node.id", "node.offset", "coverage").expect("dashjkdhkaj");
+    write!(f, "{}\t{}\t{}\t{}", "seq.pos", "node.id", "node.offset", "coverage").expect("Can not write file");
 
     let mut node = 0;
     for x in 0..pc.coverage.len(){
         if x == 0{
-            write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+            write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
         }else {
             if pc.node[x] == pc.node[x - 1] {
                 node += 1;
-                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             } else {
                 node = 0;
-                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("dashjkdhkaj");
+                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             }
         }
 

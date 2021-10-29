@@ -57,7 +57,12 @@ fn main() {
             .short('s'))
         .arg(Arg::new("pb")
             .short('p')
-            .takes_value(true)
+            .takes_value(true))
+        .arg(Arg::new("meta")
+            .short('m')
+            .long("meta")
+            .about("Write Metafile to this file")
+
         )
 
 
@@ -89,8 +94,6 @@ fn main() {
         eprintln!("dsakdjaskld");
         let p =  parse_smart(matches.value_of("vg").unwrap());
         let buf = p.compress();
-        let buf2 = p.compress2();
-        let buf4 = p.compress4();
         writer_compress(&buf, "testing/test.compress");
         writer_compress(&buf2, "testing/test2.compress");
         writer_compress(&buf4, "testing/test4.compress");
@@ -98,10 +101,30 @@ fn main() {
 
     }
 
+    if matches.is_present("meta"){
+        let p =  parse_smart(matches.value_of("vg").unwrap());
+        let buf = p.compress_only_node();
+        writer_compress(&buf, "testing/test.node.meta");
+
+    }
+
+    if matches.is_present("compress"){
+        let p =  parse_smart(matches.value_of("vg").unwrap());
+        let buf = p.compress_only_coverage();
+        writer_compress(&buf, "testing/test.node.compress");
+    }
+
+    if matches.is_present("single file compress"){
+        let p =  parse_smart(matches.value_of("vg").unwrap());
+        let buf = p.compress_all();
+        writer_compress(&buf, "testing/test.node.ccompress");
+    }
+
     if matches.is_present("pb"){
         let mut p = PackCompact::new();
         p.read_complete(matches.value_of("pb").unwrap());
     }
+
 
 
 

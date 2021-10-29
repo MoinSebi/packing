@@ -56,7 +56,7 @@ impl PackCompact {
     }
 
     /// Compress file
-    pub fn compress(&self) -> Vec<u8>{
+    pub fn compress_all(&self) -> Vec<u8>{
         let mut buf: Vec<u8> = Vec::new();
         for x in 0..self.coverage.len(){
             buf.extend(transform_u32_to_array_of_u8(self.node[x]));
@@ -68,7 +68,7 @@ impl PackCompact {
     }
 
     /// Only nodes
-    pub fn compress3(&self) -> Vec<u8> {
+    pub fn compress_only_node(&self) -> Vec<u8> {
         let mut buf: Vec<u8> = Vec::new();
         for x in 0..self.coverage.len() {
             buf.extend(transform_u32_to_array_of_u8(self.node[x]));
@@ -79,7 +79,7 @@ impl PackCompact {
     }
 
     /// Only coverage
-    pub fn compress4(&self) -> Vec<u8> {
+    pub fn compress_only_coverage(&self) -> Vec<u8> {
         let mut buf: Vec<u8> = Vec::new();
         for x in 0..self.coverage.len() {
             buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
@@ -91,7 +91,7 @@ impl PackCompact {
 
 
     // This might be overkill
-    pub fn compress2(&self) -> Vec<u8>{
+    pub fn compress_smart(&self) -> Vec<u8>{
         let mut buf: Vec<u8> = Vec::new();
         let mut node: &u32 = &0;
         let mut repeats: u32 = 0;
