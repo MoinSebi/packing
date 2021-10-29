@@ -6,17 +6,13 @@ mod writer;
 mod reader;
 
 use clap::{App, Arg};
-use crate::vg_parser::{parse_node_mean, parse_node_thresh, parse_smart};
-use crate::writer::{write_file, writer_compress};
+use crate::vg_parser::{parse_smart};
+use crate::writer::{write_file, writer_compress, write_pack};
 use crate::helper::{vec_u16_u8, binary2u8};
-use std::env;
-use getopts::Options;
+use std::{ process};
 use crate::core::PackCompact;
-
-fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} FILE [options]", program);
-    print!("{}", opts.usage(&brief));
-}
+use std::path::Path;
+use crate::reader::wrapper_meta;
 
 
 fn main() {
@@ -26,22 +22,28 @@ fn main() {
         .version("0.1.0")
         .author("Sebastian V")
         .about("packing")
-        .arg(Arg::new("vg")
-            .short('v')
-            .long("vg")
-            .about("vg file")
-            .takes_value(true)
-            .default_value("/home/svorbrugg_local/Rust/packing/9986.100k.txt"))
-        .arg(Arg::new("type")
+        .arg(Arg::new("pack")
+            .short('p')
+            .long("pack")
+            .about("vg pack file")
+            .takes_value(true))
+        .arg(Arg::new("meta")
+            .short('m')
+            .takes_value(true))
+        .arg(Arg::new("coverage")
+            .short('c')
+            .takes_value(true))
+        .arg(Arg::new("binary pack")
+            .short('b')
+            .takes_value(true))
+        .arg(Arg::new("sequence")
+            .short('s')
+            .long("sequence")
+            .about("sequence [default: nodes]"))
+        .arg(Arg::new("threshold")
             .short('t')
-            .long("type")
-            .about("n|s (nodes or sequence)")
-            .takes_value(true)
-            .default_value("n"))
-        .arg(Arg::new("threshhold")
-            .short('d')
-            .long("threshhold")
-            .about("threshhold")
+            .long("threshold")
+            .about("threshold")
             .takes_value(true))
         .arg(Arg::new("out")
             .short('o')
@@ -49,21 +51,23 @@ fn main() {
             .about("Output name")
             .takes_value(true)
             .default_value("pack"))
-        .arg(Arg::new("coverage")
-            .short('c')
-            .long("coverage")
-            .about("Take coverage not nodes"))
-        .arg(Arg::new("compress")
-            .short('s'))
-        .arg(Arg::new("pb")
-            .short('p')
-            .takes_value(true))
-        .arg(Arg::new("meta")
-            .short('m')
-            .long("meta")
+        .arg(Arg::new("output meta")
+            .long("outmeta")
             .about("Write Metafile to this file")
+            .takes_value(true))
+        .arg(Arg::new("output coverage")
+            .long("outcov")
+            .about("Write Coverage to this file")
+            .takes_value(true))
+        .arg(Arg::new("output binary packing")
+            .long("outbpack")
+            .about("Write complete file to this file")
+            .takes_value(true))
+        .arg(Arg::new("output packing")
+            .long("outpack")
+            .about("Write complete file to this file")
+            .takes_value(true))
 
-        )
 
 
         .get_matches();
@@ -83,76 +87,106 @@ fn main() {
 
 
     // Collect the name
-
-    let name: &str = matches.value_of("vg").unwrap();
-    let s2:Vec<&str> = name.split("/").collect();
-    let s = s2.last().unwrap().clone();
-
-    println!("Packing tool");
-    let mean_node_out:Vec<u8>;
-    if matches.is_present("compress"){
-        eprintln!("dsakdjaskld");
-        let p =  parse_smart(matches.value_of("vg").unwrap());
-        let buf = p.compress();
-        writer_compress(&buf, "testing/test.compress");
-        writer_compress(&buf2, "testing/test2.compress");
-        writer_compress(&buf4, "testing/test4.compress");
-
-
-    }
-
-    if matches.is_present("meta"){
-        let p =  parse_smart(matches.value_of("vg").unwrap());
-        let buf = p.compress_only_node();
-        writer_compress(&buf, "testing/test.node.meta");
-
-    }
-
-    if matches.is_present("compress"){
-        let p =  parse_smart(matches.value_of("vg").unwrap());
-        let buf = p.compress_only_coverage();
-        writer_compress(&buf, "testing/test.node.compress");
-    }
-
-    if matches.is_present("single file compress"){
-        let p =  parse_smart(matches.value_of("vg").unwrap());
-        let buf = p.compress_all();
-        writer_compress(&buf, "testing/test.node.ccompress");
-    }
-
-    if matches.is_present("pb"){
-        let mut p = PackCompact::new();
-        p.read_complete(matches.value_of("pb").unwrap());
-    }
+    eprintln!("Packing tool");
 
 
 
 
 
-    if matches.is_present("vg"){
-        if matches.is_present("coverage"){
-            if matches.is_present("threshhold") {
-                let thresh: u16 = matches.value_of("threshhold").unwrap().parse().unwrap();
-                let p =  parse_smart(matches.value_of("vg").unwrap());
-                mean_node_out = p.coverage2byte_thresh_bit(&thresh);
-                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+
+    // Read input:
+    let mut s = "";
+    let mut p: PackCompact = PackCompact::new();
+    let mut no_file = false;
+    if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) | (matches.is_present("binary pack")){
+        if matches.is_present("pack"){
+            if Path::new(matches.value_of("pack").unwrap()).exists(){
+                p =  parse_smart(matches.value_of("pack").unwrap());
+                let name: &str = matches.value_of("pack").unwrap();
+                let s2:Vec<&str> = name.split("/").collect();
+                s = s2.last().unwrap().clone();
             } else {
-                let p = parse_smart(matches.value_of("vg").unwrap());
-                mean_node_out = p.coverage2byte();
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+                no_file = true;
             }
         }
-        else { // this is for nodes
-            if matches.is_present("threshhold") {
-                let thresh: u16 = matches.value_of("threshhold").unwrap().parse().unwrap();
-                let (name, mean_node) = parse_node_thresh(matches.value_of("vg").unwrap(), thresh);
-                mean_node_out = binary2u8(&mean_node);
-                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+        else if matches.is_present("binary pack") {
+            if Path::new(matches.value_of("binary pack").unwrap()).exists() {
+                p = PackCompact::new();
+                p.read_complete(matches.value_of("binary pack").unwrap());
+                let name: &str = matches.value_of("binary pack").unwrap();
+                let s2: Vec<&str> = name.split("/").collect();
+                s = s2.last().unwrap().clone();
             } else {
-                let (name, mean_node) = parse_node_mean(matches.value_of("vg").unwrap());
-                mean_node_out = vec_u16_u8(&mean_node);
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+                no_file = true;
             }
+        }
+        else {
+            if Path::new(matches.value_of("coverage").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
+                eprintln!("the file is");
+                p = wrapper_meta(matches.value_of("meta").unwrap(), matches.value_of("coverage").unwrap());
+                let name: &str = matches.value_of("coverage").unwrap();
+                let s2: Vec<&str> = name.split("/").collect();
+                s = s2.last().unwrap().clone();
+            }else {
+                no_file = true;
+            }
+        }
+    }
+
+    if no_file{
+        eprintln!("There is no input file");
+    }
+    if p.coverage.len() == 0{
+        eprintln!("There is a problem with the input files");
+
+        process::exit(0x0100);
+    } else {
+        eprintln!("File is {}", s)
+    }
+
+
+
+    // Output
+    if matches.is_present("output meta"){
+        let buf = p.compress_only_node();
+        writer_compress(&buf, matches.value_of("output meta").unwrap());
+
+    }
+
+    if matches.is_present("output coverage"){
+        let buf = p.compress_only_coverage();
+        writer_compress(&buf, matches.value_of("output coverage").unwrap());
+    }
+
+    if matches.is_present("output binary packing"){
+        let buf = p.compress_all();
+        writer_compress(&buf, matches.value_of("output binary packing").unwrap());
+    }
+    if matches.is_present("output packing"){
+        write_pack(&p, matches.value_of("output packing").unwrap())
+    }
+
+
+
+    // Cat output
+    let mean_node_out: Vec<u8>;
+    if matches.is_present("coverage"){
+        if matches.is_present("threshold"){
+            let thresh: u16 = matches.value_of("threshold").unwrap().parse().unwrap();
+            mean_node_out = p.coverage2byte_thresh_bit(&thresh);
+            write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+        } else {
+            mean_node_out = p.coverage2byte();
+            write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+        }
+    } else {
+        if matches.is_present("threshold") {
+            let thresh: u16 = matches.value_of("threshold").unwrap().parse().unwrap();
+            mean_node_out = binary2u8(&p.node2byte_thresh(thresh));
+            write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+        } else {
+            mean_node_out = vec_u16_u8(&p.node2byte());
+            write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
         }
     }
 }

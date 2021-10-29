@@ -65,14 +65,14 @@ pub fn write_pack(pc: &PackCompact, filename: &str){
     let mut node = 0;
     for x in 0..pc.coverage.len(){
         if x == 0{
-            write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+            write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
         }else {
             if pc.node[x] == pc.node[x - 1] {
                 node += 1;
-                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+                write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             } else {
                 node = 0;
-                write!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+                write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             }
         }
 
@@ -84,16 +84,4 @@ pub fn write_pack(pc: &PackCompact, filename: &str){
 
 
 
-#[cfg(test)]
-mod tests {
-    use crate::main;
 
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-
-    fn it1(){
-        main();
-    }
-}

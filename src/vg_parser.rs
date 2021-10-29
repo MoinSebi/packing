@@ -15,10 +15,10 @@ pub fn parse_smart(filename: &str) -> PackCompact {
         let l = line.unwrap();
         if i != 0{
             let line_split: Vec<&str> = l.split("\t").collect();
-            let h4: u32 = line_split[3].parse().unwrap();
-            let h5: u32 = line_split[1].parse().unwrap();
-            pc.node.push(h4);
-            pc.coverage.push(h5);
+            let no: u32 = line_split[1].parse().unwrap();
+            let cov: u32 = line_split[3].parse().unwrap();
+            pc.node.push(no);
+            pc.coverage.push(cov);
 
         }
     }
@@ -26,6 +26,7 @@ pub fn parse_smart(filename: &str) -> PackCompact {
 }
 
 
+#[allow(dead_code)]
 /// Node only parser
 /// Return a boolean vector for all nodes
 pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
@@ -75,7 +76,7 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 }
 
 
-
+#[allow(dead_code)]
 /// Node only parser -> u16
 /// Return a boolean vector for all nodes
 pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){

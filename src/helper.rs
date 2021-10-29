@@ -1,6 +1,3 @@
-use std::convert::TryInto;
-
-
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -76,14 +73,13 @@ pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
 
 
 
-
-
 pub fn transform_u32_to_array_of_u8(x:u32) -> [u8;4] {
     let b1 : u8 = ((x >> 24) & 0xff) as u8;
     let b2 : u8 = ((x >> 16) & 0xff) as u8;
     let b3 : u8 = ((x >> 8) & 0xff) as u8;
     let b4 : u8 = (x & 0xff) as u8;
-    return [b1, b2, b3, b4]
+    let array = [b1, b2, b3, b4];
+    return array
 }
 
 
@@ -139,10 +135,7 @@ pub fn u8_u322(vector: &[u8]) -> u32{
 
 
 
-pub fn u8_u32(vector: &[u8;4]) -> u32{
-    let number = ((vector[0] as u32) << 24) |((vector[1] as u32) << 16) |((vector[2] as u32) << 8) | vector[3] as u32;
-    number
-}
+
 
 
 /// Coverts two bytes to a 16
@@ -155,12 +148,11 @@ pub fn byte2u16(vector: &[u8]) -> u16{
 
 #[cfg(test)]
 mod tests {
-    use crate::helper::{u8_u32, transform_u32_to_array_of_u8};
+    use crate::helper::{transform_u32_to_array_of_u8, u8_u322};
 
     #[test]
     fn test_converter(){
-        let o = 10;
-        assert_eq!(10, u8_u32(&transform_u32_to_array_of_u8(10)));
+        assert_eq!(10, u8_u322(&transform_u32_to_array_of_u8(10)));
     }
 }
 

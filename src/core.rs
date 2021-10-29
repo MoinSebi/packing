@@ -1,4 +1,4 @@
-use crate::helper::{vec_u16_u8, binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322};
+use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16};
 use crate::reader::get_file_as_byte_vec;
 
 
@@ -30,6 +30,47 @@ impl PackCompact {
                 self.coverage.push(u8_u322(x))
             }
         }
+    }
+
+
+    pub fn node2byte_thresh(&self, thresh: u16) -> Vec<bool>{
+        let mut node_id = 1;
+        let mut node_mean: Vec<u16> = Vec::new();
+        let mut result: Vec<bool> = Vec::new();
+        for x in 0..self.coverage.len(){
+            if self.node[x] != node_id {
+                let mm = mean_vec_u16(&node_mean);
+                if mm >= thresh{
+                    result.push(true);
+                } else {
+                    result.push(false);
+                }
+                node_id = self.node[x] ;
+                node_mean = vec![self.coverage[x] as u16];
+            } else {
+                node_mean.push(self.coverage[x] as u16)
+            }
+        }
+        result
+
+    }
+
+    pub fn node2byte(&self) -> Vec<u16>{
+        let mut node_id = 1;
+        let mut node_mean: Vec<u16> = Vec::new();
+        let mut result: Vec<u16> = Vec::new();
+        for x in 0..self.coverage.len(){
+            if self.node[x]  != node_id {
+                result.push(mean_vec_u16(&node_mean));
+
+                node_id = self.node[x] ;
+                node_mean = vec![self.coverage[x] as u16];
+            } else {
+                node_mean.push(self.coverage[x] as u16)
+            }
+        }
+        result
+
     }
 
 
@@ -89,7 +130,7 @@ impl PackCompact {
         buf
     }
 
-
+    #[allow(dead_code)]
     // This might be overkill
     pub fn compress_smart(&self) -> Vec<u8>{
         let mut buf: Vec<u8> = Vec::new();

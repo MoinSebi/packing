@@ -2,24 +2,24 @@
 use std::fs::File;
 use std::io::Read;
 use std::fs;
-use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, transform_u32_to_array_of_u8, u8_u32, u8_u322, u8_u16};
-use std::error::Error;
+use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16};
 use crate::core::PackCompact;
-use crate::writer::write_pack;
 
-pub struct R2 {
-    pub ty: String,
+
+pub struct ReaderBit {
+    pub ty: bool,
     pub name: String,
     pub cc: Vec<bool>,
 }
 
-pub struct R3 {
-    pub ty: String,
+
+pub struct ReaderU16 {
+    pub ty: bool,
     pub name: String,
     pub cc: Vec<u16>,
 }
 
-/// Get files byte by byte
+/// Get files byte by byte - Now exact
 pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
     let mut f = File::open(&filename).expect("no file found");
     let metadata = fs::metadata(&filename).expect("unable to read metadata");
@@ -34,42 +34,47 @@ pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
 }
 
 
-pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<R2>{
+#[allow(dead_code)]
+/// Reads buf to Vec<bool>
+pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
     let length = u8_u322(&buffer[3..7]);
     println!("{}", length);
     let oo = buffer.chunks((length + 73) as usize );
     println!("How many samples: {}", oo.len());
-    let mut jo: Vec<R2> = Vec::new();
+    let mut jo: Vec<ReaderBit> = Vec::new();
     for x in oo.into_iter(){
         println!("len is {}", x.len());
         let u = get_meta(x);
         let c = get_bin(x);
-        jo.push(R2 {name: u.3, ty: "dunno".to_string(), cc: c});
+        jo.push(ReaderBit {name: u.3, ty: u.0, cc: c});
     }
     return jo
 
 }
 
-pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<R3>{
+
+#[allow(dead_code)]
+/// Reads buf to Vec<u16>
+pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     // total length 73 + len
     let length = u8_u322(&mut &buffer[3..7]);
-    println!("{}", length);
     let oo = buffer.chunks((length + 73) as usize );
 
     println!("How many samples: {}", oo.len());
-    let mut jo: Vec<R3> = Vec::new();
+    let mut jo: Vec<ReaderU16> = Vec::new();
     for x in oo.into_iter(){
-        println!("len is {}", length + 73);
         let u = get_meta(x);
         let c = get_u16(x);
-        jo.push(R3 {name: u.3, ty: "dunno".to_string(), cc: c});
+        jo.push(ReaderU16 {name: u.3, ty: u.0, cc: c});
     }
     return jo
 
 }
 
+#[allow(dead_code)]
 /// Get the meta data from the binary pack file (73 bytes)
+/// Sequence/Node, length, thresh, name
 pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
     let cov = buffer[3];
     let length = u8_u322(&mut &buffer[3..7]);
@@ -81,6 +86,32 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
 
 }
 
+
+/// Reads a binary file
+/// Buff -> Vec<u32>
+pub fn read_simple(filename: &str) -> Vec<u32>{
+    let buf = get_file_as_byte_vec(filename);
+    let chunks = buf.chunks(4);
+    let mut vec_nodes: Vec<u32> = Vec::new();
+    for x in chunks.into_iter(){
+        vec_nodes.push(u8_u322(x));
+    }
+    return vec_nodes
+}
+
+/// Wrapper for meta + coverage combination
+pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
+    let nodes = read_simple(filename1);
+    let cov = read_simple(filename2);
+    let pc: PackCompact = PackCompact{node: nodes, coverage: cov};
+    pc
+}
+
+
+
+
+//___________________________________________________________
+// Helper functions
 /// Get binary information from file
 pub fn get_bin(buffer: & [u8]) -> Vec<bool>{
     let mut j: Vec<bool> = Vec::new();
@@ -102,22 +133,9 @@ pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
     j
 }
 
-pub fn read_simple(filename: &str) -> Vec<u32>{
-    let buf = get_file_as_byte_vec(filename);
-    let chunks = buf.chunks(4);
-    let mut vec_nodes: Vec<u32> = Vec::new();
-    for x in chunks.into_iter(){
-        vec_nodes.push(u8_u322(x));
-    }
-    return vec_nodes
-}
 
-pub fn wrapper_meta(filename1: &str, filename2: &str, filename3: &str){
-    let nodes = read_simple(filename1);
-    let cov = read_simple(filename2);
-    let pc: PackCompact = PackCompact{node: nodes, coverage: cov};
-    write_pack(&pc, filename3);
-}
+
+
 
 
 
