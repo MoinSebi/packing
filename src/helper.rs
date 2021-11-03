@@ -47,7 +47,7 @@ pub fn vec_u16_u82(vecc: &Vec<u32>) -> Vec<u8>{
     buff
 }
 
-
+/// Same function than "transform_u16_to_array_of_u8"
 pub fn transform_u32_u16to_array_of_u8(x1:u32) -> [u8;2] {
     let x = x1 as u16;
     let b3 : u8 = ((x >> 8) & 0xff) as u8;
@@ -56,6 +56,7 @@ pub fn transform_u32_u16to_array_of_u8(x1:u32) -> [u8;2] {
 }
 
 
+/// Transform u16 to 2 u8
 pub fn transform_u16_to_array_of_u8(x:u16) -> [u8;2] {
     let b3 : u8 = ((x >> 8) & 0xff) as u8;
     let b4 : u8 = (x & 0xff) as u8;
@@ -73,6 +74,7 @@ pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
 
 
 
+/// u32 -> 4xu8
 pub fn transform_u32_to_array_of_u8(x:u32) -> [u8;4] {
     let b1 : u8 = ((x >> 24) & 0xff) as u8;
     let b2 : u8 = ((x >> 16) & 0xff) as u8;
@@ -98,6 +100,10 @@ pub fn byte_to_bitvec(buf: &u8) -> Vec<bool>{
 }
 
 
+/// Byte to string
+///
+/// Alternativ to  std::str::from_utf8
+/// https://doc.rust-lang.org/std/str/fn.from_utf8.html
 pub fn byte_to_string(input: &[u8]) -> String {
     let mut o = "".to_string();
     for x in input.iter(){
@@ -148,12 +154,45 @@ pub fn byte2u16(vector: &[u8]) -> u16{
 
 #[cfg(test)]
 mod tests {
-    use crate::helper::{transform_u32_to_array_of_u8, u8_u322};
+    use crate::helper::{transform_u32_to_array_of_u8, u8_u322, transform_u16_to_array_of_u8, u8_u16, mean_vec_u16, binary2u8, byte_to_bitvec, byte_to_string};
 
     #[test]
     fn test_converter(){
         assert_eq!(10, u8_u322(&transform_u32_to_array_of_u8(10)));
     }
+
+    #[test]
+    fn test_u16(){
+        assert_eq!(10, u8_u16(&transform_u16_to_array_of_u8(10)));
+    }
+
+    #[test]
+    fn mean_test(){
+        assert_eq!(10, mean_vec_u16(&vec![11,10,0,9,20]))
+    }
+
+    #[test]
+    fn bit_vec(){
+        assert_eq!(vec![224,224], binary2u8(&vec![true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false]))
+    }
+
+    #[test]
+    fn u32_u8(){
+        assert_eq!(vec![59, 154, 202, 0], transform_u32_to_array_of_u8(1000000000));
+    }
+
+    #[test]
+    fn u8_bit(){
+        assert_eq!(byte_to_bitvec(&3), vec![false, false, false, false, false, false, true, true])
+    }
+
+    #[test]
+    fn u8_string(){
+        assert_eq!(byte_to_string(&vec![116, 101, 115,116]), "test".to_string());
+    }
+
+
+
 }
 
 
