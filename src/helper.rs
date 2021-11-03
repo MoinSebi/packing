@@ -153,7 +153,7 @@ pub fn byte2u16(vector: &[u8]) -> u16{
 
 
 #[cfg(test)]
-mod tests {
+mod helper {
     use crate::helper::{transform_u32_to_array_of_u8, u8_u322, transform_u16_to_array_of_u8, u8_u16, mean_vec_u16, binary2u8, byte_to_bitvec, byte_to_string};
 
     #[test]

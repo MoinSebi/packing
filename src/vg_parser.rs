@@ -72,6 +72,12 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 
         }
     }
+    let mm = mean_vec_u16(&o);
+    if mm >= thresh{
+        test1.push(true);
+    } else {
+        test1.push(false);
+    }
     (name, test1)
 }
 
@@ -118,5 +124,38 @@ pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
 
         }
     }
+    let mm = mean_vec_u16(&o);
+    test1.push(mm);
     (name, test1)
+}
+
+#[cfg(test)]
+mod parser {
+    use crate::vg_parser::{parse_smart, parse_node_thresh, parse_node_mean};
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
+
+    #[test]
+    fn read_smart() {
+        let k = parse_smart("testing/9986.100k.txt");
+        let k2:HashSet<u32> = HashSet::from_iter(k.node.iter().cloned());
+        assert_eq!(k.coverage[2527], 1);
+        assert_eq!(k.node[2527], 182);
+    }
+
+    #[test]
+    fn read_node_thresh() {
+        let k = parse_node_thresh("testing/9986.100k.txt", 10);
+        //assert_eq!(k.1.len(), 99999);
+        assert_eq!(k.1.len(), 7404);
+        assert_eq!(k.1[0], false);
+        assert_eq!(k.1[96], false);
+    }
+
+    #[test]
+    fn read_node() {
+        let k = parse_node_mean("testing/9986.100k.txt");
+        assert_eq!(k.1.len(), 7404);
+        assert_eq!(k.1[182], 1);
+    }
 }
