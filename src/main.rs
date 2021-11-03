@@ -182,7 +182,7 @@ fn main() {
     } else {
         if matches.is_present("threshold") {
             let thresh: u16 = matches.value_of("threshold").unwrap().parse().unwrap();
-            mean_node_out = binary2u8(&p.node2byte_thresh(thresh));
+            mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
             write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
         } else {
             mean_node_out = vec_u16_u8(&p.node2byte());

@@ -60,25 +60,119 @@ pub fn writer_compress(buf: &Vec<u8>, filename: &str){
 pub fn write_pack(pc: &PackCompact, filename: &str){
     let f = File::create(filename).expect("Unable to create file");
     let mut f = BufWriter::new(f);
-    write!(f, "{}\t{}\t{}\t{}", "seq.pos", "node.id", "node.offset", "coverage").expect("Can not write file");
+    write!(f, "{}\t{}\t{}\t{}\n", "seq.pos", "node.id", "node.offset", "coverage").expect("Can not write file");
 
     let mut node = 0;
     for x in 0..pc.coverage.len(){
         if x == 0{
-            write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+            write!(f, "{}\t{}\t{}\t{}\n", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
         }else {
             if pc.node[x] == pc.node[x - 1] {
                 node += 1;
-                write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+                write!(f, "{}\t{}\t{}\t{}\n", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             } else {
                 node = 0;
-                write!(f, "{}\t{}\t{}\t{}\t", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
+                write!(f, "{}\t{}\t{}\t{}\n", x, pc.node[x], node, pc.coverage[x]).expect("Can not write file");
             }
         }
 
 
 
     }
+}
+
+#[cfg(test)]
+mod write {
+    use crate::vg_parser::{parse_smart, parse_node_thresh, parse_node_mean};
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
+    use crate::writer::{write_pack, writer_compress, write_file};
+    use crate::reader::wrapper_meta;
+    use crate::core::PackCompact;
+    use crate::helper::{vec_u16_u8, binary2u8};
+
+    #[test]
+    fn pack_pack() {
+        let k = parse_smart("testing/9986.100k.txt");
+        let k2: HashSet<u32> = HashSet::from_iter(k.node.iter().cloned());
+        write_pack(&k, "testing/write_pack.bin");
+    }
+    #[test]
+    fn pack_meta() {
+        let p = parse_smart("testing/9986.100k.txt");
+        let buf = p.compress_only_node();
+        writer_compress(&buf, "testing/meta_test.bin");
+    }
+
+    #[test]
+    fn pack_cov() {
+        let p = parse_smart("testing/9986.100k.txt");
+        let buf = p.compress_only_node();
+        writer_compress(&buf, "testing/node_test.bin");
+    }
+
+    #[test]
+    fn bin_cov() {
+        let p = wrapper_meta("testing/meta_test.bin", "testing/coverage_test.bin");
+        let buf = p.compress_only_coverage();
+        writer_compress(&buf, "testing/coverage_test.bin");
+    }
+
+
+    #[test]
+    fn pack_all() {
+        let p = parse_smart("testing/9986.100k.txt");
+        let buf = p.compress_all();
+        writer_compress(&buf, "testing/all_test.bin");
+
+    }
+
+    #[test]
+    fn bin_bin_pack() {
+        let mut p = PackCompact::new();
+        p.read_complete("testing/all_test.bin");
+        let buf = p.compress_all();
+        writer_compress(&buf, "testing/all_test2.bin");
+        write_pack(&p, "testing/9986.alt.txt");
+    }
+
+    #[test]
+    fn bin_smart_node() {
+        let mut p = PackCompact::new();
+        p.read_complete("testing/all_test.bin");
+        let mean_node_out = p.coverage2byte();
+        write_file("test1", &mean_node_out, 0, "testing/smart_cov.bin", false);
+    }
+
+
+    #[test]
+    fn bin_smart_coverage() {
+        let mut p = PackCompact::new();
+        p.read_complete("testing/all_test.bin");
+        let mean_node_out = vec_u16_u8(&p.node2byte());
+        write_file("test1", &mean_node_out, 0, "testing/smart_node.bin", false);
+    }
+
+
+    #[test]
+    fn bin_smart_node_thresh() {
+        let mut p = PackCompact::new();
+        p.read_complete("testing/all_test.bin");
+        let mean_node_out = binary2u8(&p.node2byte_thresh(&10));
+        write_file("test1", &mean_node_out, 0, "testing/smart_node2.bin", false);
+    }
+
+
+    #[test]
+    fn bin_smart_coverage_thresh() {
+        let mut p = PackCompact::new();
+        p.read_complete("testing/all_test.bin");
+        let mean_node_out = p.coverage2byte_thresh_bit(&10);
+        write_file("test1", &mean_node_out, 0, "testing/smart_cov2.bin", false);
+    }
+
+
+
 }
 
 

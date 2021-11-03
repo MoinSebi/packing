@@ -33,14 +33,14 @@ impl PackCompact {
     }
 
 
-    pub fn node2byte_thresh(&self, thresh: u16) -> Vec<bool>{
+    pub fn node2byte_thresh(&self, thresh: &u16) -> Vec<bool>{
         let mut node_id = 1;
         let mut node_mean: Vec<u16> = Vec::new();
         let mut result: Vec<bool> = Vec::new();
         for x in 0..self.coverage.len(){
             if self.node[x] != node_id {
                 let mm = mean_vec_u16(&node_mean);
-                if mm >= thresh{
+                if &mm >= thresh{
                     result.push(true);
                 } else {
                     result.push(false);
