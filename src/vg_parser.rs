@@ -132,13 +132,10 @@ pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
 #[cfg(test)]
 mod parser {
     use crate::vg_parser::{parse_smart, parse_node_thresh, parse_node_mean};
-    use std::collections::HashSet;
-    use std::iter::FromIterator;
 
     #[test]
     fn read_smart() {
         let k = parse_smart("testing/9986.100k.txt");
-        let k2:HashSet<u32> = HashSet::from_iter(k.node.iter().cloned());
         assert_eq!(k.coverage[2527], 1);
         assert_eq!(k.node[2527], 182);
     }

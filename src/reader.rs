@@ -23,7 +23,6 @@ pub struct ReaderU16 {
 pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
     let mut f = File::open(&filename).expect("no file found");
     let metadata = fs::metadata(&filename).expect("unable to read metadata");
-    println!("meta len {:?}", metadata.len());
     let mut buffer = vec![0; metadata.len() as usize];
     // THIS IS A FUCKING JOKE
     f.read_exact(&mut buffer).expect("buffer overflow");
@@ -39,14 +38,13 @@ pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
 pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
     let length = u8_u322(&buffer[3..7]);
-    println!("{}", length);
     let oo = buffer.chunks((length + 73) as usize );
     println!("How many samples: {}", oo.len());
     let mut jo: Vec<ReaderBit> = Vec::new();
     for x in oo.into_iter(){
-        println!("len is {}", x.len());
         let u = get_meta(x);
         let c = get_bin(x);
+        eprintln!("{}", u.3);
         jo.push(ReaderBit {name: u.3, ty: u.0, cc: c});
     }
     return jo
@@ -65,6 +63,7 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     let mut jo: Vec<ReaderU16> = Vec::new();
     for x in oo.into_iter(){
         let u = get_meta(x);
+        eprintln!("{}", u.3);
         let c = get_u16(x);
         jo.push(ReaderU16 {name: u.3, ty: u.0, cc: c});
     }

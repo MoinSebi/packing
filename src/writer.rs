@@ -83,9 +83,7 @@ pub fn write_pack(pc: &PackCompact, filename: &str){
 
 #[cfg(test)]
 mod write {
-    use crate::vg_parser::{parse_smart, parse_node_thresh, parse_node_mean};
-    use std::collections::HashSet;
-    use std::iter::FromIterator;
+    use crate::vg_parser::{parse_smart};
     use crate::writer::{write_pack, writer_compress, write_file};
     use crate::reader::wrapper_meta;
     use crate::core::PackCompact;
@@ -94,7 +92,6 @@ mod write {
     #[test]
     fn pack_pack() {
         let k = parse_smart("testing/9986.100k.txt");
-        let k2: HashSet<u32> = HashSet::from_iter(k.node.iter().cloned());
         write_pack(&k, "testing/write_pack.bin");
     }
     #[test]
