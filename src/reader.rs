@@ -32,6 +32,15 @@ pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
     buffer
 }
 
+// Decode zlib
+fn decode_reader2(bytes: Vec<u8>) -> Vec<u8>{
+    let mut gz = zstd::Decoder::new(&bytes[..]).unwrap();
+    let mut s = String::new();
+    let mut k: Vec<u8> = Vec::new();
+    gz.read_to_end(& mut k);
+    return k;
+}
+
 
 #[allow(dead_code)]
 /// Reads buf to Vec<bool>
