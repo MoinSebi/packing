@@ -46,10 +46,11 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     }
     let buf2 = zstd_encode(&buff);
     let mut file = File::create([out, "bin"].join(".")).expect("Not able to write ");
-    file.write_all(&buff).expect("Not able to write ");
+    file.write_all(&buf2).expect("Not able to write ");
 
 }
 
+#[allow(dead_code)]
 /// Just writing bytes to a file
 pub fn writer_compress(buf: &Vec<u8>, filename: &str){
     let mut file = File::create(filename).expect("Not able to write ");

@@ -9,7 +9,7 @@ mod index;
 
 use clap::{App, Arg};
 use crate::vg_parser::{parse_smart};
-use crate::writer::{write_file, writer_compress, write_pack, writer_compress_zlib};
+use crate::writer::{write_file, write_pack, writer_compress_zlib};
 use crate::helper::{vec_u16_u8, binary2u8};
 use std::{ process};
 use crate::core::PackCompact;
@@ -112,19 +112,17 @@ fn main() {
     eprintln!("Packing tool");
 
 
-    /// This is a index file to recreate files
+    // This is a index file to recreate files
     if let Some(ref matches) = matches.subcommand_matches("index") {
         if matches.is_present("gfa")  {
             let j = matches.value_of("gfa").unwrap();
             let o = matches.value_of("output").unwrap();
-            index::index_main::makeIndex(&j, o);
+            index::index_main::make_index(&j, o);
         } else if matches.is_present("pack"){
-            let j = matches.value_of("pack").unwrap();
             let o = matches.value_of("output").unwrap();
-            let mut p: PackCompact = PackCompact::new();
-            p =  parse_smart(matches.value_of("pack").unwrap());
+            let p =  parse_smart(matches.value_of("pack").unwrap());
             let buf = p.compress_only_node();
-            writer_compress_zlib(&buf, matches.value_of("output meta").unwrap());
+            writer_compress_zlib(&buf, o);
 
 
 

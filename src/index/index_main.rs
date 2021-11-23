@@ -1,21 +1,10 @@
-use gfaR_wrapper::{GraphWrapper, NGfa};
-use std::fs::File;
-use std::fs;
-use std::io::BufWriter;
+use gfaR_wrapper::{NGfa};
 use crate::helper::transform_u32_to_array_of_u8;
 use crate::writer::writer_compress_zlib;
 
-pub struct pack{
-    pub node: u32,
-    pub size: u32,
-}
-
-
-
-pub fn makeIndex(filename: &str, output: &str){
+pub fn make_index(filename: &str, output: &str){
     let mut graph = NGfa::new();
-    graph.from_graph("/home/svorbrugg_local/Rust/data/AAA_AAB.cat.gfa");
-    let vec_data: Vec<pack> = Vec::new();
+    graph.from_graph(filename);
 
     let mut h: Vec<u32> = graph.nodes.keys().cloned().collect();
 
@@ -33,13 +22,10 @@ pub fn makeIndex(filename: &str, output: &str){
 
 }
 
-pub fn function(){
-    println!("dsakjdsa");
-}
 
-
+#[cfg(test)]
 mod index {
-    use crate::index::index_main::makeIndex;
+    use crate::index::index_main::make_index;
 
     #[test]
     fn pack_pack() {
