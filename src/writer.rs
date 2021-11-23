@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Write, BufWriter};
-use crate::helper::{transform_u16_to_array_of_u8, transform_u32_to_array_of_u8};
+use crate::helper::{transform_u16_to_array_of_u8, transform_u32_to_array_of_u8, zstd_encode};
 use crate::core::PackCompact;
 
 
@@ -44,6 +44,7 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     for x in vecc.iter(){
         buff.push(x.clone());
     }
+    let buf2 = zstd_encode(&buff);
     let mut file = File::create([out, "bin"].join(".")).expect("Not able to write ");
     file.write_all(&buff).expect("Not able to write ");
 
@@ -53,6 +54,15 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
 pub fn writer_compress(buf: &Vec<u8>, filename: &str){
     let mut file = File::create(filename).expect("Not able to write ");
     file.write_all(&buf).expect("Not able to write ");
+}
+
+
+
+/// Just writing bytes to a file
+pub fn writer_compress_zlib(buf: &Vec<u8>, filename: &str){
+    let u = zstd_encode(buf);
+    let mut file = File::create(filename).expect("Not able to write ");
+    file.write_all(&u).expect("Not able to write ");
 }
 
 
@@ -84,7 +94,7 @@ pub fn write_pack(pc: &PackCompact, filename: &str){
 #[cfg(test)]
 mod write {
     use crate::vg_parser::{parse_smart};
-    use crate::writer::{write_pack, writer_compress, write_file};
+    use crate::writer::{write_pack, writer_compress, write_file, writer_compress_zlib};
     use crate::reader::wrapper_meta;
     use crate::core::PackCompact;
     use crate::helper::{vec_u16_u8, binary2u8};
@@ -168,6 +178,12 @@ mod write {
         write_file("test1", &mean_node_out, 0, "testing/smart_cov2.bin", false);
     }
 
+    #[test]
+    fn bin_smart_coverage_thresh2() {
+        let p = parse_smart("testing/9986.100k.txt");
+        let buf = p.compress_all();
+        writer_compress_zlib(&buf, "testing/all_test.bin2");
+    }
 
 
 }

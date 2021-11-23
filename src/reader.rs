@@ -2,7 +2,7 @@
 use std::fs::File;
 use std::io::Read;
 use std::fs;
-use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16};
+use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16, zstd_decode};
 use crate::core::PackCompact;
 
 
@@ -27,18 +27,9 @@ pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
     // THIS IS A FUCKING JOKE
     f.read_exact(&mut buffer).expect("buffer overflow");
 
+    let buf2 = zstd_decode(buffer);
 
-
-    buffer
-}
-
-// Decode zlib
-fn decode_reader2(bytes: Vec<u8>) -> Vec<u8>{
-    let mut gz = zstd::Decoder::new(&bytes[..]).unwrap();
-    let mut s = String::new();
-    let mut k: Vec<u8> = Vec::new();
-    gz.read_to_end(& mut k);
-    return k;
+    buf2
 }
 
 

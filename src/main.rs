@@ -7,7 +7,7 @@ mod reader;
 
 use clap::{App, Arg};
 use crate::vg_parser::{parse_smart};
-use crate::writer::{write_file, writer_compress, write_pack};
+use crate::writer::{write_file, writer_compress, write_pack, writer_compress_zlib};
 use crate::helper::{vec_u16_u8, binary2u8};
 use std::{ process};
 use crate::core::PackCompact;
@@ -149,18 +149,18 @@ fn main() {
     // Output
     if matches.is_present("output meta"){
         let buf = p.compress_only_node();
-        writer_compress(&buf, matches.value_of("output meta").unwrap());
+        writer_compress_zlib(&buf, matches.value_of("output meta").unwrap());
 
     }
 
     if matches.is_present("output coverage"){
         let buf = p.compress_only_coverage();
-        writer_compress(&buf, matches.value_of("output coverage").unwrap());
+        writer_compress_zlib(&buf, matches.value_of("output coverage").unwrap());
     }
 
     if matches.is_present("output binary packing"){
         let buf = p.compress_all();
-        writer_compress(&buf, matches.value_of("output binary packing").unwrap());
+        writer_compress_zlib(&buf, matches.value_of("output binary packing").unwrap());
     }
     if matches.is_present("output packing"){
         write_pack(&p, matches.value_of("output packing").unwrap())

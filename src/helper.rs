@@ -1,3 +1,4 @@
+use std::io::{Write, Read};
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -150,6 +151,21 @@ pub fn byte2u16(vector: &[u8]) -> u16{
     number
 }
 
+
+pub fn zstd_encode(v: &Vec<u8>) -> Vec<u8>{
+    let mut e = zstd::Encoder::new(Vec::new(), 0).unwrap();
+    e.write_all(v);
+    let com = e.finish().unwrap();
+    return com
+}
+
+pub fn zstd_decode(bytes: Vec<u8>) -> Vec<u8> {
+    let mut gz = zstd::Decoder::new(&bytes[..]).unwrap();
+    let mut s = String::new();
+    let mut k: Vec<u8> = Vec::new();
+    println!("{:?}", gz.read(& mut k));
+    k
+}
 
 
 #[cfg(test)]
