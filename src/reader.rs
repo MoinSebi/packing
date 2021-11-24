@@ -102,7 +102,7 @@ pub fn read_simple(filename: &str) -> Vec<u32>{
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
     let nodes = read_simple(filename1);
     let cov = read_simple(filename2);
-    let pc: PackCompact = PackCompact{node: nodes, coverage: cov};
+    let pc: PackCompact = PackCompact{node: nodes, coverage: cov, coverage_normalized: Vec::new()};
     pc
 }
 

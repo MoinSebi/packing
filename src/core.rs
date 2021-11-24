@@ -4,18 +4,17 @@ use crate::reader::get_file_as_byte_vec;
 
 pub struct PackCompact {
     pub node: Vec<u32>,
-    pub coverage: Vec<u32>
+    pub coverage: Vec<u32>,
+    pub coverage_normalized: Vec<f32>
 }
 
 impl PackCompact {
     /// Creating empty PackCompact struct
     pub fn new() -> Self {
-        let node = Vec::new();
-        let cov = Vec::new();
-
         Self {
-            node: node,
-            coverage: cov,
+            node: Vec::new(),
+            coverage: Vec::new(),
+            coverage_normalized: Vec::new()
         }
     }
 
@@ -103,7 +102,7 @@ impl PackCompact {
             buf.extend(transform_u32_to_array_of_u8(self.node[x]));
             buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
         }
-        println!("1 {}", buf.len());
+        //println!("1 {}", buf.len());
 
         buf
     }
@@ -114,7 +113,7 @@ impl PackCompact {
         for x in 0..self.coverage.len() {
             buf.extend(transform_u32_to_array_of_u8(self.node[x]));
         }
-        println!("1 {}", buf.len());
+        //println!("1 {}", buf.len());
 
         buf
     }
@@ -125,7 +124,7 @@ impl PackCompact {
         for x in 0..self.coverage.len() {
             buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
         }
-        println!("1 {}", buf.len());
+        //println!("1 {}", buf.len());
 
         buf
     }

@@ -29,7 +29,7 @@ mod index {
 
     #[test]
     fn pack_pack() {
-        let k = makeIndex("holyshit32131920839021");
+        make_index("/home/svorbrugg_local/Rust/data/AAA_AAB.cat.gfa", "holyshit32131920839021");
 
     }
 }
