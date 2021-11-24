@@ -136,6 +136,8 @@ fn main() {
         process::exit(0x0100);
 
     }
+
+    // This is for the conversion + compression
     if let Some(ref matches) = matches.subcommand_matches("convert"){
         let mut s = "";
         let mut p: PackCompact = PackCompact::new();

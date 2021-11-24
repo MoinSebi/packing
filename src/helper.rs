@@ -73,6 +73,21 @@ pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
     j
 }
 
+/// Mean of a vector
+pub fn mean_vec_u32(val: &Vec<u32>) -> u32{
+    let su: u32= val.iter().sum();
+    let j:u32  = (su as u32)/(val.len() as u32);
+    j
+}
+
+/// Mean of a vector
+pub fn median(numbers: & Vec<u32>) -> u32 {
+    let mut num = numbers.clone();
+    num.sort();
+    let mid = num.len() / 2;
+    num[mid]
+}
+
 
 
 /// u32 -> 4xu8

@@ -1,4 +1,4 @@
-use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16};
+use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16, mean_vec_u32, median};
 use crate::reader::get_file_as_byte_vec;
 
 
@@ -29,6 +29,51 @@ impl PackCompact {
                 self.coverage.push(u8_u322(x))
             }
         }
+    }
+
+    /// Normalize coverages by mean
+    pub fn normalize_covered_mean(&mut self){
+        let mut values = Vec::new();
+        for x in self.coverage.iter(){
+            values.push(x.clone());
+        }
+        let h = mean_vec_u32(&values);
+
+        for x in self.coverage.iter(){
+            self.coverage_normalized.push(*x as f32/h as f32);
+        }
+        println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
+
+    }
+
+
+    /// Normalize coverages by meadian
+    pub fn normalize_covered_median(&mut self){
+        let mut values = Vec::new();
+        for x in self.coverage.iter(){
+            values.push(x.clone());
+        }
+        let h = median(&values);
+
+        for x in self.coverage.iter(){
+            self.coverage_normalized.push(*x as f32/h as f32);
+        }
+        println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
+
+    }
+
+
+    /// Normalize coverages by total sum
+    pub fn normalize_covered_sum(&mut self){
+        let mut sum = 0;
+        for x in self.coverage.iter(){
+            sum += x;
+        }
+
+        for x in self.coverage.iter(){
+            self.coverage_normalized.push(*x as f32/sum as f32);
+        }
+
     }
 
 
@@ -94,6 +139,9 @@ impl PackCompact {
         let h = binary2u8(&j);
         h
     }
+
+
+
 
     /// Compress file
     pub fn compress_all(&self) -> Vec<u8>{
