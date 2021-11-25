@@ -99,6 +99,7 @@ pub fn read_simple(filename: &str) -> Vec<u32>{
 }
 
 /// Wrapper for meta + coverage combination
+/// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
     let nodes = read_simple(filename1);
     let cov = read_simple(filename2);
