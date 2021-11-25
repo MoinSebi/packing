@@ -1,4 +1,6 @@
 use std::io::{Write, Read};
+use std::ops::{Add, Sub};
+use std::iter::Sum;
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -65,13 +67,22 @@ pub fn transform_u16_to_array_of_u8(x:u16) -> [u8;2] {
 }
 
 
-
 /// Mean of a vector
 pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
     let su: u16= val.iter().sum();
     let j:u16  = (su as u16)/(val.len() as u16);
     j
 }
+
+
+/// Mean of a vector
+pub fn mean_vec_f32(val: &Vec<f32>) -> f32{
+    let su: f32= val.iter().sum();
+    let j:f32 = (su as f32)/(val.len() as f32);
+    j
+}
+
+
 
 /// Mean of a vector
 pub fn mean_vec_u32(val: &Vec<u32>) -> u32{
@@ -87,6 +98,8 @@ pub fn median(numbers: & Vec<u32>) -> u32 {
     let mid = num.len() / 2;
     num[mid]
 }
+
+
 
 
 

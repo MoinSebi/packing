@@ -7,7 +7,7 @@ mod reader;
 mod index;
 
 
-use clap::{App, Arg};
+use clap::{App, Arg, ArgGroup};
 use crate::vg_parser::{parse_smart};
 use crate::writer::{write_file, write_pack, writer_compress_zlib};
 use crate::helper::{vec_u16_u8, binary2u8};
@@ -44,6 +44,7 @@ fn main() {
                 .required(true)))
 
         .subcommand(App::new("convert")
+            // Input
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
@@ -58,25 +59,35 @@ fn main() {
             .arg(Arg::new("binary pack")
                 .short('b')
                 .takes_value(true))
+
+            // Type
             .arg(Arg::new("sequence")
                 .short('s')
                 .long("sequence")
                 .about("sequence [default: nodes]"))
+
+
+            // Modification
             .arg(Arg::new("threshold")
                 .short('t')
                 .long("threshold")
                 .about("threshold")
                 .takes_value(true))
+            // If you normalize, pls use me
             .arg(Arg::new("normalize")
                 .short('n')
                 .long("normalize")
                 .about("Normalize everything"))
+
+
+
+            //Output
             .arg(Arg::new("out")
                 .short('o')
                 .long("out")
                 .about("Output name")
                 .takes_value(true)
-                .default_value("pack"))
+                .default_value("pack")
                 .takes_value(true))
             .arg(Arg::new("output coverage")
                 .long("outcov")
@@ -139,6 +150,7 @@ fn main() {
         let mut s = "";
         let mut p: PackCompact = PackCompact::new();
         let mut no_file = false;
+        // Determine Input format
         if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) | (matches.is_present("binary pack")){
             if matches.is_present("pack"){
                 if Path::new(matches.value_of("pack").unwrap()).exists(){
@@ -186,6 +198,7 @@ fn main() {
         }
 
 
+        // Output special stuff
         if matches.is_present("output coverage"){
             let buf = p.compress_only_coverage();
             writer_compress_zlib(&buf, matches.value_of("output coverage").unwrap());
@@ -197,6 +210,12 @@ fn main() {
         }
         if matches.is_present("output packing"){
             write_pack(&p, matches.value_of("output packing").unwrap())
+        }
+
+
+        if matches.is_present("normalize"){
+            let median = p.normalize_covered_median();
+            println!("Median was {}", median);
         }
 
 
