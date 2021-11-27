@@ -90,7 +90,6 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
 /// Buff -> Vec<u32>
 pub fn read_simple(filename: &str) -> Vec<u32>{
     let buf = get_file_as_byte_vec(filename);
-    let buf = zstd_decode(buf);
     let chunks = buf.chunks(4);
     let mut vec_nodes: Vec<u32> = Vec::new();
     for x in chunks.into_iter(){
