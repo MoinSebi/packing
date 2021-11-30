@@ -1,6 +1,4 @@
 use std::io::{Write, Read};
-use std::ops::{Add, Sub};
-use std::iter::Sum;
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -180,6 +178,9 @@ pub fn byte2u16(vector: &[u8]) -> u16{
 }
 
 
+
+/// Helper function for zstd encoder
+/// /// https://docs.rs/zstd/0.1.9/zstd/struct.Endcoder.html
 pub fn zstd_encode(v: &Vec<u8>) -> Vec<u8>{
     let mut e = zstd::Encoder::new(Vec::new(), 0).unwrap();
     e.write_all(v).expect("Not working");
@@ -187,10 +188,13 @@ pub fn zstd_encode(v: &Vec<u8>) -> Vec<u8>{
     return com
 }
 
+
+/// Helper function for zstd decoder
+/// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
 pub fn zstd_decode(bytes: Vec<u8>) -> Vec<u8> {
     let mut gz = zstd::Decoder::new(&bytes[..]).unwrap();
     let mut k: Vec<u8> = Vec::new();
-    println!("{:?}", gz.read(& mut k));
+    gz.read_to_end(& mut k);
     k
 }
 

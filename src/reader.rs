@@ -29,6 +29,7 @@ pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
 
     let buf2 = zstd_decode(buffer);
 
+
     buf2
 }
 
@@ -131,6 +132,19 @@ pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
         j.push(byte2u16(& x));
     }
     j
+}
+
+#[cfg(test)]
+mod reader {
+    use crate::vg_parser::{parse_smart};
+    use crate::writer::{writer_compress_zlib};
+
+    #[test]
+    fn pack_pack() {
+        let k = parse_smart("testing/9986.100k.txt");
+        let buf = k.compress_only_coverage();
+        writer_compress_zlib(&buf, "testing/cov.test.zst");
+    }
 }
 
 

@@ -22,7 +22,9 @@ impl PackCompact {
 
     /// Read from vg pack file
     pub fn read_complete(&mut self, filename: &str) {
+        print!("Filename {}\n", filename);
         let buffer = get_file_as_byte_vec(filename);
+        print!("Size1 {}", buffer.len());
         let chunks = buffer.chunks(4);
         for (i, x) in chunks.into_iter().enumerate() {
             if i % 2 == 0 {
@@ -37,6 +39,7 @@ impl PackCompact {
 
     // Modification
 
+    #[allow(dead_code)]
     /// Normalize coverages by mean
     pub fn normalize_covered_mean(&mut self){
         let mut values = Vec::new();

@@ -109,7 +109,7 @@ mod write {
     fn pack_meta() {
         let p = parse_smart("testing/9986.100k.txt");
         let buf = p.compress_only_node();
-        writer_compress(&buf, "testing/meta_test.bin");
+        writer_compress_zlib(&buf, "testing/meta_test.bin");
     }
 
     #[test]
@@ -183,7 +183,11 @@ mod write {
     fn bin_smart_coverage_thresh2() {
         let p = parse_smart("testing/9986.100k.txt");
         let buf = p.compress_all();
-        writer_compress_zlib(&buf, "testing/all_test.bin2");
+        writer_compress_zlib(&buf, "testing/all_test.zst");
+
+        let mut  p2 = PackCompact::new();
+        p2.read_complete("testing/all_test.zst");
+        write_pack(&p2, "testing/jo.reverse.txt");
     }
 
 
