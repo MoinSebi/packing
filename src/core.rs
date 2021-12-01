@@ -184,6 +184,21 @@ impl PackCompact {
     }
 
 
+    pub fn cov2byte_thresh_normalized(&self, thresh: &f32) -> Vec<u8>{
+        let mut j: Vec<bool> = Vec::new();
+        for x in self.coverage_normalized.iter() {
+            if x >= thresh {
+                j.push(true)
+            } else {
+                j.push(false);
+            }
+        }
+        let h = binary2u8(&j);
+        h
+
+    }
+
+
 
 
     // Compression of data
