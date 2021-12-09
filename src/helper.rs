@@ -48,6 +48,18 @@ pub fn vec_u16_u82(vecc: &Vec<u32>) -> Vec<u8>{
     buff
 }
 
+
+/// u16 vector to u8 vector
+pub fn vec_f32_u82(vecc: &Vec<f32>) -> Vec<u8>{
+    let mut buff: Vec<u8> = Vec::new();
+    for x in vecc.iter(){
+        buff.extend(x.to_ne_bytes());
+    }
+
+    buff
+}
+
+
 /// Same function than "transform_u16_to_array_of_u8"
 pub fn transform_u32_u16to_array_of_u8(x1:u32) -> [u8;2] {
     let x = x1 as u16;
@@ -177,7 +189,8 @@ pub fn byte2u16(vector: &[u8]) -> u16{
     number
 }
 
-
+//-------------------------------------------------------------------------------------------------------
+// Compression
 
 /// Helper function for zstd encoder
 /// /// https://docs.rs/zstd/0.1.9/zstd/struct.Endcoder.html

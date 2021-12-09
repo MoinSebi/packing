@@ -10,7 +10,7 @@ mod index;
 use clap::{App, Arg, ArgGroup};
 use crate::vg_parser::{parse_smart};
 use crate::writer::{write_file, write_pack, writer_compress_zlib};
-use crate::helper::{vec_u16_u8, binary2u8};
+use crate::helper::{vec_u16_u8, binary2u8, vec_f32_u82};
 use std::{ process};
 use crate::core::PackCompact;
 use std::path::Path;
@@ -68,6 +68,11 @@ fn main() {
 
 
             // Modification
+            .arg(Arg::new("absolute threshold")
+                .long("absolute threshold")
+                .about("absolute threshold")
+                .takes_value(true))
+
             .arg(Arg::new("threshold")
                 .short('t')
                 .long("threshold")
@@ -218,26 +223,50 @@ fn main() {
             println!("Median was {}", median);
         }
 
+        if matches.is_present("threshold"){
+            if matches.is_present("normalize"){
+                let median = p.normalize_covered_median();
+            }
+        }
+
 
 
         // Cat output
-        let mean_node_out: Vec<u8>;
+        let mut mean_node_out: Vec<u8>;
         if matches.is_present("coverage"){
-            if matches.is_present("threshold"){
-                let thresh: u16 = matches.value_of("threshold").unwrap().parse().unwrap();
+            if matches.is_present("absolute threshold"){
+                let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = p.coverage2byte_thresh_bit(&thresh);
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else {
                 mean_node_out = p.coverage2byte();
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
+            if matches.is_present("threshold"){
+                let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
+                let thresh = t/ 100 as f32;
+                mean_node_out = p.cov2byte_thresh_normalized(&thresh);
+                write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
+            } else {
+                mean_node_out = p.coverage2byte_normalized();
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+            }
         } else {
-            if matches.is_present("threshold") {
-                let thresh: u16 = matches.value_of("threshold").unwrap().parse().unwrap();
+            if matches.is_present("absolute threshold") {
+                let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else {
                 mean_node_out = vec_u16_u8(&p.node2byte());
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+            }
+            if matches.is_present("threshold"){
+                let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
+                let thresh = t/ 100 as f32;
+                mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
+                write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
+            } else {
+                mean_node_out = vec_f32_u82(&p.node2byte_normalized());
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         }

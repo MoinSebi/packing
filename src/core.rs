@@ -1,4 +1,4 @@
-use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16, mean_vec_u32, median, mean_vec_f32};
+use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16, mean_vec_u32, median, mean_vec_f32, vec_f32_u82};
 use crate::reader::get_file_as_byte_vec;
 
 
@@ -90,7 +90,7 @@ impl PackCompact {
 
 
 
-
+    //----------------------------------------------------------------------------------------------------------
     // Reduce the data for packing output
 
 
@@ -159,6 +159,7 @@ impl PackCompact {
         h
     }
 
+    // NORMALIZED
 
 
     pub fn node2byte_thresh_normalized(&self, thresh: &f32) -> Vec<bool>{
@@ -184,6 +185,30 @@ impl PackCompact {
     }
 
 
+    pub fn node2byte_normalized(&self) -> Vec<f32>{
+        let mut node_id = 1;
+        let mut node_mean: Vec<f32> = Vec::new();
+        let mut result: Vec<f32> = Vec::new();
+        for x in 0..self.coverage.len(){
+            if self.node[x]  != node_id {
+                result.push(mean_vec_f32(&node_mean));
+
+                node_id = self.node[x] ;
+                node_mean = vec![self.coverage_normalized[x] ];
+            } else {
+                node_mean.push(self.coverage_normalized[x])
+            }
+        }
+        result
+
+    }
+
+    pub fn coverage2byte_normalized(&self) -> Vec<u8> {
+        let h = vec_f32_u82(&self.coverage_normalized);
+        h
+    }
+
+
     pub fn cov2byte_thresh_normalized(&self, thresh: &f32) -> Vec<u8>{
         let mut j: Vec<bool> = Vec::new();
         for x in self.coverage_normalized.iter() {
@@ -202,6 +227,7 @@ impl PackCompact {
 
 
     // Compression of data
+    //------------------------------------------------------------------------------------------------------------------------------
 
     /// Compress total coverage to binary represenation
     pub fn compress_all(&self) -> Vec<u8>{
