@@ -71,7 +71,7 @@ fn main() {
             .arg(Arg::new("threshold")
                 .short('t')
                 .long("threshold")
-                .about("threshold")
+                .about("Threshold after normalizing (in %)")
                 .takes_value(true))
             .arg(Arg::new("absolute threshold")
                 .long("absolute threshold")
@@ -81,7 +81,9 @@ fn main() {
             .arg(Arg::new("normalize")
                 .short('n')
                 .long("normalize")
-                .about("Normalize everything"))
+                .about("Normalize everything")
+                .takes_value(true))
+
 
 
 
@@ -246,7 +248,7 @@ fn main() {
             } else  if matches.is_present("threshold"){
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
                 let thresh = t/ 100 as f32;
-                mean_node_out = p.cov2byte_thresh_normalized(&thresh);
+                mean_node_out = p.coverage2byte_thresh_normalized(&thresh);
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
             } else if matches.is_present("normalized"){
                 mean_node_out = p.coverage2byte_normalized();

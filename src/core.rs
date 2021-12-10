@@ -170,32 +170,6 @@ impl PackCompact {
 
     }
 
-
-    /// Coverage vector to byte vector
-    /// Storing only u16 for max coverage
-    pub fn coverage2byte(&self) -> Vec<u8> {
-        let h = vec_u16_u82(&self.coverage);
-        h
-    }
-
-    /// Coverage vector to byte vector
-    /// Storing only bits
-    pub fn coverage2byte_thresh_bit(&self, thresh: &u16) -> Vec<u8> {
-        let mut j: Vec<bool> = Vec::new();
-        for x in self.coverage.iter() {
-            if *x as u16 >= *thresh {
-                j.push(true)
-            } else {
-                j.push(false);
-            }
-        }
-        let h = binary2u8(&j);
-        h
-    }
-
-    // NORMALIZED
-
-
     pub fn node2byte_thresh_normalized(&self, thresh: &f32) -> Vec<bool>{
         let mut node_id = 1;
         let mut node_mean: Vec<f32> = Vec::new();
@@ -237,13 +211,38 @@ impl PackCompact {
 
     }
 
+
+    /// Coverage vector to byte vector
+    /// Storing only u16 for max coverage
+    pub fn coverage2byte(&self) -> Vec<u8> {
+        let h = vec_u16_u82(&self.coverage);
+        h
+    }
+
+    /// Coverage vector to byte vector
+    /// Storing only bits
+    pub fn coverage2byte_thresh_bit(&self, thresh: &u16) -> Vec<u8> {
+        let mut j: Vec<bool> = Vec::new();
+        for x in self.coverage.iter() {
+            if *x as u16 >= *thresh {
+                j.push(true)
+            } else {
+                j.push(false);
+            }
+        }
+        let h = binary2u8(&j);
+        h
+    }
+
+    // NORMALIZED
+
     pub fn coverage2byte_normalized(&self) -> Vec<u8> {
         let h = vec_f32_u82(&self.coverage_normalized);
         h
     }
 
 
-    pub fn cov2byte_thresh_normalized(&self, thresh: &f32) -> Vec<u8>{
+    pub fn coverage2byte_thresh_normalized(&self, thresh: &f32) -> Vec<u8>{
         let mut j: Vec<bool> = Vec::new();
         for x in self.coverage_normalized.iter() {
             if x >= thresh {
