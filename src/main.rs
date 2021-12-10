@@ -7,7 +7,7 @@ mod reader;
 mod index;
 
 
-use clap::{App, Arg, ArgGroup};
+use clap::{App, Arg };
 use crate::vg_parser::{parse_smart};
 use crate::writer::{write_file, write_pack, writer_compress_zlib};
 use crate::helper::{vec_u16_u8, binary2u8, vec_f32_u82};
@@ -68,15 +68,14 @@ fn main() {
 
 
             // Modification
-            .arg(Arg::new("absolute threshold")
-                .long("absolute threshold")
-                .about("absolute threshold")
-                .takes_value(true))
-
             .arg(Arg::new("threshold")
                 .short('t')
                 .long("threshold")
                 .about("threshold")
+                .takes_value(true))
+            .arg(Arg::new("absolute threshold")
+                .long("absolute threshold")
+                .about("absolute threshold")
                 .takes_value(true))
             // If you normalize, pls use me
             .arg(Arg::new("normalize")
@@ -129,7 +128,7 @@ fn main() {
     eprintln!("Packing tool");
 
 
-    // This is a index file to recreate files
+    // INDEX
     if let Some(ref matches) = matches.subcommand_matches("index") {
         if matches.is_present("gfa")  {
             let j = matches.value_of("gfa").unwrap();
@@ -150,13 +149,14 @@ fn main() {
 
     }
 
-    // This is for the conversion + compression
+    // CONVERT
     if let Some(ref matches) = matches.subcommand_matches("convert"){
         let mut s = "";
         let mut p: PackCompact = PackCompact::new();
         let mut no_file = false;
         // Determine Input format
         if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) | (matches.is_present("binary pack")){
+            // READ "NORMAL" PACK FILE
             if matches.is_present("pack"){
                 if Path::new(matches.value_of("pack").unwrap()).exists(){
                     p =  parse_smart(matches.value_of("pack").unwrap());
@@ -167,6 +167,7 @@ fn main() {
                     no_file = true;
                 }
             }
+                // READ BINARY PACK
             else if matches.is_present("binary pack") {
                 if Path::new(matches.value_of("binary pack").unwrap()).exists() {
                     p = PackCompact::new();
@@ -178,9 +179,9 @@ fn main() {
                     no_file = true;
                 }
             }
+                //READ COVERAGE AND META
             else {
                 if Path::new(matches.value_of("coverage").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
-                    eprintln!("the file is");
                     p = wrapper_meta(matches.value_of("meta").unwrap(), matches.value_of("coverage").unwrap());
                     let name: &str = matches.value_of("coverage").unwrap();
                     let s2: Vec<&str> = name.split("/").collect();
@@ -203,7 +204,7 @@ fn main() {
         }
 
 
-        // Output special stuff
+        // OUTPUT FOR SPECIAL OUTPUT
         if matches.is_present("output coverage"){
             let buf = p.compress_only_coverage();
             writer_compress_zlib(&buf, matches.value_of("output coverage").unwrap());
@@ -218,37 +219,40 @@ fn main() {
         }
 
 
+
+        // NORMALIZING
         if matches.is_present("normalize"){
-            let median = p.normalize_covered_median();
-            println!("Median was {}", median);
+            p.normalize_wrapper("median");
         }
 
         if matches.is_present("threshold"){
             if matches.is_present("normalize"){
-                let median = p.normalize_covered_median();
+
+                p.normalize_wrapper("median");
             }
         }
 
 
 
-        // Cat output
+        // THE REAL OUTPUT
+        // ABSOLUTE THRESHOLD -> NO NORMALIZE
+        // THRESHOLD -> NORMALIZE
         let mut mean_node_out: Vec<u8>;
         if matches.is_present("coverage"){
             if matches.is_present("absolute threshold"){
                 let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = p.coverage2byte_thresh_bit(&thresh);
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-            } else {
-                mean_node_out = p.coverage2byte();
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            }
-            if matches.is_present("threshold"){
+            } else  if matches.is_present("threshold"){
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
                 let thresh = t/ 100 as f32;
                 mean_node_out = p.cov2byte_thresh_normalized(&thresh);
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-            } else {
+            } else if matches.is_present("normalized"){
                 mean_node_out = p.coverage2byte_normalized();
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+            } else {
+                mean_node_out = p.coverage2byte();
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         } else {
@@ -256,17 +260,17 @@ fn main() {
                 let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-            } else {
-                mean_node_out = vec_u16_u8(&p.node2byte());
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            }
-            if matches.is_present("threshold"){
+            } else  if matches.is_present("threshold"){
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
                 let thresh = t/ 100 as f32;
                 mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-            } else {
+            } else if matches.is_present("normalized") {
                 mean_node_out = vec_f32_u82(&p.node2byte_normalized());
+                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+            } else
+            {
+                mean_node_out = vec_u16_u8(&p.node2byte());
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         }

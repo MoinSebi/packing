@@ -39,6 +39,40 @@ impl PackCompact {
 
     // Modification
 
+    pub fn normalize_wrapper(&mut self, kind: &str){
+        let mut values = Vec::new();
+        if kind == "mean"{
+            for x in self.coverage.iter(){
+                values.push(x.clone());
+            }
+            let h = mean_vec_u32(&values);
+
+            for x in self.coverage.iter(){
+                self.coverage_normalized.push(*x as f32/h as f32);
+            }
+        } else if kind == "sum"{
+            let mut sum = 0;
+            for x in self.coverage.iter(){
+                sum += x;
+            }
+
+            for x in self.coverage.iter(){
+                self.coverage_normalized.push(*x as f32/sum as f32);
+            }
+        } else {
+            for x in self.coverage.iter(){
+                values.push(x.clone());
+            }
+            let h = median(&values);
+
+            for x in self.coverage.iter(){
+                self.coverage_normalized.push(*x as f32/h as f32);
+            }
+            println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
+
+        }
+    }
+
     #[allow(dead_code)]
     /// Normalize coverages by mean
     pub fn normalize_covered_mean(&mut self){
