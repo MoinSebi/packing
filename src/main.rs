@@ -228,7 +228,7 @@ fn main() {
         }
 
         if matches.is_present("threshold"){
-            if matches.is_present("normalize"){
+            if ! matches.is_present("normalize"){
 
                 p.normalize_wrapper("median");
             }
@@ -264,6 +264,7 @@ fn main() {
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else  if matches.is_present("threshold"){
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
+                // This is very important
                 let thresh = t/ 100 as f32;
                 mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
