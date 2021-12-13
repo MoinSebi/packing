@@ -45,7 +45,7 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
         buff.push(x.clone());
     }
     let buf2 = zstd_encode(&buff);
-    let mut file = File::create([out, "bin"].join(".")).expect("Not able to write ");
+    let mut file = File::create([out, "bin", "zst"].join(".")).expect("Not able to write ");
     file.write_all(&buf2).expect("Not able to write ");
 
 }
@@ -69,7 +69,7 @@ pub fn writer_compress_zlib(buf: &Vec<u8>, filename: &str){
 
 /// Writing normal pack file using the PackCompact structure
 pub fn write_pack(pc: &PackCompact, filename: &str){
-    let f = File::create(filename).expect("Unable to create file");
+    let f = File::create([filename, "bin", "zst"].join(".")).expect("Unable to create file");
     let mut f = BufWriter::new(f);
     write!(f, "{}\t{}\t{}\t{}\n", "seq.pos", "node.id", "node.offset", "coverage").expect("Can not write file");
 

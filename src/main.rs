@@ -196,10 +196,10 @@ fn main() {
 
         if no_file{
             eprintln!("There is no input file");
+            process::exit(0x0100);
         }
         if p.coverage.len() == 0{
             eprintln!("There is a problem with the input files");
-
             process::exit(0x0100);
         } else {
             eprintln!("File is {}", s)
@@ -229,7 +229,6 @@ fn main() {
 
         if matches.is_present("threshold"){
             if ! matches.is_present("normalize"){
-
                 p.normalize_wrapper("median");
             }
         }
