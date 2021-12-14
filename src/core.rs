@@ -22,9 +22,8 @@ impl PackCompact {
 
     /// Read from vg pack file
     pub fn read_complete(&mut self, filename: &str) {
-        print!("Filename {}\n", filename);
+        eprint!("Filename {}\n", filename);
         let buffer = get_file_as_byte_vec(filename);
-        print!("Size1 {}", buffer.len());
         let chunks = buffer.chunks(4);
         for (i, x) in chunks.into_iter().enumerate() {
             if i % 2 == 0 {
@@ -64,61 +63,14 @@ impl PackCompact {
                 values.push(x.clone());
             }
             let h = median(&values);
+            println!("The median is {}.", h );
 
             for x in self.coverage.iter(){
                 self.coverage_normalized.push(*x as f32/h as f32);
             }
-            println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
+            eprintln!("Coverage vs normalized {} {}", self.coverage.len(), self.coverage_normalized.len());
 
         }
-    }
-
-    #[allow(dead_code)]
-    /// Normalize coverages by mean
-    pub fn normalize_covered_mean(&mut self){
-        let mut values = Vec::new();
-        for x in self.coverage.iter(){
-            values.push(x.clone());
-        }
-        let h = mean_vec_u32(&values);
-
-        for x in self.coverage.iter(){
-            self.coverage_normalized.push(*x as f32/h as f32);
-        }
-        println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
-
-    }
-
-
-    /// Normalize coverages by meadian
-    pub fn normalize_covered_median(&mut self) -> u32{
-        let mut values = Vec::new();
-        for x in self.coverage.iter(){
-            values.push(x.clone());
-        }
-        let h = median(&values);
-
-        for x in self.coverage.iter(){
-            self.coverage_normalized.push(*x as f32/h as f32);
-        }
-        println!("{} {}", self.coverage.len(), self.coverage_normalized.len());
-        return h;
-
-
-    }
-
-
-    /// Normalize coverages by total sum
-    pub fn normalize_covered_sum(&mut self){
-        let mut sum = 0;
-        for x in self.coverage.iter(){
-            sum += x;
-        }
-
-        for x in self.coverage.iter(){
-            self.coverage_normalized.push(*x as f32/sum as f32);
-        }
-
     }
 
 
@@ -324,7 +276,7 @@ impl PackCompact {
         buf.extend(transform_u32_to_array_of_u8(node.clone()));
         buf.extend(transform_u32_to_array_of_u8(repeats));
         buf.extend(vec_u16_u82(&cov));
-        println!("2 {}", buf.len());
+        //eprintln!("2 {}", buf.len());
         buf
     }
 

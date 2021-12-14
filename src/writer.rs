@@ -19,8 +19,7 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     } else {
         buff.push(0);
     }
-    println!("{}", vecc.len());
-    println!("{:?}", transform_u32_to_array_of_u8(vecc.len() as u32));
+    eprintln!("Total length of output {}", vecc.len());
     // Length of the vector
     buff.extend(transform_u32_to_array_of_u8(vecc.len() as u32));
     // Add threshold
@@ -62,7 +61,7 @@ pub fn writer_compress(buf: &Vec<u8>, filename: &str){
 /// Just writing bytes to a file
 pub fn writer_compress_zlib(buf: &Vec<u8>, filename: &str){
     let u = zstd_encode(buf);
-    let mut file = File::create(filename).expect("Not able to write ");
+    let mut file = File::create([filename, "zst"].join(".")).expect("Not able to write ");
     file.write_all(&u).expect("Not able to write ");
 }
 
@@ -115,8 +114,8 @@ mod write {
     #[test]
     fn pack_cov() {
         let p = parse_smart("testing/9986.100k.txt");
-        let buf = p.compress_only_node();
-        writer_compress(&buf, "testing/node_test.bin");
+        let buf = p.compress_only_coverage();
+        writer_compress_zlib(&buf, "testing/node_test.bin");
     }
 
     #[test]

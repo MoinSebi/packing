@@ -40,7 +40,7 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
     let length = u8_u322(&buffer[3..7]);
     let oo = buffer.chunks((length + 73) as usize );
-    println!("How many samples: {}", oo.len());
+    eprintln!("How many samples: {}", oo.len());
     let mut jo: Vec<ReaderBit> = Vec::new();
     for x in oo.into_iter(){
         let u = get_meta(x);
@@ -60,7 +60,7 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     let length = u8_u322(&mut &buffer[3..7]);
     let oo = buffer.chunks((length + 73) as usize );
 
-    println!("How many samples: {}", oo.len());
+    eprintln!("How many samples: {}", oo.len());
     let mut jo: Vec<ReaderU16> = Vec::new();
     for x in oo.into_iter(){
         let u = get_meta(x);
