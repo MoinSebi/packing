@@ -26,13 +26,20 @@ fn main() {
         .author("Sebastian V")
         .about("packing")
         .subcommand(App::new("info")
-                        .version("0.1.0")
-                        .arg(Arg::new("index")
-                            .short('i')
-                            .long("index")
-                            .about("Information about the binary index file")
-                            .takes_value(true)))
+            .about("Information about the compressed index")
+            .version("0.1.0")
+            .arg(Arg::new("index")
+                .short('i')
+                .long("index")
+                .required(true)
+                .about("Information about the binary index file")
+                .takes_value(true))
+            .arg(Arg::new("exact")
+                .short('e')
+                .long("exact")
+                .about("Check if length are the same")))
         .subcommand(App::new("index")
+            .about("Index a graph (gfa format)")
             .version("0.1.0")
             .arg(Arg::new("gfa")
                 .short('g')
@@ -52,6 +59,7 @@ fn main() {
                 .required(true)))
 
         .subcommand(App::new("convert")
+            .about("Convert VG PACK format for a compact index structure (partially reversible)")
             // Input
             .arg(Arg::new("pack")
                 .short('p')
@@ -135,7 +143,7 @@ fn main() {
 
 
     // Collect the name
-    eprintln!("Packing tool");
+    eprintln!("             Packing tool");
 
 
     // INDEX
@@ -154,6 +162,17 @@ fn main() {
 
         } else {
             println!("No input")
+        }
+        process::exit(0x0100);
+
+    }
+
+    if let Some(ref matches) = matches.subcommand_matches("info") {
+        eprintln!("Index info");
+        if matches.is_present("exact"){
+            info::info::stats(matches.value_of("index").unwrap(), true);
+        } else {
+            info::info::stats(matches.value_of("index").unwrap(), false);
         }
         process::exit(0x0100);
 
@@ -265,7 +284,6 @@ fn main() {
                 mean_node_out = p.coverage2byte_normalized();
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             } else {
-                eprintln!("Total");
                 mean_node_out = p.coverage2byte();
 
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
@@ -289,7 +307,6 @@ fn main() {
                 mean_node_out = vec_f32_u82(&p.node2byte_normalized());
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             } else {
-                eprintln!("Total");
                 mean_node_out = vec_u16_u8(&p.node2byte());
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }

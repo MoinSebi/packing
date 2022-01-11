@@ -19,7 +19,7 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     } else {
         buff.push(0);
     }
-    eprintln!("Total length of output {}", vecc.len());
+    eprintln!("Number of bytes (sample only) {}", vecc.len());
     // Length of the vector
     buff.extend(transform_u32_to_array_of_u8(vecc.len() as u32));
     // Add threshold

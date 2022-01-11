@@ -32,21 +32,32 @@ pub fn stats(filename: &str, exact: bool) {
     let meta = get_meta(&g);
 
     let mut length_measured = 0;
+    let mut length: u32 = 0;
     if exact{
         if meta.2 != 0{
-            let k = wrapper_bool(&g);
-            length_measured = k.len();
 
+            let k = wrapper_bool(&g);
+            print!("{}", k.len());
+            length_measured = k[0].cc.len();
         } else {
             let k = wrapper_u16(&g);
-            length_measured = k.len();
+            print!("{}", k.len());
+            length_measured = k[0].cc.len();
         }
+
 
     }
 
+    if meta.2 != 0{
+        length = meta.1*8
+    } else {
+        length = meta.1/2
+    }
+    eprintln!("");
     eprintln!("Name {}", meta.3);
     eprintln!("Threshold {}", meta.2);
-    eprintln!("Length {}", meta.1);
+    eprintln!("Bytes {}", meta.1 );
+    eprintln!("Length {}", length);
     if exact{
         eprintln!("Length measured {}", length_measured);
     }
