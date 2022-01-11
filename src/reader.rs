@@ -1,7 +1,7 @@
 
 use std::fs::File;
-use std::io::Read;
-use std::fs;
+use std::io::{Read, Write};
+use std::{fs, io};
 use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16, zstd_decode};
 use crate::core::PackCompact;
 
@@ -40,12 +40,14 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
     let length = u8_u322(&buffer[3..7]);
     let oo = buffer.chunks((length + 73) as usize );
-    eprintln!("How many samples: {}", oo.len());
+    eprintln!("Number of samples: {}", oo.len());
     let mut jo: Vec<ReaderBit> = Vec::new();
     for x in oo.into_iter(){
+        eprintln!("");
+        eprintln!("{}", u.3);
+        io::stdout().flush().unwrap();
         let u = get_meta(x);
         let c = get_bin(x);
-        eprintln!("{}", u.3);
         jo.push(ReaderBit {name: u.3, ty: u.0, cc: c});
     }
     return jo
@@ -60,11 +62,13 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     let length = u8_u322(&mut &buffer[3..7]);
     let oo = buffer.chunks((length + 73) as usize );
 
-    eprintln!("How many samples: {}", oo.len());
+    eprintln!("Number of samples: {}", oo.len());
     let mut jo: Vec<ReaderU16> = Vec::new();
     for x in oo.into_iter(){
-        let u = get_meta(x);
+        eprintln!("");
         eprintln!("{}", u.3);
+        io::stdout().flush().unwrap();
+        let u = get_meta(x);
         let c = get_u16(x);
         jo.push(ReaderU16 {name: u.3, ty: u.0, cc: c});
     }
