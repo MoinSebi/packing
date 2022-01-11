@@ -37,7 +37,11 @@ fn main() {
             .arg(Arg::new("exact")
                 .short('e')
                 .long("exact")
-                .about("Check if length are the same")))
+                .about("Check if length are the same"))
+            .arg(Arg::new("all")
+                .short('a')
+                .long("all")
+                .about("Check all entries (for concatenated index)")))
         .subcommand(App::new("index")
             .about("Index a graph (gfa format)")
             .version("0.1.0")
@@ -170,9 +174,13 @@ fn main() {
     if let Some(ref matches) = matches.subcommand_matches("info") {
         eprintln!("Index info");
         if matches.is_present("exact"){
-            info::info::stats(matches.value_of("index").unwrap(), true);
+            if matches.is_present("all"){
+                info::info::stats(matches.value_of("index").unwrap(), true, true);
+            } else {
+                info::info::stats(matches.value_of("index").unwrap(), true, false);
+            }
         } else {
-            info::info::stats(matches.value_of("index").unwrap(), false);
+            info::info::stats(matches.value_of("index").unwrap(), false, false);
         }
         process::exit(0x0100);
 

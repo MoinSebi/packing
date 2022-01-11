@@ -45,8 +45,8 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     for x in oo.into_iter(){
 
         let u = get_meta(x);
-        eprintln!("");
-        eprintln!("{}", u.3);
+        eprint!("");
+        eprint!("{}\r", u.3);
         io::stdout().flush().unwrap();
         let c = get_bin(x);
         jo.push(ReaderBit {name: u.3, ty: u.0, cc: c});
@@ -67,8 +67,8 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     let mut jo: Vec<ReaderU16> = Vec::new();
     for x in oo.into_iter(){
         let u = get_meta(x);
-        eprintln!("");
-        eprintln!("{}", u.3);
+        eprint!("");
+        eprint!("{}\r", u.3);
         io::stdout().flush().unwrap();
         let c = get_u16(x);
         jo.push(ReaderU16 {name: u.3, ty: u.0, cc: c});
