@@ -5,6 +5,7 @@ mod helper;
 mod writer;
 mod reader;
 mod index;
+mod info;
 
 
 use clap::{App, Arg };
@@ -24,6 +25,13 @@ fn main() {
         .version("0.1.0")
         .author("Sebastian V")
         .about("packing")
+        .subcommand(App::new("info")
+                        .version("0.1.0")
+                        .arg(Arg::new("index")
+                            .short('i')
+                            .long("index")
+                            .about("Information about the binary index file")
+                            .takes_value(true)))
         .subcommand(App::new("index")
             .version("0.1.0")
             .arg(Arg::new("gfa")
