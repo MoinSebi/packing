@@ -15,8 +15,11 @@ use crate::helper::{vec_u16_u8, binary2u8, vec_f32_u82};
 use std::{ process};
 use crate::core::PackCompact;
 use std::path::Path;
+use chrono::Local;
+use env_logger::{Builder, Target};
+use log::{info, LevelFilter};
 use crate::reader::wrapper_meta;
-
+use std::io::Write;
 
 fn main() {
 
@@ -144,10 +147,23 @@ fn main() {
     - if node  tresh same as above but + 2
      */
 
+    Builder::new()
+        .format(|buf, record| {
+            writeln!(buf,
+                     "{} [{}] - {}",
+                     Local::now().format("%d/%m/%Y %H:%M:%S %p"),
+                     record.level(),
+                     record.args()
+            )
+        })
+        .filter(None, LevelFilter::Info)
+        .target(Target::Stderr)
+        .init();
+
 
 
     // Collect the name
-    eprintln!("             Packing tool");
+    info!("Packing tool");
 
 
     // INDEX
@@ -165,14 +181,14 @@ fn main() {
 
 
         } else {
-            println!("No input")
+            info!("No input")
         }
         process::exit(0x0100);
 
     }
 
     if let Some(ref matches) = matches.subcommand_matches("info") {
-        eprintln!("Index info");
+        info!("Index info");
         if matches.is_present("exact"){
             if matches.is_present("all"){
                 info::info::stats(matches.value_of("index").unwrap(), true, true);
@@ -230,14 +246,14 @@ fn main() {
         }
 
         if no_file{
-            eprintln!("There is no input file");
+            info!("There is no input file");
             process::exit(0x0100);
         }
         if p.coverage.len() == 0{
-            eprintln!("There is a problem with the input files");
+            info!("There is a problem with the input files");
             process::exit(0x0100);
         } else {
-            eprintln!("File is {}", s)
+            info!("File is {}", s)
         }
 
 
@@ -275,20 +291,20 @@ fn main() {
         // THRESHOLD -> NORMALIZE
         let mut mean_node_out: Vec<u8>;
         if matches.is_present("sequence"){
-            eprintln!("USING SEQUENCE");
+            info!("USING SEQUENCE");
             if matches.is_present("absolute threshold"){
-                eprintln!("Absolute threshold");
+                info!("Absolute threshold");
                 let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = p.coverage2byte_thresh_bit(&thresh);
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else  if matches.is_present("threshold"){
-                eprintln!("Threshold");
+                info!("Threshold");
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
                 let thresh = t/ 100 as f32;
                 mean_node_out = p.coverage2byte_thresh_normalized(&thresh);
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
             } else if matches.is_present("normalized"){
-                eprintln!("Normalized");
+                info!("Normalized");
                 mean_node_out = p.coverage2byte_normalized();
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             } else {
@@ -297,21 +313,21 @@ fn main() {
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             }
         } else {
-            eprintln!("USING NODES");
+            info!("USING NODES");
             if matches.is_present("absolute threshold") {
-                eprintln!("Absolute threshold");
+                info!("Absolute threshold");
                 let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
                 mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
                 write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
             } else  if matches.is_present("threshold"){
-                eprintln!("Threshold");
+                info!("Threshold");
                 let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
                 // This is very important
                 let thresh = t/ 100 as f32;
                 mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
                 write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
             } else if matches.is_present("normalized") {
-                eprintln!("Normalized");
+                info!("Normalized");
                 mean_node_out = vec_f32_u82(&p.node2byte_normalized());
                 write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
             } else {

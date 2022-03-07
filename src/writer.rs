@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{Write, BufWriter};
+use log::info;
 use crate::helper::{transform_u16_to_array_of_u8, transform_u32_to_array_of_u8, zstd_encode};
 use crate::core::PackCompact;
 
@@ -19,7 +20,7 @@ pub fn write_file(name: &str, vecc: &Vec<u8>, tresh: u16, out: &str, b: bool){
     } else {
         buff.push(0);
     }
-    eprintln!("Number of bytes (sample only) {}", vecc.len());
+    info!("Bytes {}", vecc.len());
     // Length of the vector
     buff.extend(transform_u32_to_array_of_u8(vecc.len() as u32));
     // Add threshold

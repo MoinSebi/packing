@@ -62,19 +62,15 @@ OPTIONS:
 ```
 ./packing index -g test.gfa -o out.indexless
 Alterantive: 
-./packing index -p test.pack -o out.indexless
+./packing index -p test.pack -o out.index
 
 ./packing convert -p test.pack --outcov test
   
 ```
 
-
+**Get pack file from index + coverage**
 ```
-./packing index -g test.gfa -o out.indexless
-Alterantive: 
-./packing index -p test.pack -o out.indexless
-
-./packing convert -p test.pack --outcov test
+./packing convert -c test.zst  -m index.index.zst --outpack pack.pack 
   
 ```
 
