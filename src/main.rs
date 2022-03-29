@@ -28,6 +28,14 @@ fn main() {
         .version("0.1.0")
         .author("Sebastian V")
         .about("packing")
+        .arg(Arg::new("verbose")
+            .short('v')
+            .about("-v = DEBUG | -vv = TRACE")
+            .takes_value(true)
+            .default_missing_value("v1"))
+        .arg(Arg::new("quiet")
+            .short('q')
+            .about("No messages"))
         .subcommand(App::new("info")
             .about("Information about the compressed index")
             .version("0.1.0")
@@ -147,6 +155,22 @@ fn main() {
     - if node  tresh same as above but + 2
      */
 
+    let mut level = LevelFilter::Info;
+    // Checking verbose
+    // Ugly, but needed - May end up in a small library later
+    if matches.is_present("quiet"){
+        level = LevelFilter::Warn;
+    }
+
+    else if matches.is_present("verbose"){
+        if matches.value_of("verbose").unwrap() == "v1"{
+            level = LevelFilter::Debug;
+        }
+        else if matches.value_of("verbose").unwrap() == "v"{
+            level = LevelFilter::Trace
+        }
+    }
+
     Builder::new()
         .format(|buf, record| {
             writeln!(buf,
@@ -156,9 +180,10 @@ fn main() {
                      record.args()
             )
         })
-        .filter(None, LevelFilter::Info)
+        .filter(None, level)
         .target(Target::Stderr)
         .init();
+
 
 
 
