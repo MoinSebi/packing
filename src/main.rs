@@ -20,6 +20,7 @@ use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 use crate::reader::wrapper_meta;
 use std::io::Write;
+use crate::index::index_main::make_index;
 
 fn main() {
 
@@ -196,7 +197,8 @@ fn main() {
         if matches.is_present("gfa")  {
             let j = matches.value_of("gfa").unwrap();
             let o = matches.value_of("output").unwrap();
-            index::index_main::make_index(&j, o);
+            let buf = make_index(&j);
+            writer_compress_zlib(&buf, o);
         } else if matches.is_present("pack"){
             let o = matches.value_of("output").unwrap();
             let p =  parse_smart(matches.value_of("pack").unwrap());

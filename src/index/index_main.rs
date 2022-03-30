@@ -5,34 +5,24 @@ use crate::writer::writer_compress_zlib;
 
 /// Read GFA and get nodes + sequences
 /// Same order than VG --> sort(node, sequence)
-pub fn make_index(filename: &str, output: &str){
+pub fn make_index(filename: &str) -> Vec<u8>{
     let mut graph = NGfa::new();
     graph.from_graph(filename);
 
-    let mut h: Vec<u32> = graph.nodes.keys().cloned().collect();
+    let mut nodes: Vec<u32> = graph.nodes.keys().cloned().collect();
 
-    h.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    nodes.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
 
-    let mut h2 = Vec::new();
-    for x in h.iter() {
+    let mut buf = Vec::new();
+    for x in nodes.iter() {
         for _y in 0..graph.nodes.get(x).unwrap().len {
-            h2.extend(transform_u32_to_array_of_u8(x.clone()));
+            buf.extend(transform_u32_to_array_of_u8(x.clone()));
         }
 
     }
-    writer_compress_zlib(&h2, output);
+    return buf
 
 }
 
 
-#[cfg(test)]
-mod index {
-    use crate::index::index_main::make_index;
-
-    #[test]
-    fn pack_pack() {
-        make_index("/home/svorbrugg_local/Rust/data/AAA_AAB.cat.gfa", "holyshit32131920839021");
-
-    }
-}
