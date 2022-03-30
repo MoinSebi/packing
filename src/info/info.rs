@@ -27,7 +27,7 @@ pub fn get_thresh(filename: &str) -> u16{
     size
 }
 
-/// Info about index file
+/// Compute statistics about the index file.
 pub fn stats(filename: &str, exact: bool, check_all: bool) {
     let g: Vec<u8> = get_file_as_byte_vec(filename);
     let meta = get_meta(&g);
@@ -39,14 +39,14 @@ pub fn stats(filename: &str, exact: bool, check_all: bool) {
         if meta.2 != 0{
 
             let k = wrapper_bool(&g);
-            all_length = k.iter().map(|x| x.cc.len()).collect();
+            all_length = k.iter().map(|x| x.data.len()).collect();
             print!("{}", k.len());
-            length_measured = k[0].cc.len();
+            length_measured = k[0].data.len();
         } else {
             let k = wrapper_u16(&g);
-            all_length = k.iter().map(|x| x.cc.len()).collect();
+            all_length = k.iter().map(|x| x.data.len()).collect();
             print!("{}", k.len());
-            length_measured = k[0].cc.len();
+            length_measured = k[0].data.len();
         }
 
 

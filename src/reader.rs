@@ -2,21 +2,25 @@
 use std::fs::File;
 use std::io::{Read, Write};
 use std::{fs, io};
+use bitvec::order::Lsb0;
+use bitvec::vec::BitVec;
 use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16, zstd_decode};
 use crate::core::PackCompact;
 
+// Use this as a library for reading the binary files
 
+/// Reading th
 pub struct ReaderBit {
-    pub ty: bool,
+    pub kind: bool,             // 0 = node, 1 == cov
     pub name: String,
-    pub cc: Vec<bool>,
+    pub data: bitvec::vec::BitVec,
 }
 
 
 pub struct ReaderU16 {
-    pub ty: bool,
+    pub kind: bool,              // 0 = node, 1 == cov
     pub name: String,
-    pub cc: Vec<u16>,
+    pub data: Vec<u16>,
 }
 
 /// Get files byte by byte - Now exact
@@ -48,8 +52,8 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
         eprint!("");
         eprint!("{}\r", u.3);
         io::stdout().flush().unwrap();
-        let c = get_bin(x);
-        jo.push(ReaderBit {name: u.3, ty: u.0, cc: c});
+        let c = get_bin2(x);
+        jo.push(ReaderBit {name: u.3, kind: u.0, data: c});
     }
     return jo
 
@@ -71,7 +75,7 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
         eprint!("{}\r", u.3);
         io::stdout().flush().unwrap();
         let c = get_u16(x);
-        jo.push(ReaderU16 {name: u.3, ty: u.0, cc: c});
+        jo.push(ReaderU16 {name: u.3, kind: u.0, data: c});
     }
     return jo
 
@@ -121,13 +125,27 @@ pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
 /// Get binary information from file
 pub fn get_bin(buffer: & [u8]) -> Vec<bool>{
     let mut j: Vec<bool> = Vec::new();
+    let mut j2: bitvec::vec::BitVec = bitvec::vec::BitVec::new();
+    let o = &buffer[73..];
+    let bi: BitVec<_, Lsb0> = BitVec::from_slice(o);
+    println!("rtwerw {:?}", bi);
     for x in buffer[73..].iter(){
         j.extend(byte_to_bitvec(&x));
     }
     j
 }
 
+pub fn get_bin2(buffer: & [u8]) -> bitvec::vec::BitVec{
+    let mut j2: bitvec::vec::BitVec = bitvec::vec::BitVec::new();
+    let o = &buffer[73..];
+    let bi: BitVec<_, Lsb0> = BitVec::from_slice(o);
+    println!("rtwerw {:?}", bi);
+    j2
+}
+
 /// Get coverage from file
+/// ```rust
+/// ```
 pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
     let mut j: Vec<u16> = Vec::new();
     let g = buffer[73..].chunks(2);

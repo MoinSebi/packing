@@ -1,7 +1,10 @@
+use log::info;
 use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16, mean_vec_u32, median, mean_vec_f32, vec_f32_u82};
 use crate::reader::get_file_as_byte_vec;
 
-
+/// VG pack representation + additional information.
+///
+/// Is working with VG version 1.3 (maybe also earlier)
 pub struct PackCompact {
     pub node: Vec<u32>,
     pub coverage: Vec<u32>,
@@ -9,7 +12,9 @@ pub struct PackCompact {
 }
 
 impl PackCompact {
-    /// Creating empty PackCompact struct
+    /// PackCompact constructor.
+    ///
+    /// No arguments.
     pub fn new() -> Self {
         Self {
             node: Vec::new(),
@@ -18,11 +23,9 @@ impl PackCompact {
         }
     }
 
-    // Create
-
-    /// Read from vg pack file
+    /// Read from VG pack file.
     pub fn read_complete(&mut self, filename: &str) {
-        eprint!("Filename {}\n", filename);
+        info!("Filename {}\n", filename);
         let buffer = get_file_as_byte_vec(filename);
         let chunks = buffer.chunks(4);
         for (i, x) in chunks.into_iter().enumerate() {

@@ -17,7 +17,7 @@ use crate::core::PackCompact;
 use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
-use log::{info, LevelFilter};
+use log::{info, LevelFilter, warn};
 use crate::reader::wrapper_meta;
 use std::io::Write;
 use crate::index::index_main::make_index;
@@ -37,8 +37,11 @@ fn main() {
         .arg(Arg::new("quiet")
             .short('q')
             .about("No messages"))
+
+
+
         .subcommand(App::new("info")
-            .about("Information about the compressed index")
+            .about("Information about the compressed index file")
             .version("0.1.0")
             .arg(Arg::new("index")
                 .short('i')
@@ -54,8 +57,11 @@ fn main() {
                 .short('a')
                 .long("all")
                 .about("Check all entries (for concatenated index)")))
+
+
+
         .subcommand(App::new("index")
-            .about("Index a graph (gfa format)")
+            .about("Index a graph (gfa or VG pack)")
             .version("0.1.0")
             .arg(Arg::new("gfa")
                 .short('g')
@@ -73,6 +79,8 @@ fn main() {
                 .about("Output file")
                 .takes_value(true)
                 .required(true)))
+
+
 
         .subcommand(App::new("convert")
             .about("Convert VG PACK format for a compact index structure (partially reversible)")
@@ -196,9 +204,14 @@ fn main() {
     if let Some(ref matches) = matches.subcommand_matches("index") {
         if matches.is_present("gfa")  {
             let j = matches.value_of("gfa").unwrap();
-            let o = matches.value_of("output").unwrap();
-            let buf = make_index(&j);
-            writer_compress_zlib(&buf, o);
+            if Path::new(matches.value_of("gfa").unwrap()).exists() {
+                let o = matches.value_of("output").unwrap();
+                let buf = make_index(&j);
+                writer_compress_zlib(&buf, o);
+            } else {
+                warn!("No file found");
+            }
+
         } else if matches.is_present("pack"){
             let o = matches.value_of("output").unwrap();
             let p =  parse_smart(matches.value_of("pack").unwrap());

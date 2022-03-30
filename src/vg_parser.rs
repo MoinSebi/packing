@@ -5,7 +5,15 @@ use crate::helper::mean_vec_u16;
 
 
 
-/// Reading full file - but smarter
+/// Reading a VG pack file (tabular format).
+///
+/// Iterating over every line in the file and push node and coverage to the PackCompact field.
+///
+/// Input:
+///     - filename: &str --> Name of the VG pack file
+/// Output:
+///     - PackCompact
+///
 ///
 pub fn parse_smart(filename: &str) -> PackCompact {
     let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");

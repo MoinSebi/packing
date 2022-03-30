@@ -1,4 +1,7 @@
 use std::io::{Write, Read};
+use bitvec::bitvec;
+use bitvec::order::{Lsb0, Msb0};
+use bitvec::vec::BitVec;
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -126,6 +129,14 @@ pub fn transform_u32_to_array_of_u8(x:u32) -> [u8;4] {
 
 
 pub fn byte_to_bitvec(buf: &u8) -> Vec<bool>{
+    let v = vec![0u16, 1, 2, 3];
+    let bv = BitVec::<_, Lsb0>::from_vec(v);
+    println!("bvbvb {}", bv);
+    let bv = bitvec![u8, Lsb0; 0, 1, 0, 0, 1];
+    println!("bvbvb {:?}", bv);
+    let v = bv.into_vec();
+
+    println!("bvbvb {:?}", v);
     let mut h: Vec<bool> = Vec::new();
     let mut n = buf.clone();
     while n > 0{

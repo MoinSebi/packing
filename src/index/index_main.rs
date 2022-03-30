@@ -6,6 +6,7 @@ use crate::writer::writer_compress_zlib;
 /// Read GFA and get nodes + sequences
 /// Same order than VG --> sort(node, sequence)
 pub fn make_index(filename: &str) -> Vec<u8>{
+
     let mut graph = NGfa::new();
     graph.from_graph(filename);
 
