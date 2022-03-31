@@ -2,8 +2,10 @@
 use std::fs::File;
 use std::io::{Read, Write};
 use std::{fs, io};
-use bitvec::order::Lsb0;
+use bitvec::order::{Lsb0, Msb0};
 use bitvec::vec::BitVec;
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
+use log::info;
 use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16, zstd_decode};
 use crate::core::PackCompact;
 
@@ -13,7 +15,7 @@ use crate::core::PackCompact;
 pub struct ReaderBit {
     pub kind: bool,             // 0 = node, 1 == cov
     pub name: String,
-    pub data: bitvec::vec::BitVec,
+    pub data: BitVec<u8, Msb0>,
 }
 
 
@@ -23,71 +25,76 @@ pub struct ReaderU16 {
     pub data: Vec<u16>,
 }
 
-/// Get files byte by byte - Now exact
+/// Read a file byte by byte (whole file)
+///
+/// Check if file is available and readable. Returns buffer
 pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
-    let mut f = File::open(&filename).expect("no file found");
+    let mut file = File::open(&filename).expect("no file found");
     let metadata = fs::metadata(&filename).expect("unable to read metadata");
     let mut buffer = vec![0; metadata.len() as usize];
     // THIS IS A FUCKING JOKE
-    f.read_exact(&mut buffer).expect("buffer overflow");
+    file.read_exact(&mut buffer).expect("buffer overflow");
 
-    let buf2 = zstd_decode(buffer);
+    let buffer2 = zstd_decode(buffer);
 
 
-    buf2
+    buffer2
 }
 
 
 #[allow(dead_code)]
-/// Reads buf to Vec<bool>
+/// Reads buffer to Vector of ReaderBit
+///
+///
 pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
-    let length = u8_u322(&buffer[3..7]);
-    let oo = buffer.chunks((length + 73) as usize );
-    eprintln!("Number of samples: {}", oo.len());
-    let mut jo: Vec<ReaderBit> = Vec::new();
-    for x in oo.into_iter(){
+    let length = BigEndian::read_u32(& buffer[3..7]);
+    let chunks = buffer.chunks((length + 73) as usize );
+    eprintln!("Number of samples: {}", chunks.len());
+    let mut result: Vec<ReaderBit> = Vec::new();
 
-        let u = get_meta(x);
-        eprint!("");
-        eprint!("{}\r", u.3);
-        io::stdout().flush().unwrap();
-        let c = get_bin2(x);
-        jo.push(ReaderBit {name: u.3, kind: u.0, data: c});
+    for chunk in chunks.into_iter(){
+
+        let (kind, length, thresh, name) = get_meta(chunk);
+        info!("Name {}", name);
+        let bv: BitVec<u8, Msb0> = BitVec::from_slice(&chunk[73..]);
+        result.push(ReaderBit {name, kind, data: bv});
     }
-    return jo
+    return result
 
 }
 
 
 #[allow(dead_code)]
-/// Reads buf to Vec<u16>
+/// Convert bytes to a Vector of ReaderU16
+///
+/// Iterate over each sample (
 pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     // total length 73 + len
-    let length = u8_u322(&mut &buffer[3..7]);
-    let oo = buffer.chunks((length + 73) as usize );
+    let length = BigEndian::read_u32(& buffer[3..7]);
+    let chunks = buffer.chunks((length + 73) as usize );
 
-    eprintln!("Number of samples: {}", oo.len());
-    let mut jo: Vec<ReaderU16> = Vec::new();
-    for x in oo.into_iter(){
-        let u = get_meta(x);
-        eprint!("");
-        eprint!("{}\r", u.3);
-        io::stdout().flush().unwrap();
-        let c = get_u16(x);
-        jo.push(ReaderU16 {name: u.3, kind: u.0, data: c});
+    eprintln!("Number of samples: {}", chunks.len());
+    let mut result: Vec<ReaderU16> = Vec::new();
+    for chunk in chunks.into_iter(){
+        let (kind, length, thresh, name) = get_meta(chunk);
+        info!("Name {}", name);
+        let mut data = vec![0; chunk[73..].len()/2];
+        BigEndian::read_u16_into(&chunk[73..], & mut data);
+        result.push(ReaderU16 {name, kind, data});
     }
-    return jo
+    return result
 
 }
 
 #[allow(dead_code)]
 /// Get the meta data from the binary pack file (73 bytes)
-/// Sequence/Node, length, thresh, name
+/// Outputs sequence/Node, length, thresh, name
 pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
+    println!("{:?}", buffer.len());
     let cov = buffer[3];
-    let length = u8_u322(&mut &buffer[3..7]);
-    let thresh = u8_u16(&mut &buffer[7..9]);
+    let length = BigEndian::read_u32(& buffer[3..7]);
+    let thresh = BigEndian::read_u16(& buffer[7..9]);
     let name = byte_to_string(&mut &buffer[9..73]);
 
 
@@ -96,19 +103,23 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
 }
 
 
+//--------------------------------------------------------------------------------------------------
+//
+
 /// Reads a binary file
 /// Buff -> Vec<u32>
 pub fn read_simple(filename: &str) -> Vec<u32>{
     let buf = get_file_as_byte_vec(filename);
     let chunks = buf.chunks(4);
-    let mut vec_nodes: Vec<u32> = Vec::new();
-    for x in chunks.into_iter(){
-        vec_nodes.push(u8_u322(x));
+    let mut vec_nodes: Vec<u32> = vec![0; buf.len()/4];
+    BigEndian::read_u32_into(& buf, & mut vec_nodes);
+    for chunks in chunks.into_iter(){
+        vec_nodes.push(u8_u322(chunks));
     }
     return vec_nodes
 }
 
-/// Wrapper for meta + coverage combination
+/// Wrapper for meta + coverage file
 /// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
     let nodes = read_simple(filename1);
@@ -118,55 +129,53 @@ pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
 }
 
 
-
-
-//___________________________________________________________
-// Helper functions
-/// Get binary information from file
-pub fn get_bin(buffer: & [u8]) -> Vec<bool>{
-    let mut j: Vec<bool> = Vec::new();
-    let mut j2: bitvec::vec::BitVec = bitvec::vec::BitVec::new();
-    let o = &buffer[73..];
-    let bi: BitVec<_, Lsb0> = BitVec::from_slice(o);
-    println!("rtwerw {:?}", bi);
-    for x in buffer[73..].iter(){
-        j.extend(byte_to_bitvec(&x));
-    }
-    j
-}
-
-pub fn get_bin2(buffer: & [u8]) -> bitvec::vec::BitVec{
-    let mut j2: bitvec::vec::BitVec = bitvec::vec::BitVec::new();
-    let o = &buffer[73..];
-    let bi: BitVec<_, Lsb0> = BitVec::from_slice(o);
-    println!("rtwerw {:?}", bi);
-    j2
-}
-
-/// Get coverage from file
-/// ```rust
-/// ```
-pub fn get_u16(buffer: & [u8]) -> Vec<u16>{
-    let mut j: Vec<u16> = Vec::new();
-    let g = buffer[73..].chunks(2);
-
-    for x in g.into_iter(){
-
-        j.push(byte2u16(& x));
-    }
-    j
-}
-
 #[cfg(test)]
 mod reader {
+    use bitvec::order::{Lsb0, Msb0};
+    use bitvec::prelude::BitVec;
+    use byteorder::{BigEndian, ByteOrder, LittleEndian};
+    use crate::helper::{binary2u8, byte2u16, byte_to_bitvec, vec_u16_u8};
+    use crate::reader::{get_file_as_byte_vec, ReaderBit, ReaderU16, wrapper_bool, wrapper_u16};
     use crate::vg_parser::{parse_smart};
-    use crate::writer::{writer_compress_zlib};
+    use crate::writer::{write_file, writer_compress_zlib};
+    use std::mem::size_of_val;
+
+    #[test]
+    fn testing1() {
+        let mut k: Vec<u8> = vec![1,2];
+        let mut numbers_given: Vec<u16> = vec![0; k.len()/2];
+        BigEndian::read_u16_into(& mut k, & mut numbers_given);
+        println!("test1  {:?}", numbers_given);
+    }
+
+    #[test]
+    fn byte2bitvec() {
+        let mut k: Vec<u8> = vec![1, 2];
+        let bi: BitVec<_, Msb0> = BitVec::from_slice(&k);
+    }
+
 
     #[test]
     fn pack_pack() {
         let k = parse_smart("testing/9986.100k.txt");
-        let buf = k.compress_only_coverage();
-        writer_compress_zlib(&buf, "testing/cov.test.zst");
+        let buf = vec_u16_u8(&k.node2byte());
+        write_file("tt1t", &buf, 0, "testing/cov.test", false);
+        let buf: Vec<u8> = get_file_as_byte_vec("testing/cov.test.bin.zst");
+        let data: Vec<ReaderU16> = wrapper_u16(&buf);
+        eprint!("data {}", data.len());
+        eprint!("data {}", data[0].data.len());
+    }
+
+
+    #[test]
+    fn pack_pack2() {
+        let k = parse_smart("testing/9986.100k.txt");
+        let mean_node_out = binary2u8(&k.node2byte_thresh(&1));
+        write_file("jo1", &mean_node_out, 1, "testing/jo1", true);
+        let buf: Vec<u8> = get_file_as_byte_vec("testing/jo1.bin.zst");
+        let data: Vec<ReaderBit> = wrapper_bool(&buf);
+        eprint!("data {}", data.len());
+        eprint!("data {}", data[0].data.len());
     }
 }
 
