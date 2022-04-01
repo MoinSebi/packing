@@ -91,11 +91,11 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
 /// Get the meta data from the binary pack file (73 bytes)
 /// Outputs sequence/Node, length, thresh, name
 pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
-    println!("{:?}", buffer.len());
     let cov = buffer[3];
     let length = BigEndian::read_u32(& buffer[3..7]);
     let thresh = BigEndian::read_u16(& buffer[7..9]);
-    let name = byte_to_string(&mut &buffer[9..73]);
+    let mut name = byte_to_string(&mut &buffer[9..73]);
+    let name = name.trim_matches(char::from(0)).to_string();
 
 
     (cov == 1, length, thresh, name)
@@ -113,9 +113,7 @@ pub fn read_simple(filename: &str) -> Vec<u32>{
     let chunks = buf.chunks(4);
     let mut vec_nodes: Vec<u32> = vec![0; buf.len()/4];
     BigEndian::read_u32_into(& buf, & mut vec_nodes);
-    for chunks in chunks.into_iter(){
-        vec_nodes.push(u8_u322(chunks));
-    }
+
     return vec_nodes
 }
 

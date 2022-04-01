@@ -12,7 +12,6 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-o")
         .arg("tests_output/t1");
     cmd.assert().success();
-
     Ok(())
 }
 
@@ -29,3 +28,4 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+

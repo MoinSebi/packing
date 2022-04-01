@@ -153,13 +153,13 @@ mod write {
     }
 
 
-    #[test]
-    fn bin_smart_coverage() {
-        let mut p = PackCompact::new();
-        p.read_complete("testing/all_test.bin");
-        let mean_node_out = vec_u16_u8(&p.node2byte());
-        write_file("test1", &mean_node_out, 0, "testing/smart_node.bin", false);
-    }
+    // #[test]
+    // fn bin_smart_coverage() {
+    //     let mut p = PackCompact::new();
+    //     p.read_complete("testing/all_test.bin");
+    //     let mean_node_out = vec_u16_u8(&p.node2byte());
+    //     write_file("test1", &mean_node_out, 0, "testing/smart_node.bin", false);
+    // }
 
 
     #[test]
@@ -170,25 +170,6 @@ mod write {
         write_file("test1", &mean_node_out, 0, "testing/smart_node2.bin", false);
     }
 
-
-    #[test]
-    fn bin_smart_coverage_thresh() {
-        let mut p = PackCompact::new();
-        p.read_complete("testing/all_test.bin");
-        let mean_node_out = p.coverage2byte_thresh_bit(&10);
-        write_file("test1", &mean_node_out, 0, "testing/smart_cov2.bin", false);
-    }
-
-    #[test]
-    fn bin_smart_coverage_thresh2() {
-        let p = parse_smart("testing/9986.100k.txt");
-        let buf = p.compress_all();
-        writer_compress_zlib(&buf, "testing/all_test.zst");
-
-        let mut  p2 = PackCompact::new();
-        p2.read_complete("testing/all_test.zst");
-        write_pack(&p2, "testing/jo.reverse.txt");
-    }
 
 
 }

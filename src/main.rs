@@ -21,6 +21,7 @@ use log::{info, LevelFilter, warn};
 use crate::reader::wrapper_meta;
 use std::io::Write;
 use crate::index::index_main::make_index;
+use crate::info::info::stats_index;
 
 fn main() {
 
@@ -41,18 +42,18 @@ fn main() {
 
 
         .subcommand(App::new("info")
-            .about("Information about the compressed index file")
+            .about("Information about index or binary files")
             .version("0.1.0")
+            .arg(Arg::new("binary")
+                .short('b')
+                .long("binary")
+                .about("Information about the binary")
+                .takes_value(true))
             .arg(Arg::new("index")
                 .short('i')
                 .long("index")
-                .required(true)
-                .about("Information about the binary index file")
+                .about("Information about the index")
                 .takes_value(true))
-            .arg(Arg::new("exact")
-                .short('e')
-                .long("exact")
-                .about("Check if length are the same"))
             .arg(Arg::new("all")
                 .short('a')
                 .long("all")
@@ -229,17 +230,18 @@ fn main() {
 
     if let Some(ref matches) = matches.subcommand_matches("info") {
         info!("Index info");
-        if matches.is_present("exact"){
-            if matches.is_present("all"){
-                info::info::stats(matches.value_of("index").unwrap(), true, true);
+        if matches.is_present("index") | (matches.is_present("binary")) {
+            if matches.is_present("index") {
+                stats_index(matches.value_of("index").unwrap())
             } else {
-                info::info::stats(matches.value_of("index").unwrap(), true, false);
+                println!("{}", matches.value_of("binary").unwrap());
+                if matches.is_present("all") {
+                    info::info::stats(matches.value_of("binary").unwrap(), true, true);
+                } else {
+                    info::info::stats(matches.value_of("binary").unwrap(), true, false);
+                }
             }
-        } else {
-            info::info::stats(matches.value_of("index").unwrap(), false, false);
         }
-        process::exit(0x0100);
-
     }
 
     // CONVERT

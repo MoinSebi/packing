@@ -2,6 +2,7 @@ use std::io::{Write, Read};
 use bitvec::bitvec;
 use bitvec::order::{Lsb0, Msb0};
 use bitvec::vec::BitVec;
+use byteorder::{BigEndian, ByteOrder};
 
 /// bool vector to u8 vector
 pub fn binary2u8(vecc: &Vec<bool>) -> Vec<u8>{
@@ -83,6 +84,7 @@ pub fn transform_u16_to_array_of_u8(x:u16) -> [u8;2] {
 /// Mean of a vector
 pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
     let su: u16= val.iter().sum();
+    println!("val {}", val.len());
     let j:u16  = (su as u16)/(val.len() as u16);
     j
 }
@@ -186,6 +188,7 @@ pub fn u8_u16(vector: &[u8]) -> u16{
 
 pub fn u8_u322(vector: &[u8]) -> u32{
     let number = ((vector[0] as u32) << 24) |((vector[1] as u32) << 16) |((vector[2] as u32) << 8) | vector[3] as u32;
+    let number2 = BigEndian::read_u32(vector);
     number
 }
 
@@ -197,6 +200,7 @@ pub fn u8_u322(vector: &[u8]) -> u32{
 /// Coverts two bytes to a 16
 pub fn byte2u16(vector: &[u8]) -> u16{
     let number = ((vector[0] as u16) << 8) | vector[1] as u16;
+    let number2 = BigEndian::read_u16(vector);
     number
 }
 

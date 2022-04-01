@@ -1,4 +1,5 @@
-use crate::reader::{get_file_as_byte_vec, get_meta, wrapper_bool, wrapper_u16};
+use std::collections::HashSet;
+use crate::reader::{get_file_as_byte_vec, get_meta, read_simple, wrapper_bool, wrapper_u16};
 use crate::helper::{u8_u16, u8_u322};
 
 /// This is the same as read_exact, except if it reaches EOF it doesn't return
@@ -27,29 +28,38 @@ pub fn get_thresh(filename: &str) -> u16{
     size
 }
 
+
+/// Information about the a index file
+pub fn stats_index(filename: &str){
+    let nodes = read_simple(filename);
+    let nodes_hs: HashSet<u32> = nodes.iter().cloned().collect();
+    println!("Number of nodes: {}", nodes_hs.len());
+    println!("Number of entries: {}", nodes.len());
+
+}
+
+
+
 /// Compute statistics about the index file.
 pub fn stats(filename: &str, exact: bool, check_all: bool) {
     let g: Vec<u8> = get_file_as_byte_vec(filename);
     let meta = get_meta(&g);
-
+    let length = meta.1;
     let mut length_measured = 0;
     let mut all_length: Vec<usize> = Vec::new();
     let mut length: u32 = 0;
-    if exact{
-        if meta.2 != 0{
+    let mut h = 0;
+    if meta.2 != 0{
 
-            let k = wrapper_bool(&g);
-            all_length = k.iter().map(|x| x.data.len()).collect();
-            print!("{}", k.len());
-            length_measured = k[0].data.len();
-        } else {
-            let k = wrapper_u16(&g);
-            all_length = k.iter().map(|x| x.data.len()).collect();
-            print!("{}", k.len());
-            length_measured = k[0].data.len();
-        }
-
-
+        let k = wrapper_bool(&g);
+        all_length = k.iter().map(|x| x.data.len()).collect();
+        length_measured = k[0].data.len();
+        h = k.len();
+    } else {
+        let k = wrapper_u16(&g);
+        all_length = k.iter().map(|x| x.data.len()).collect();
+        length_measured = k[0].data.len();
+        h = k.len();
     }
 
     let mut allgood = true;
@@ -66,19 +76,25 @@ pub fn stats(filename: &str, exact: bool, check_all: bool) {
     } else {
         length = meta.1/2
     }
-    eprintln!("");
-    eprintln!("Name {}", meta.3);
-    eprintln!("Threshold {}", meta.2);
-    eprintln!("Bytes {}", meta.1 );
-    eprintln!("Length {}", length);
+    println!("Number of elements: {}", h);
+    if meta.0{
+        println!("Threshold: Sequence");
+
+    } else {
+        println!("Threshold: Node");
+
+    }
+    println!("Threshold: {}", meta.2);
+    println!("Bytes: {}", meta.1 );
+    println!("Length: {}", length);
     if exact{
-        eprintln!("Length measured {}", length_measured);
+        println!("Length measured {}", length_measured);
     }
     if check_all{
         if allgood{
-            eprintln!("All length are the same.")
+            println!("All length are the same.")
         } else {
-            eprintln!("ERROR! Not the same length. ")
+            println!("ERROR! Not the same length. ")
         }
     }
 
