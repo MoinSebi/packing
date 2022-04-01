@@ -59,8 +59,7 @@ fn index_pack3() -> Result<(), Box<dyn std::error::Error>> {
     cmd2.arg("info")
         .arg("-b")
         .arg("tests_output/t21.bin.zst");
-    cmd2.assert().stdout(predicate::str::contains("Number of nodes: 9"));
-    cmd2.assert().stdout(predicate::str::contains("Number of entries: 58"));
+    cmd2.assert().stdout(predicate::str::contains("7404"));
 
 
     Ok(())
