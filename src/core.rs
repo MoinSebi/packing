@@ -1,5 +1,6 @@
+use byteorder::BigEndian;
 use log::info;
-use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vec_u16, mean_vec_u32, median, mean_vec_f32, vec_f32_u82};
+use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vecU16_u16, mean_vec_u32, median, mean_vec_f32, vec_f32_u82};
 use crate::reader::get_file_as_byte_vec;
 
 /// VG pack representation + additional information.
@@ -7,7 +8,7 @@ use crate::reader::get_file_as_byte_vec;
 /// Is working with VG version 1.3 (maybe also earlier)
 pub struct PackCompact {
     pub node: Vec<u32>,
-    pub coverage: Vec<u32>,
+    pub coverage: Vec<u16>,
     pub coverage_normalized: Vec<f32>
 }
 
@@ -23,58 +24,7 @@ impl PackCompact {
         }
     }
 
-    /// Read from VG pack file.
-    pub fn read_complete(&mut self, filename: &str) {
-        info!("Filename {}\n", filename);
-        let buffer = get_file_as_byte_vec(filename);
-        let chunks = buffer.chunks(4);
-        for (i, x) in chunks.into_iter().enumerate() {
-            if i % 2 == 0 {
-                self.node.push(u8_u322(x))
-            } else {
-                self.coverage.push(u8_u322(x))
-            }
-        }
-    }
 
-
-
-    // Modification
-
-    pub fn normalize_wrapper(&mut self, kind: &str){
-        let mut values = Vec::new();
-        if kind == "mean"{
-            for x in self.coverage.iter(){
-                values.push(x.clone());
-            }
-            let h = mean_vec_u32(&values);
-
-            for x in self.coverage.iter(){
-                self.coverage_normalized.push(*x as f32/h as f32);
-            }
-        } else if kind == "sum"{
-            let mut sum = 0;
-            for x in self.coverage.iter(){
-                sum += x;
-            }
-
-            for x in self.coverage.iter(){
-                self.coverage_normalized.push(*x as f32/sum as f32);
-            }
-        } else {
-            for x in self.coverage.iter(){
-                values.push(x.clone());
-            }
-            let h = median(&values);
-            println!("The median is {}.", h );
-
-            for x in self.coverage.iter(){
-                self.coverage_normalized.push(*x as f32/h as f32);
-            }
-            eprintln!("Coverage vs normalized {} {}", self.coverage.len(), self.coverage_normalized.len());
-
-        }
-    }
 
 
 
@@ -91,7 +41,7 @@ impl PackCompact {
         let mut result: Vec<bool> = Vec::new();
         for x in 0..self.coverage.len(){
             if self.node[x] != node_id {
-                let mm = mean_vec_u16(&node_mean);
+                let mm = mean_vecU16_u16(&node_mean);
                 if &mm >= thresh{
                     result.push(true);
                 } else {
@@ -114,7 +64,7 @@ impl PackCompact {
         println!("{}", self.coverage.len());
         for x in 0..self.coverage.len() {
             if self.node[x] != node_id {
-                result.push(mean_vec_u16(&node_mean));
+                result.push(mean_vecU16_u16(&node_mean));
 
                 node_id = self.node[x];
                 node_mean = vec![self.coverage[x] as u16];
@@ -123,7 +73,7 @@ impl PackCompact {
             }
         }
         println!("{}", node_mean.len());
-        result.push(mean_vec_u16(&node_mean));
+        result.push(mean_vecU16_u16(&node_mean));
         result
 
     }
@@ -170,12 +120,7 @@ impl PackCompact {
     }
 
 
-    /// Coverage vector to byte vector
-    /// Storing only u16 for max coverage
-    pub fn coverage2byte(&self) -> Vec<u8> {
-        let h = vec_u16_u82(&self.coverage);
-        h
-    }
+
 
     /// Coverage vector to byte vector
     /// Storing only bits
@@ -200,6 +145,14 @@ impl PackCompact {
     }
 
 
+    /// Coverage vector to byte vector
+    /// Storing only u16 for max coverage
+    pub fn coverage2byte(&self) -> Vec<u8> {
+        let h = vec_u16_u82(&self.coverage);
+        h
+    }
+
+
     pub fn coverage2byte_thresh_normalized(&self, thresh: &f32) -> Vec<u8>{
         let mut j: Vec<bool> = Vec::new();
         for x in self.coverage_normalized.iter() {
@@ -220,18 +173,6 @@ impl PackCompact {
     // Compression of data
     //------------------------------------------------------------------------------------------------------------------------------
 
-    /// Compress total coverage to binary represenation
-    pub fn compress_all(&self) -> Vec<u8>{
-        let mut buf: Vec<u8> = Vec::new();
-        for x in 0..self.coverage.len(){
-            buf.extend(transform_u32_to_array_of_u8(self.node[x]));
-            buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
-        }
-        //println!("1 {}", buf.len());
-
-        buf
-    }
-
     /// Compress only the nodes (index)
     pub fn compress_only_node(&self) -> Vec<u8> {
         let mut buf: Vec<u8> = Vec::new();
@@ -243,48 +184,39 @@ impl PackCompact {
         buf
     }
 
-    /// Compress ony the coverage
-    pub fn compress_only_coverage(&self) -> Vec<u8> {
-        let mut buf: Vec<u8> = Vec::new();
-        for x in 0..self.coverage.len() {
-            buf.extend(transform_u32_to_array_of_u8(self.coverage[x]));
-        }
-        //println!("1 {}", buf.len());
-
-        buf
-    }
 
 
-    #[allow(dead_code)]
-    // This might be overkill - keep it for later
-    pub fn compress_smart(&self) -> Vec<u8>{
-        let mut buf: Vec<u8> = Vec::new();
-        let mut node: &u32 = &0;
-        let mut repeats: u32 = 0;
-        let mut cov: Vec<u32> = Vec::new();
 
-        for x in 0..self.coverage.len(){
-           if (self.node[x] != *node) & (repeats != 0){
-               buf.extend(transform_u32_to_array_of_u8(node.clone()));
-               buf.extend(transform_u32_to_array_of_u8(repeats));
-               buf.extend(vec_u16_u82(&cov));
-               node = &self.node[x];
-               repeats = 1;
-               cov = vec![self.coverage[x]];
-
-           }
-            else {
-                repeats += 1;
-                cov.push(self.coverage[x].clone());
-                node = &self.node[x];
-            }
-        }
-        buf.extend(transform_u32_to_array_of_u8(node.clone()));
-        buf.extend(transform_u32_to_array_of_u8(repeats));
-        buf.extend(vec_u16_u82(&cov));
-        //eprintln!("2 {}", buf.len());
-        buf
-    }
+    // #[allow(dead_code)]
+    // // This might be overkill - keep it for later
+    // pub fn compress_smart(&self) -> Vec<u8>{
+    //     let mut buf: Vec<u8> = Vec::new();
+    //     let mut node: &u32 = &0;
+    //     let mut repeats: u32 = 0;
+    //     let mut cov: Vec<u32> = Vec::new();
+    //
+    //     for x in 0..self.coverage.len(){
+    //        if (self.node[x] != *node) & (repeats != 0){
+    //            buf.extend(transform_u32_to_array_of_u8(node.clone()));
+    //            buf.extend(transform_u32_to_array_of_u8(repeats));
+    //            buf.extend(vec_u16_u82(&cov));
+    //            node = &self.node[x];
+    //            repeats = 1;
+    //            cov = vec![self.coverage[x]];
+    //
+    //        }
+    //         else {
+    //             repeats += 1;
+    //             cov.push(self.coverage[x].clone());
+    //             node = &self.node[x];
+    //         }
+    //     }
+    //     buf.extend(transform_u32_to_array_of_u8(node.clone()));
+    //     buf.extend(transform_u32_to_array_of_u8(repeats));
+    //     buf.extend(vec_u16_u82(&cov));
+    //     //eprintln!("2 {}", buf.len());
+    //     buf
+    // }
 
 
 

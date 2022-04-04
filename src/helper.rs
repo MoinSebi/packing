@@ -43,13 +43,11 @@ pub fn vec_u16_u8(vecc: &Vec<u16>) -> Vec<u8>{
 
 
 /// u16 vector to u8 vector
-pub fn vec_u16_u82(vecc: &Vec<u32>) -> Vec<u8>{
-    let mut buff: Vec<u8> = Vec::new();
-    for x in vecc.iter(){
-        buff.extend(transform_u32_u16to_array_of_u8(x.clone()));
-    }
+pub fn vec_u16_u82(vecc: &Vec<u16>) -> Vec<u8>{
+    let mut buff2: Vec<u8> = vec![0; vecc.len()*2];
+    BigEndian::write_u16_into(vecc, & mut buff2);
 
-    buff
+    buff2
 }
 
 
@@ -81,8 +79,8 @@ pub fn transform_u16_to_array_of_u8(x:u16) -> [u8;2] {
 }
 
 
-/// Mean of a vector
-pub fn mean_vec_u16(val: &Vec<u16>) -> u16{
+/// Mean of a U16 vector and returns a u16
+pub fn mean_vecU16_u16(val: &Vec<u16>) -> u16{
     let su: u16= val.iter().sum();
     println!("val {}", val.len());
     let j:u16  = (su as u16)/(val.len() as u16);
@@ -229,7 +227,7 @@ pub fn zstd_decode(bytes: Vec<u8>) -> Vec<u8> {
 
 #[cfg(test)]
 mod helper {
-    use crate::helper::{transform_u32_to_array_of_u8, u8_u322, transform_u16_to_array_of_u8, u8_u16, mean_vec_u16, binary2u8, byte_to_bitvec, byte_to_string};
+    use crate::helper::{transform_u32_to_array_of_u8, u8_u322, transform_u16_to_array_of_u8, u8_u16, mean_vecU16_u16, binary2u8, byte_to_bitvec, byte_to_string};
 
     #[test]
     fn test_converter(){
@@ -243,7 +241,7 @@ mod helper {
 
     #[test]
     fn mean_test(){
-        assert_eq!(10, mean_vec_u16(&vec![11,10,0,9,20]))
+        assert_eq!(10, mean_vecU16_u16(&vec![11, 10, 0, 9, 20]))
     }
 
     #[test]

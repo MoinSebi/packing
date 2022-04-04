@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use crate::reader::{get_file_as_byte_vec, get_meta, read_simple, wrapper_bool, wrapper_u16};
+use crate::reader::{get_file_as_byte_vec, get_meta, read_simple_u32, wrapper_bool, wrapper_u16};
 use crate::helper::{u8_u16, u8_u322};
 
 /// This is the same as read_exact, except if it reaches EOF it doesn't return
@@ -31,7 +31,7 @@ pub fn get_thresh(filename: &str) -> u16{
 
 /// Information about the a index file
 pub fn stats_index(filename: &str){
-    let nodes = read_simple(filename);
+    let nodes = read_simple_u32(filename);
     let nodes_hs: HashSet<u32> = nodes.iter().cloned().collect();
     println!("Number of nodes: {}", nodes_hs.len());
     println!("Number of entries: {}", nodes.len());

@@ -18,11 +18,11 @@ use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter, warn};
-use crate::reader::wrapper_meta;
 use std::io::Write;
 use bitvec::macros::internal::funty::Fundamental;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
+use crate::reader::wrapper_meta;
 
 fn main() {
 
@@ -324,6 +324,7 @@ fn main() {
 
         let mut absolute = false;
         let mut thresh: u32 = 0;
+        let mut absolute_thresh = 0;
         if matches.is_present("absolute threshold"){
             absolute = true;
             thresh = matches.value_of("absolute threshold").unwrap().parse().unwrap();
@@ -346,7 +347,8 @@ fn main() {
                 }
             } else {
                 warn!("You have not set additional threshold");
-                warn!("Relative threshold is 100% (normalized by mean)")
+                warn!("Relative threshold is 100% (normalized by mean)");
+                thresh = 100;
             }
         }
 
@@ -359,16 +361,11 @@ fn main() {
 
 
 
-        // NORMALIZING
-        if matches.is_present("normalize"){
-            p.normalize_wrapper("median");
-        }
 
-        if matches.is_present("threshold"){
-            if ! matches.is_present("normalize"){
-                p.normalize_wrapper("median");
-            }
-        }
+
+        // Modify the vector
+
+
 
 
 

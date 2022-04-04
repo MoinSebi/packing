@@ -108,7 +108,7 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
 
 /// Reads a binary file
 /// Buff -> Vec<u32>
-pub fn read_simple(filename: &str) -> Vec<u32>{
+pub fn read_simple_u32(filename: &str) -> Vec<u32>{
     let buf = get_file_as_byte_vec(filename);
     let chunks = buf.chunks(4);
     let mut vec_nodes: Vec<u32> = vec![0; buf.len()/4];
@@ -117,14 +117,25 @@ pub fn read_simple(filename: &str) -> Vec<u32>{
     return vec_nodes
 }
 
-/// Wrapper for meta + coverage file
+pub fn read_simple_u16(filename: &str) -> Vec<u16> {
+    let buf = get_file_as_byte_vec(filename);
+    let chunks = buf.chunks(4);
+    let mut vec_nodes: Vec<u16> = vec![0; buf.len() / 2];
+    BigEndian::read_u16_into(&buf, &mut vec_nodes);
+
+    return vec_nodes
+}
+
+/// Wrapper for meta + coverage combination
 /// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
-    let nodes = read_simple(filename1);
-    let cov = read_simple(filename2);
+    let nodes = read_simple_u32(filename1);
+    let cov = read_simple_u16(filename2);
     let pc: PackCompact = PackCompact{node: nodes, coverage: cov, coverage_normalized: Vec::new()};
     pc
 }
+
+
 
 
 #[cfg(test)]
