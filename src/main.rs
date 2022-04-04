@@ -323,7 +323,7 @@ fn main() {
         }
 
         let mut absolute = false;
-        let mut thresh: u32 = 0;
+        let mut thresh: u16 = 0;
         let mut absolute_thresh = 0;
         if matches.is_present("absolute threshold"){
             absolute = true;
@@ -356,6 +356,25 @@ fn main() {
         if matches.is_present("non-covered"){
             include_all = true;
         }
+        if !absolute{
+            absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
+        } else {
+            absolute_thresh = thresh;
+        }
+
+        let output: Vec<u16>;
+
+        if bin{
+
+        } else if normalize {
+
+        }
+
+
+
+
+
+
 
 
 

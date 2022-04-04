@@ -105,7 +105,7 @@ pub fn mean_vec_u32(val: &Vec<u32>) -> u32{
 }
 
 /// Mean of a vector
-pub fn median(numbers: & Vec<u32>) -> u32 {
+pub fn median(numbers: & Vec<u16>) -> u16 {
     let mut num = numbers.clone();
     num.sort();
     let mid = num.len() / 2;

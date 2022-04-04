@@ -1,3 +1,4 @@
+use bitvec::vec::BitVec;
 use byteorder::BigEndian;
 use log::info;
 use crate::helper::{binary2u8, vec_u16_u82, transform_u32_to_array_of_u8, u8_u322, mean_vecU16_u16, mean_vec_u32, median, mean_vec_f32, vec_f32_u82};
@@ -218,8 +219,96 @@ impl PackCompact {
     //     buf
     // }
 
+    pub fn get_real_threshold(&self, node: bool, all: bool, relative: u16, tt: &str) -> u16{
+        let mut work_on: Vec<u16>;
+        if node{
+            work_on = self.get_node_cov_mean();
+
+        } else {
+            work_on = self.coverage.clone();
+        }
+
+         if all{
+             remove_zero(& mut work_on)
+         } else {
+             remove_zero(& mut work_on)
+         }
+        let mut thresh = 0;
+        if tt != "nothing"{
+            work_on.sort();
+            thresh = work_on[(((work_on.len() as f64)/(100 as f64)) * ((relative as f64)/(100 as f64))) as usize];
+        } else if tt == "mean"{
+            thresh = mean_vecU16_u16(& work_on)
+        } else {
+            thresh = median(&work_on)
+        }
+        thresh = ((thresh as f64) * ((relative as f64)/(100 as f64))) as u16;
 
 
+
+        thresh
+
+    }
+
+    pub fn get_norm_vec(&self, node: bool, absolute_thresh: &u16) -> Vec<u16>{
+        let mut work_on: Vec<u16>;
+        if node{
+            work_on = self.get_node_cov_mean();
+
+        } else {
+            work_on = self.coverage.clone();
+        }
+        let mut ww: Vec<u16> = Vec::new();
+        for x in work_on.iter(){
+            ww.push(((*x as f64)/(*absolute_thresh as f64)) as u16)
+        }
+        ww
+    }
+
+    pub fn get_bit_vec(&self, node: bool, absolute_thresh: &u16) -> BitVec{
+        let mut work_on: Vec<u16>;
+        if node{
+            work_on = self.get_node_cov_mean();
+
+        } else {
+            work_on = self.coverage.clone();
+        }
+        let mut bv: BitVec = BitVec::new();
+        for x in work_on.iter(){
+            if x >= absolute_thresh{
+                bv.push(true)
+            } else {
+                bv.push(false)
+            }
+        }
+        bv
+    }
+
+    pub fn get_node_cov_mean(&self) -> Vec<u16>{
+        let mut node_id = self.node[0];
+        let mut node_mean: Vec<u16> = Vec::new();
+        let mut result: Vec<u16> = Vec::new();
+        println!("{}", self.coverage.len());
+        for x in 0..self.coverage.len() {
+            if self.node[x] != node_id {
+                result.push(mean_vecU16_u16(&node_mean));
+
+                node_id = self.node[x];
+                node_mean = vec![self.coverage[x] as u16];
+            } else {
+                node_mean.push(self.coverage[x] as u16)
+            }
+        }
+        result
+    }
+
+
+
+
+}
+
+pub fn remove_zero(vecc: & mut Vec<u16>){
+    vecc.retain(|&x| x != 0);
 }
 
 
