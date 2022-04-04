@@ -20,6 +20,7 @@ use env_logger::{Builder, Target};
 use log::{info, LevelFilter, warn};
 use crate::reader::wrapper_meta;
 use std::io::Write;
+use bitvec::macros::internal::funty::Fundamental;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
 
@@ -91,32 +92,32 @@ fn main() {
                 .long("pack")
                 .about("vg pack file")
                 .takes_value(true))
-            .arg(Arg::new("meta")
-                .short('m')
+            .arg(Arg::new("index")
+                .short('i')
+                .long("index")
+                .about("Index file from 'packing index'")
                 .takes_value(true))
-            .arg(Arg::new("coverage")
+            .arg(Arg::new("compressed pack (sequence)")
                 .short('c')
-                .takes_value(true))
-            .arg(Arg::new("binary pack")
-                .short('b')
                 .takes_value(true))
 
             // Type
-            .arg(Arg::new("sequence")
-                .short('s')
-                .long("sequence")
-                .about("sequence [default: nodes]"))
+            .arg(Arg::new("type")
+                .short('t')
+                .long("type")
+                .about("Type of output: nodes|sequence|pack (default: nodes)"))
 
 
             // Modification
-            .arg(Arg::new("threshold")
-                .short('t')
+            .arg(Arg::new("relative threshold")
+                .short('r')
                 .long("threshold")
-                .about("Threshold after normalizing (in %)")
+                .about("Percentile (can be combined with 'normalize' flag" )
                 .takes_value(true))
             .arg(Arg::new("absolute threshold")
+                .short('a')
                 .long("absolute threshold")
-                .about("absolute threshold")
+                .about("Presence-absence according to absolute threshold")
                 .takes_value(true))
             // If you normalize, pls use me
             .arg(Arg::new("normalize")
@@ -124,31 +125,33 @@ fn main() {
                 .long("normalize")
                 .about("Normalize everything")
                 .takes_value(true))
+            .arg(Arg::new("binary")
+                .short('b')
+                .long("binary")
+                .about("Make a presence-absence binary file"))
+            .arg(Arg::new("non-covered")
+                .long("non-covered")
+                .about("Include non-covered entries (nodes or sequences) for dynamic normalizing calculations (e.g mean)"))
+            .arg(Arg::new("Statistics")
+                .short('s')
+                .long("stats")
+                .about("Normalize by mean or median (always in combination relative threshold)"))
+
 
 
 
 
             //Output
+            // As you might get mutiple file, takes value for everythin
+            // Alternative only one run per process
+            // ReaderBit and u16 with stats function
+            // You iterate and lose information directly
             .arg(Arg::new("out")
                 .short('o')
                 .long("out")
                 .about("Output name")
-                .takes_value(true)
                 .default_value("pack")
-                .takes_value(true))
-            .arg(Arg::new("output coverage")
-                .long("outcov")
-                .about("Write Coverage to this file")
-                .takes_value(true))
-            .arg(Arg::new("output binary packing")
-                .long("outbpack")
-                .about("Write complete file to this file")
-                .takes_value(true))
-            .arg(Arg::new("output packing")
-                .long("outpack")
-                .about("Write complete file to this file")
                 .takes_value(true)))
-
 
 
         .get_matches();
@@ -250,7 +253,7 @@ fn main() {
         let mut p: PackCompact = PackCompact::new();
         let mut no_file = false;
         // Determine Input format
-        if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) | (matches.is_present("binary pack")){
+        if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) {
             // READ "NORMAL" PACK FILE
             if matches.is_present("pack"){
                 if Path::new(matches.value_of("pack").unwrap()).exists(){
@@ -262,22 +265,10 @@ fn main() {
                     no_file = true;
                 }
             }
-                // READ BINARY PACK
-            else if matches.is_present("binary pack") {
-                if Path::new(matches.value_of("binary pack").unwrap()).exists() {
-                    p = PackCompact::new();
-                    p.read_complete(matches.value_of("binary pack").unwrap());
-                    let name: &str = matches.value_of("binary pack").unwrap();
-                    let s2: Vec<&str> = name.split("/").collect();
-                    s = s2.last().unwrap().clone();
-                } else {
-                    no_file = true;
-                }
-            }
                 //READ COVERAGE AND META
             else {
-                if Path::new(matches.value_of("coverage").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
-                    p = wrapper_meta(matches.value_of("meta").unwrap(), matches.value_of("coverage").unwrap());
+                if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
+                    p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("coverage").unwrap());
                     let name: &str = matches.value_of("coverage").unwrap();
                     let s2: Vec<&str> = name.split("/").collect();
                     s = s2.last().unwrap().clone();
@@ -292,26 +283,79 @@ fn main() {
             process::exit(0x0100);
         }
         if p.coverage.len() == 0{
-            info!("There is a problem with the input files");
+            info!("There is a problem with the input files. Test packing info");
             process::exit(0x0100);
         } else {
             info!("File is {}", s)
         }
 
 
-        // OUTPUT FOR SPECIAL OUTPUT
-        if matches.is_present("output coverage"){
-            let buf = p.compress_only_coverage();
-            writer_compress_zlib(&buf, matches.value_of("output coverage").unwrap());
+        let mut out_type = "node";
+        if matches.is_present("type"){
+            let ty = matches.value_of("type").unwrap();
+            if ty == "node"{
+                out_type = "node";
+            } else if ty == "sequence" {
+                out_type = "sequence";
+            } else if ty == "pack"{
+                out_type = "pack"
+            } else {
+                warn!("Not one of the available output types");
+                warn!("Using default value: node");
+            }
+        }
+        if out_type == "pack"{
+            write_pack(&p, matches.value_of("output").unwrap());
+            process::exit(0x0100);
         }
 
-        if matches.is_present("output binary packing"){
-            let buf = p.compress_all();
-            writer_compress_zlib(&buf, matches.value_of("output binary packing").unwrap());
+
+        // Modify
+        // Bit or u16
+        // Normalize or presence-absence
+        let mut bin = false;
+        if matches.is_present("binary"){
+            bin = true;
         }
-        if matches.is_present("output packing"){
-            write_pack(&p, matches.value_of("output packing").unwrap())
+        let mut normalize = false;
+        if matches.is_present("normalize"){
+            normalize = true;
         }
+
+        let mut absolute = false;
+        let mut thresh: u32 = 0;
+        if matches.is_present("absolute threshold"){
+            absolute = true;
+            thresh = matches.value_of("absolute threshold").unwrap().parse().unwrap();
+        }
+        if matches.is_present("relative threshold"){
+            thresh = matches.value_of("relative threshold").unwrap().parse().unwrap();
+        }
+
+        let mut stats:  &str = "nothing";
+        if matches.is_present("stats"){
+            if (thresh != 0) & !absolute{
+                let m_m = matches.value_of("stats").unwrap();
+                if m_m == "mean"{
+                    stats = m_m
+                } else if m_m == "median"{
+                    stats = m_m
+                } else {
+                    warn!("This metric is not available");
+                    warn!("Normalized by percentile");
+                }
+            } else {
+                warn!("You have not set additional threshold");
+                warn!("Relative threshold is 100% (normalized by mean)")
+            }
+        }
+
+        let mut include_all = false;
+        if matches.is_present("non-covered"){
+            include_all = true;
+        }
+
+
 
 
 

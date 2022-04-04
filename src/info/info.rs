@@ -41,6 +41,10 @@ pub fn stats_index(filename: &str){
 
 
 /// Compute statistics about the index file.
+///
+/// TODO
+/// Mean and median coverage of all and covered nodes if single file
+/// Split files after cat
 pub fn stats(filename: &str, exact: bool, check_all: bool) {
     let g: Vec<u8> = get_file_as_byte_vec(filename);
     let meta = get_meta(&g);
