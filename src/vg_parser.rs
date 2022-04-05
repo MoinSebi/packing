@@ -1,7 +1,7 @@
 use crate::core::{PackCompact};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-use crate::helper::mean_vecU16_u16;
+use crate::helper::mean_vec_u16_u16;
 
 
 
@@ -65,7 +65,7 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
                 Err(_e) => h3 = u16::MAX,
             };
             if node != j{
-                let mm = mean_vecU16_u16(&o);
+                let mm = mean_vec_u16_u16(&o);
                 if mm >= thresh{
                     test1.push(true);
                 } else {
@@ -80,7 +80,7 @@ pub fn parse_node_thresh(filename: &str, thresh: u16 ) -> (String, Vec<bool>){
 
         }
     }
-    let mm = mean_vecU16_u16(&o);
+    let mm = mean_vec_u16_u16(&o);
     if mm >= thresh{
         test1.push(true);
     } else {
@@ -121,7 +121,7 @@ pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
                 Err(_e) => h3 = u16::MAX,
             };
             if node != j{
-                let mm = mean_vecU16_u16(&o);
+                let mm = mean_vec_u16_u16(&o);
                 test1.push(mm);
                 j = node;
                 o = vec![h3];
@@ -132,7 +132,7 @@ pub fn parse_node_mean(filename: &str) -> (String, Vec<u16>){
 
         }
     }
-    let mm = mean_vecU16_u16(&o);
+    let mm = mean_vec_u16_u16(&o);
     test1.push(mm);
     (name, test1)
 }

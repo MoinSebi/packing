@@ -15,7 +15,7 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd2 = Command::cargo_bin("packing")?;
     cmd2.arg("info")
         .arg("-i")
-        .arg("tests_output/t10.zst");
+        .arg("tests_output/t10.bin.zst");
     cmd2.assert().stdout(predicate::str::contains("Number of nodes: 9"));
     cmd2.assert().stdout(predicate::str::contains("Number of entries: 58"));
 
@@ -36,7 +36,7 @@ fn index_pack2() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd2 = Command::cargo_bin("packing")?;
     cmd2.arg("info")
         .arg("-i")
-        .arg("tests_output/t20.zst");
+        .arg("tests_output/t20.bin.zst");
     cmd2.assert().stdout(predicate::str::contains("Number of nodes: 7404"));
     cmd2.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 

@@ -1,8 +1,5 @@
-
-use assert_cmd::cargo::CommandCargoExt;
 use assert_cmd::Command;
-use predicates::prelude::predicate;
-use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_u16};
+use packing_lib::reader::{get_file_as_byte_vec, wrapper_u16};
 
 #[test]
 fn convert_pack_normal() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,6 +25,9 @@ fn convert_pack_normal() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(p[0].name, "9986.100k.txt");
     assert_eq!(p[0].data[1], 0 );
     assert_eq!(p[0].data[49], 1);
+    // cmd.assert()
+    //     .failure()
+    //     .stderr(predicate::str::contains("could not read file"));
 
 
     Ok(())

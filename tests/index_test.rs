@@ -1,7 +1,6 @@
 
-use assert_cmd::cargo::CommandCargoExt;
+
 use assert_cmd::Command;
-use predicates::prelude::predicate;
 
 #[test]
 fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {

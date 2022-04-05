@@ -10,8 +10,8 @@ mod info;
 
 use clap::{App, Arg };
 use crate::vg_parser::{parse_smart};
-use crate::writer::{write_file, write_pack, writer_compress_zlib};
-use crate::helper::{vec_u16_u8, binary2u8, vec_f32_u82};
+use crate::writer::{write_pack, writer_compress_zlib};
+use crate::helper::{vec_u16_u8,normalizeing, bitbit, make_header};
 use std::{ process};
 use crate::core::PackCompact;
 use std::path::Path;
@@ -19,7 +19,6 @@ use chrono::Local;
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter, warn};
 use std::io::Write;
-use bitvec::macros::internal::funty::Fundamental;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
 use crate::reader::wrapper_meta;
@@ -248,41 +247,41 @@ fn main() {
     }
 
     // CONVERT
-    if let Some(ref matches) = matches.subcommand_matches("convert"){
+    if let Some(ref matches) = matches.subcommand_matches("convert") {
         let mut s = "";
         let mut p: PackCompact = PackCompact::new();
         let mut no_file = false;
         // Determine Input format
         if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) {
             // READ "NORMAL" PACK FILE
-            if matches.is_present("pack"){
-                if Path::new(matches.value_of("pack").unwrap()).exists(){
-                    p =  parse_smart(matches.value_of("pack").unwrap());
+            if matches.is_present("pack") {
+                if Path::new(matches.value_of("pack").unwrap()).exists() {
+                    p = parse_smart(matches.value_of("pack").unwrap());
                     let name: &str = matches.value_of("pack").unwrap();
-                    let s2:Vec<&str> = name.split("/").collect();
+                    let s2: Vec<&str> = name.split("/").collect();
                     s = s2.last().unwrap().clone();
                 } else {
                     no_file = true;
                 }
             }
-                //READ COVERAGE AND META
+            //READ COVERAGE AND META
             else {
                 if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
                     p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("coverage").unwrap());
                     let name: &str = matches.value_of("coverage").unwrap();
                     let s2: Vec<&str> = name.split("/").collect();
                     s = s2.last().unwrap().clone();
-                }else {
+                } else {
                     no_file = true;
                 }
             }
         }
 
-        if no_file{
+        if no_file {
             info!("There is no input file");
             process::exit(0x0100);
         }
-        if p.coverage.len() == 0{
+        if p.coverage.len() == 0 {
             info!("There is a problem with the input files. Test packing info");
             process::exit(0x0100);
         } else {
@@ -291,20 +290,20 @@ fn main() {
 
 
         let mut out_type = "node";
-        if matches.is_present("type"){
+        if matches.is_present("type") {
             let ty = matches.value_of("type").unwrap();
-            if ty == "node"{
+            if ty == "node" {
                 out_type = "node";
             } else if ty == "sequence" {
                 out_type = "sequence";
-            } else if ty == "pack"{
+            } else if ty == "pack" {
                 out_type = "pack"
             } else {
                 warn!("Not one of the available output types");
                 warn!("Using default value: node");
             }
         }
-        if out_type == "pack"{
+        if out_type == "pack" {
             write_pack(&p, matches.value_of("output").unwrap());
             process::exit(0x0100);
         }
@@ -314,32 +313,32 @@ fn main() {
         // Bit or u16
         // Normalize or presence-absence
         let mut bin = false;
-        if matches.is_present("binary"){
+        if matches.is_present("binary") {
             bin = true;
         }
         let mut normalize = false;
-        if matches.is_present("normalize"){
+        if matches.is_present("normalize") {
             normalize = true;
         }
 
         let mut absolute = false;
         let mut thresh: u16 = 0;
-        let mut absolute_thresh = 0;
-        if matches.is_present("absolute threshold"){
+        let absolute_thresh;
+        if matches.is_present("absolute threshold") {
             absolute = true;
             thresh = matches.value_of("absolute threshold").unwrap().parse().unwrap();
         }
-        if matches.is_present("relative threshold"){
+        if matches.is_present("relative threshold") {
             thresh = matches.value_of("relative threshold").unwrap().parse().unwrap();
         }
 
-        let mut stats:  &str = "nothing";
-        if matches.is_present("stats"){
-            if (thresh != 0) & !absolute{
+        let mut stats: &str = "nothing";
+        if matches.is_present("stats") {
+            if (thresh != 0) & !absolute {
                 let m_m = matches.value_of("stats").unwrap();
-                if m_m == "mean"{
+                if m_m == "mean" {
                     stats = m_m
-                } else if m_m == "median"{
+                } else if m_m == "median" {
                     stats = m_m
                 } else {
                     warn!("This metric is not available");
@@ -353,93 +352,93 @@ fn main() {
         }
 
         let mut include_all = false;
-        if matches.is_present("non-covered"){
+        if matches.is_present("non-covered") {
             include_all = true;
         }
-        if !absolute{
+        if !absolute {
             absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
         } else {
             absolute_thresh = thresh;
         }
 
-        let output: Vec<u16>;
+        let mut output: Vec<u16>;
 
-        if bin{
 
-        } else if normalize {
-
+        if out_type == "node" {
+            output = p.node_coverage;
+        } else {
+            output = p.coverage;
         }
 
+        if normalize {
+            output = normalizeing(output, &absolute_thresh);
+        }
 
+        let buffer: Vec<u8>;
+        if bin {
 
-
-
-
-
-
-
-
-
-
+            buffer = bitbit(output, &absolute_thresh);
+        } else {
+            buffer = vec_u16_u8(&output);
+        }
+        let mut bb = make_header(&(out_type == "node"), & absolute_thresh, &buffer, s);
+        bb.extend(buffer);
+        writer_compress_zlib(&bb, matches.value_of("out").unwrap());
+        println!("Len bb {}", bb.len());
 
         // Modify the vector
 
 
-
-
-
-        // THE REAL OUTPUT
-        // ABSOLUTE THRESHOLD -> NO NORMALIZE
-        // THRESHOLD -> NORMALIZE
-        let mut mean_node_out: Vec<u8>;
-        if matches.is_present("sequence"){
-            info!("USING SEQUENCE");
-            if matches.is_present("absolute threshold"){
-                info!("Absolute threshold");
-                let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
-                mean_node_out = p.coverage2byte_thresh_bit(&thresh);
-                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-            } else  if matches.is_present("threshold"){
-                info!("Threshold");
-                let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
-                let thresh = t/ 100 as f32;
-                mean_node_out = p.coverage2byte_thresh_normalized(&thresh);
-                write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-            } else if matches.is_present("normalized"){
-                info!("Normalized");
-                mean_node_out = p.coverage2byte_normalized();
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            } else {
-                mean_node_out = p.coverage2byte();
-
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            }
-        } else {
-            info!("USING NODES");
-            if matches.is_present("absolute threshold") {
-                info!("Absolute threshold");
-                let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
-                mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
-                write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-            } else  if matches.is_present("threshold"){
-                info!("Threshold");
-                let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
-                // This is very important
-                let thresh = t/ 100 as f32;
-                mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
-                write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-            } else if matches.is_present("normalized") {
-                info!("Normalized");
-                mean_node_out = vec_f32_u82(&p.node2byte_normalized());
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            } else {
-                mean_node_out = vec_u16_u8(&p.node2byte());
-                write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-            }
-        }
-
+        // // THE REAL OUTPUT
+        // // ABSOLUTE THRESHOLD -> NO NORMALIZE
+        // // THRESHOLD -> NORMALIZE
+        // let mut mean_node_out: Vec<u8>;
+        // if matches.is_present("sequence"){
+        //     info!("USING SEQUENCE");
+        //     if matches.is_present("absolute threshold"){
+        //         info!("Absolute threshold");
+        //         let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
+        //         mean_node_out = p.coverage2byte_thresh_bit(&thresh);
+        //         write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+        //     } else  if matches.is_present("threshold"){
+        //         info!("Threshold");
+        //         let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
+        //         let thresh = t/ 100 as f32;
+        //         mean_node_out = p.coverage2byte_thresh_normalized(&thresh);
+        //         write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
+        //     } else if matches.is_present("normalized"){
+        //         info!("Normalized");
+        //         mean_node_out = p.coverage2byte_normalized();
+        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+        //     } else {
+        //         mean_node_out = p.coverage2byte();
+        //
+        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+        //     }
+        // } else {
+        //     info!("USING NODES");
+        //     if matches.is_present("absolute threshold") {
+        //         info!("Absolute threshold");
+        //         let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
+        //         mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
+        //         write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
+        //     } else  if matches.is_present("threshold"){
+        //         info!("Threshold");
+        //         let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
+        //         // This is very important
+        //         let thresh = t/ 100 as f32;
+        //         mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
+        //         write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
+        //     } else if matches.is_present("normalized") {
+        //         info!("Normalized");
+        //         mean_node_out = vec_f32_u82(&p.node2byte_normalized());
+        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+        //     } else {
+        //         mean_node_out = vec_u16_u8(&p.node2byte());
+        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
+        //     }
+        // }
     }
-
 
     // Read input:
 

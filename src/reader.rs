@@ -1,12 +1,12 @@
 
 use std::fs::File;
-use std::io::{Read, Write};
-use std::{fs, io};
-use bitvec::order::{Lsb0, Msb0};
+use std::io::{Read};
+use std::{fs};
+use bitvec::order::{Msb0};
 use bitvec::vec::BitVec;
-use byteorder::{BigEndian, ByteOrder, LittleEndian};
+use byteorder::{BigEndian, ByteOrder};
 use log::info;
-use crate::helper::{byte_to_bitvec, byte_to_string, byte2u16, u8_u322, u8_u16, zstd_decode};
+use crate::helper::{byte_to_string, zstd_decode};
 use crate::core::PackCompact;
 
 // Use this as a library for reading the binary files
@@ -55,7 +55,7 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
 
     for chunk in chunks.into_iter(){
 
-        let (kind, length, thresh, name) = get_meta(chunk);
+        let (kind, _length, _thresh, name) = get_meta(chunk);
         info!("Name {}", name);
         let bv: BitVec<u8, Msb0> = BitVec::from_slice(&chunk[73..]);
         result.push(ReaderBit {name, kind, data: bv});
@@ -77,7 +77,7 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     eprintln!("Number of samples: {}", chunks.len());
     let mut result: Vec<ReaderU16> = Vec::new();
     for chunk in chunks.into_iter(){
-        let (kind, length, thresh, name) = get_meta(chunk);
+        let (kind, _length, _thresh, name) = get_meta(chunk);
         info!("Name {}", name);
         let mut data = vec![0; chunk[73..].len()/2];
         BigEndian::read_u16_into(&chunk[73..], & mut data);
@@ -94,7 +94,7 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
     let cov = buffer[3];
     let length = BigEndian::read_u32(& buffer[3..7]);
     let thresh = BigEndian::read_u16(& buffer[7..9]);
-    let mut name = byte_to_string(&mut &buffer[9..73]);
+    let name = byte_to_string(&mut &buffer[9..73]);
     let name = name.trim_matches(char::from(0)).to_string();
 
 
@@ -110,7 +110,6 @@ pub fn get_meta(buffer: & [u8]) -> (bool, u32, u16, String){
 /// Buff -> Vec<u32>
 pub fn read_simple_u32(filename: &str) -> Vec<u32>{
     let buf = get_file_as_byte_vec(filename);
-    let chunks = buf.chunks(4);
     let mut vec_nodes: Vec<u32> = vec![0; buf.len()/4];
     BigEndian::read_u32_into(& buf, & mut vec_nodes);
 
@@ -119,7 +118,6 @@ pub fn read_simple_u32(filename: &str) -> Vec<u32>{
 
 pub fn read_simple_u16(filename: &str) -> Vec<u16> {
     let buf = get_file_as_byte_vec(filename);
-    let chunks = buf.chunks(4);
     let mut vec_nodes: Vec<u16> = vec![0; buf.len() / 2];
     BigEndian::read_u16_into(&buf, &mut vec_nodes);
 
@@ -131,62 +129,10 @@ pub fn read_simple_u16(filename: &str) -> Vec<u16> {
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
     let nodes = read_simple_u32(filename1);
     let cov = read_simple_u16(filename2);
-    let pc: PackCompact = PackCompact{node: nodes, coverage: cov, coverage_normalized: Vec::new()};
+    let pc: PackCompact = PackCompact{node: nodes, coverage: cov, coverage_normalized: Vec::new(), node_coverage: Vec::new()};
     pc
 }
 
-
-
-
-#[cfg(test)]
-mod reader {
-    use bitvec::order::{Lsb0, Msb0};
-    use bitvec::prelude::BitVec;
-    use byteorder::{BigEndian, ByteOrder, LittleEndian};
-    use crate::helper::{binary2u8, byte2u16, byte_to_bitvec, vec_u16_u8};
-    use crate::reader::{get_file_as_byte_vec, ReaderBit, ReaderU16, wrapper_bool, wrapper_u16};
-    use crate::vg_parser::{parse_smart};
-    use crate::writer::{write_file, writer_compress_zlib};
-    use std::mem::size_of_val;
-
-    #[test]
-    fn testing1() {
-        let mut k: Vec<u8> = vec![1,2];
-        let mut numbers_given: Vec<u16> = vec![0; k.len()/2];
-        BigEndian::read_u16_into(& mut k, & mut numbers_given);
-        println!("test1  {:?}", numbers_given);
-    }
-
-    #[test]
-    fn byte2bitvec() {
-        let mut k: Vec<u8> = vec![1, 2];
-        let bi: BitVec<_, Msb0> = BitVec::from_slice(&k);
-    }
-
-
-    #[test]
-    fn pack_pack() {
-        let k = parse_smart("testing/9986.100k.txt");
-        let buf = vec_u16_u8(&k.node2byte());
-        write_file("tt1t", &buf, 0, "testing/cov.test", false);
-        let buf: Vec<u8> = get_file_as_byte_vec("testing/cov.test.bin.zst");
-        let data: Vec<ReaderU16> = wrapper_u16(&buf);
-        eprint!("data {}", data.len());
-        eprint!("data {}", data[0].data.len());
-    }
-
-
-    #[test]
-    fn pack_pack2() {
-        let k = parse_smart("testing/9986.100k.txt");
-        let mean_node_out = binary2u8(&k.node2byte_thresh(&1));
-        write_file("jo1", &mean_node_out, 1, "testing/jo1", true);
-        let buf: Vec<u8> = get_file_as_byte_vec("testing/jo1.bin.zst");
-        let data: Vec<ReaderBit> = wrapper_bool(&buf);
-        eprint!("data {}", data.len());
-        eprint!("data {}", data[0].data.len());
-    }
-}
 
 
 
