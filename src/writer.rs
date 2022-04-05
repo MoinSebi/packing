@@ -17,7 +17,7 @@ pub fn writer_compress(buf: &Vec<u8>, filename: &str){
 /// Just writing bytes to a file
 pub fn writer_compress_zlib(buf: &Vec<u8>, filename: &str){
     let u = zstd_encode(buf);
-    let mut file = File::create([filename, "bin","zst"].join(".")).expect("Not able to write ");
+    let mut file = File::create(filename).expect("Not able to write ");
     file.write_all(&u).expect("Not able to write ");
 }
 

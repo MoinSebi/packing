@@ -1,3 +1,4 @@
+use std::fs;
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_u16};
@@ -16,11 +17,11 @@ fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t21")
+        .arg("tests_output/t21.pb")
         .arg("-v");
     cmd.assert().success();
 
-    let o = get_file_as_byte_vec("tests_output/t21.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t21.pb");
     let p = wrapper_u16(&o);
     cmd.assert().stderr(predicate::str::contains("File is"));
     println!("{}", p[0].name);
@@ -28,7 +29,7 @@ fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(p[0].data[1], 0 );
     assert_eq!(p[0].data[49], 1);
     assert_eq!(p[0].data.len(), 7404);
-
+    //fs::remove_file("tests_output/t21.bin.zst")?;
 
     Ok(())
 }
@@ -47,12 +48,12 @@ fn convert_pack_nodes() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t22")
+        .arg("tests_output/t22.pb")
         .arg("-t")
         .arg("sequence")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("tests_output/t22.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t22.pb");
     let p = wrapper_u16(&o);
     println!("{}", p[0].name);
     assert_eq!(p[0].name, "9986.100k.txt");
@@ -79,7 +80,7 @@ fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t23")
+        .arg("tests_output/t23.pb")
         .arg("-t")
         .arg("sequence")
         .arg("-a")
@@ -87,7 +88,7 @@ fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-b")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("tests_output/t23.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t23.pb");
     let p = wrapper_bool(&o);
     println!("{}", p[0].name);
     assert_eq!(p[0].name, "9986.100k.txt");
@@ -122,7 +123,7 @@ fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t23")
+        .arg("tests_output/t23.pb")
         .arg("-t")
         .arg("sequence")
         .arg("-r")
@@ -130,7 +131,7 @@ fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-b")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("tests_output/t23.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t23.pb");
     let p = wrapper_bool(&o);
     // cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
     println!("{}", p[0].name);
@@ -165,7 +166,7 @@ fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t23")
+        .arg("tests_output/t23.pb")
         .arg("-t")
         .arg("sequence")
         .arg("-r")
@@ -175,7 +176,7 @@ fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("median")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("tests_output/t23.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t23.pb");
     let p = wrapper_bool(&o);
     println!("{}", p[0].name);
     assert_eq!(p[0].name, "9986.100k.txt");
@@ -209,7 +210,7 @@ fn convert_pack_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t23")
+        .arg("tests_output/t23.pb")
         .arg("-t")
         .arg("sequence")
         .arg("-r")
@@ -217,7 +218,7 @@ fn convert_pack_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("--normalize")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("tests_output/t23.bin.zst");
+    let o = get_file_as_byte_vec("tests_output/t23.pb");
     let p = wrapper_u16(&o);
     //cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 

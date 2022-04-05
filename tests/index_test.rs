@@ -9,7 +9,7 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-g")
         .arg("/home/svorbrugg_local/Rust/gSV/example_data/testGraph.gfa")
         .arg("-o")
-        .arg("tests_output/t1");
+        .arg("tests_output/t1.pi");
     cmd.assert().success();
     Ok(())
 }
@@ -22,7 +22,7 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("9986.100k.txt")
         .arg("-o")
-        .arg("tests_output/t2");
+        .arg("tests_output/t2.pi");
     cmd.assert().success();
 
     Ok(())
