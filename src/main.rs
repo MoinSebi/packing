@@ -8,7 +8,7 @@ mod index;
 mod info;
 
 
-use clap::{App, Arg };
+use clap::{App, AppSettings, Arg};
 use crate::vg_parser::{parse_smart};
 use crate::writer::{write_pack, writer_compress_zlib};
 use crate::helper::{vec_u16_u8,normalizeing, bitbit, make_header};
@@ -17,7 +17,7 @@ use crate::core::PackCompact;
 use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
-use log::{info, LevelFilter, warn};
+use log::{debug, info, LevelFilter, warn};
 use std::io::Write;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
@@ -30,11 +30,13 @@ fn main() {
         .version("0.1.0")
         .author("Sebastian V")
         .about("packing")
+        .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(Arg::new("verbose")
             .short('v')
             .about("-v = DEBUG | -vv = TRACE")
             .takes_value(true)
-            .default_missing_value("v1"))
+            .default_missing_value("v1")
+                 .global(true))
         .arg(Arg::new("quiet")
             .short('q')
             .about("No messages"))
@@ -44,6 +46,7 @@ fn main() {
         .subcommand(App::new("info")
             .about("Information about index or binary files")
             .version("0.1.0")
+            .setting(AppSettings::ArgRequiredElseHelp)
             .arg(Arg::new("binary")
                 .short('b')
                 .long("binary")
@@ -64,6 +67,7 @@ fn main() {
         .subcommand(App::new("index")
             .about("Index a graph (gfa or VG pack)")
             .version("0.1.0")
+            .setting(AppSettings::ArgRequiredElseHelp)
             .arg(Arg::new("gfa")
                 .short('g')
                 .long("gfa")
@@ -85,6 +89,8 @@ fn main() {
 
         .subcommand(App::new("convert")
             .about("Convert VG PACK format for a compact index structure (partially reversible)")
+            .version("0.1.0")
+            .setting(AppSettings::ArgRequiredElseHelp)
             // Input
             .arg(Arg::new("pack")
                 .short('p')
@@ -104,7 +110,8 @@ fn main() {
             .arg(Arg::new("type")
                 .short('t')
                 .long("type")
-                .about("Type of output: nodes|sequence|pack (default: nodes)"))
+                .about("Type of output: nodes|sequence|pack (default: nodes)")
+                .takes_value(true))
 
 
             // Modification
@@ -122,8 +129,7 @@ fn main() {
             .arg(Arg::new("normalize")
                 .short('n')
                 .long("normalize")
-                .about("Normalize everything")
-                .takes_value(true))
+                .about("Normalize everything"))
             .arg(Arg::new("binary")
                 .short('b')
                 .long("binary")
@@ -131,10 +137,11 @@ fn main() {
             .arg(Arg::new("non-covered")
                 .long("non-covered")
                 .about("Include non-covered entries (nodes or sequences) for dynamic normalizing calculations (e.g mean)"))
-            .arg(Arg::new("Statistics")
+            .arg(Arg::new("stats")
                 .short('s')
                 .long("stats")
-                .about("Normalize by mean or median (always in combination relative threshold)"))
+                .about("Normalize by mean or median (always in combination relative threshold)")
+                .takes_value(true))
 
 
 
@@ -351,9 +358,9 @@ fn main() {
             }
         }
 
-        let mut include_all = false;
+        let mut include_all = true;
         if matches.is_present("non-covered") {
-            include_all = true;
+            include_all = false;
         }
         if !absolute {
             absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
@@ -362,7 +369,6 @@ fn main() {
         }
 
         let mut output: Vec<u16>;
-
 
         if out_type == "node" {
             output = p.node_coverage;
@@ -373,7 +379,6 @@ fn main() {
         if normalize {
             output = normalizeing(output, &absolute_thresh);
         }
-
         let buffer: Vec<u8>;
         if bin {
 
@@ -384,7 +389,6 @@ fn main() {
         let mut bb = make_header(&(out_type == "node"), & absolute_thresh, &buffer, s);
         bb.extend(buffer);
         writer_compress_zlib(&bb, matches.value_of("out").unwrap());
-        println!("Len bb {}", bb.len());
 
         // Modify the vector
 

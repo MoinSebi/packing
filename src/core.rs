@@ -1,5 +1,5 @@
 use log::info;
-use crate::helper::{mean_vec_u16_u16, median, transform_u32_to_array_of_u8};
+use crate::helper::{mean_vec_u16_u16, median, remove_zero, transform_u32_to_array_of_u8};
 
 /// VG pack representation + additional information.
 ///
@@ -81,6 +81,7 @@ impl PackCompact {
     // }
 
     pub fn get_real_threshold(& mut self, node: bool, all: bool, relative: u16, tt: &str) -> u16{
+
         let mut work_on: Vec<u16>;
         if node{
             work_on = self.get_node_cov_mean();
@@ -90,23 +91,29 @@ impl PackCompact {
         } else {
             work_on = self.coverage.clone();
         }
+        if relative == 0{
+            return 0
+        }
 
          if all{
              remove_zero(& mut work_on)
-         } else {
-             remove_zero(& mut work_on)
          }
         let mut thresh;
-        if tt != "nothing"{
+        if tt == "nothing"{
+
             work_on.sort();
-            thresh = work_on[(((work_on.len() as f64)/(100 as f64)) * ((relative as f64)/(100 as f64))).round() as usize];
+            thresh = work_on[((work_on.len() as f64) * ((relative as f64)/(100 as f64))).round() as usize];
+            return thresh
         } else if tt == "mean"{
             thresh = mean_vec_u16_u16(& work_on);
             info!("Mean is {}", thresh);
         } else {
+
             thresh = median(&work_on);
             info!("Median is {}", thresh);
         }
+
+        info!("Realtive {}", relative);
         thresh = ((thresh as f64) * ((relative as f64)/(100 as f64))).round() as u16;
         info!("Working threshold is {}", thresh);
 
@@ -142,9 +149,6 @@ impl PackCompact {
 
 }
 
-pub fn remove_zero(vecc: & mut Vec<u16>){
-    vecc.retain(|&x| x != 0);
-}
 
 
 

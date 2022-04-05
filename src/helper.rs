@@ -1,6 +1,5 @@
 use std::io::{Write, Read};
-use bitvec::bitvec;
-use bitvec::order::{Lsb0, Msb0};
+use bitvec::order::{ Msb0};
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
 use log::info;
@@ -64,22 +63,6 @@ pub fn byte_to_string(input: &[u8]) -> String {
     }
     return o
 }
-
-
-
-
-// pub fn read_be_u32(input: & mut &[u8]) -> u32 {
-//     let (int_bytes, rest) = input.split_at(std::mem::size_of::<u32>());
-//     *input = rest;
-//     u32::from_be_bytes(int_bytes.try_into().unwrap())
-// }
-//
-// pub fn read_be_u16(input: &mut &[u8]) -> u16 {
-//     let (int_bytes, rest) = input.split_at(std::mem::size_of::<u16>());
-//     *input = rest;
-//     u16::from_be_bytes(int_bytes.try_into().unwrap())
-// }
-
 
 
 
@@ -160,6 +143,11 @@ pub fn zstd_decode(bytes: Vec<u8>) -> Vec<u8> {
     gz.read_to_end(& mut k).expect("Decoding does not work");
     k
 }
+
+pub fn remove_zero(vecc: & mut Vec<u16>){
+    vecc.retain(|&x| x != 0);
+}
+
 
 
 
