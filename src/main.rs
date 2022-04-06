@@ -36,10 +36,11 @@ fn main() {
             .about("-v = DEBUG | -vv = TRACE")
             .takes_value(true)
             .default_missing_value("v1")
-                 .global(true))
+            .global(true))
         .arg(Arg::new("quiet")
             .short('q')
-            .about("No messages"))
+            .about("No messages")
+            .global(true))
 
 
 
