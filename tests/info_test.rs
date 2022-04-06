@@ -3,6 +3,8 @@ use assert_cmd::Command;
 use predicates::prelude::predicate;
 
 #[test]
+/// Test info subcommand
+/// -i (index)
 fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("index")
@@ -24,6 +26,10 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+/// Test info subcommand
+/// -i (index)
+///
+/// Comment: Index command copied from index_test.rs
 fn index_pack2() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("index")
@@ -46,6 +52,10 @@ fn index_pack2() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test info subcommand
+/// -b (binary)
+///
+/// Comment: Index command copied from convert_test.rs
 fn index_pack3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")

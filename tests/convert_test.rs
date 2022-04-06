@@ -4,6 +4,7 @@ use predicates::prelude::predicate;
 use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_u16};
 
 #[test]
+/// Test on normal convert subcommand without any additional flags
 fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers
@@ -35,6 +36,8 @@ fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+/// Test convert subcommand with
+/// - sequences
 fn convert_pack_nodes() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers
@@ -67,6 +70,10 @@ fn convert_pack_nodes() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test convert subcommand with
+/// - sequences
+/// - absolute threshold 2
+/// - binary output
 fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers
@@ -110,6 +117,10 @@ fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test convert subcommand with
+/// - sequences
+/// - relative threshold 50
+/// - binary output (bit)
 fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers
@@ -153,6 +164,11 @@ fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test convert subcommand with
+/// -t (type) sequences
+/// -r (relative threshold) 50
+/// -s (stats) median
+/// -b (binary) (bit)
 fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers
@@ -197,6 +213,10 @@ fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test convert subcommand with
+/// -t (type) sequences
+/// -r (relative threshold) 50
+/// --normalize (u16)
 fn convert_pack_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
     // How to test convert
     // If zstd --> read it and check one of two numbers

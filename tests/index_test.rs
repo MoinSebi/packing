@@ -3,6 +3,8 @@
 use assert_cmd::Command;
 
 #[test]
+/// Test index subcommand
+/// -g (gfa)
 fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("index")
@@ -16,6 +18,8 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+/// Test index subcommand
+/// -p (pack)
 fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("index")

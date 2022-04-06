@@ -1,6 +1,8 @@
 # VGPACK to compressed binary
 Small helper tool for reducing storage size of vg packs (tabular output).
-Can also be used as a library for reading the produced binary files. Part of [gfa2bin](https://github.com/MoinSebi/gfa2bin).   
+Can also be used as a library for reading the produced binary files. Part of [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
+I use .pb "pack binary" and .pi "pack index" as suffix, but use whatever you want.  
+
 
 
 ___ 
@@ -10,7 +12,6 @@ ___
 git clone https://github.com/MoinSebi/packing
 cd packing
 cargo build --release
-
 ```
 ___
 ### Usage
