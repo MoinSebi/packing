@@ -262,7 +262,8 @@ fn main() {
         let mut p: PackCompact = PackCompact::new();
         let mut no_file = false;
         // Determine Input format
-        if matches.is_present("pack") | (matches.is_present("meta") & matches.is_present("coverage")) {
+        if matches.is_present("pack") | (matches.is_present("index") & matches.is_present("compressed pack")) {
+        if matches.is_present("pack") | (matches.is_present("index") & matches.is_present("compressed pack")) {
             // READ "NORMAL" PACK FILE
             if matches.is_present("pack") {
                 if Path::new(matches.value_of("pack").unwrap()).exists() {
@@ -279,6 +280,7 @@ fn main() {
                 if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("compressed pack").unwrap()).exists() {
                     p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("compressed pack").unwrap());
                     let name: &str = matches.value_of("compressed pack").unwrap();
+
                     let s2: Vec<&str> = name.split("/").collect();
                     s = s2.last().unwrap().clone();
                 } else {
@@ -316,7 +318,7 @@ fn main() {
             }
         }
         if out_type == "pack" {
-            write_pack(&p, matches.value_of("output").unwrap());
+            write_pack(&p, matches.value_of("out").unwrap());
             process::exit(0x0100);
         }
 
