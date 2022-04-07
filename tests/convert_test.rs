@@ -1,4 +1,3 @@
-use std::fs;
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_u16};
@@ -6,12 +5,6 @@ use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_u16};
 #[test]
 /// Test on normal convert subcommand without any additional flags
 fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -39,12 +32,6 @@ fn convert_pack_nothing() -> Result<(), Box<dyn std::error::Error>> {
 /// Test convert subcommand with
 /// - sequences
 fn convert_pack_nodes() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -75,12 +62,6 @@ fn convert_pack_nodes() -> Result<(), Box<dyn std::error::Error>> {
 /// - absolute threshold 2
 /// - binary output
 fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -122,12 +103,6 @@ fn convert_pack_nodes_a() -> Result<(), Box<dyn std::error::Error>> {
 /// - relative threshold 50
 /// - binary output (bit)
 fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -170,12 +145,6 @@ fn convert_pack_nodes_r() -> Result<(), Box<dyn std::error::Error>> {
 /// -s (stats) median
 /// -b (binary) (bit)
 fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -218,12 +187,6 @@ fn convert_pack_nodes_median() -> Result<(), Box<dyn std::error::Error>> {
 /// -r (relative threshold) 50
 /// --normalize (u16)
 fn convert_pack_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
-    // How to test convert
-    // If zstd --> read it and check one of two numbers
-    // make 1000k example
-    // Number of entries
-    // check some nubers
-    // compute by hand
 
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
