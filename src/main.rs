@@ -263,7 +263,6 @@ fn main() {
         let mut no_file = false;
         // Determine Input format
         if matches.is_present("pack") | (matches.is_present("index") & matches.is_present("compressed pack")) {
-        if matches.is_present("pack") | (matches.is_present("index") & matches.is_present("compressed pack")) {
             // READ "NORMAL" PACK FILE
             if matches.is_present("pack") {
                 if Path::new(matches.value_of("pack").unwrap()).exists() {
