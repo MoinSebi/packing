@@ -28,9 +28,9 @@ pub fn parse_smart(filename: &str) -> PackCompact {
             let cov: u16;
             if let Ok(x) = line_split[3].parse::<u16>(){
                 cov = x;
-                count += 1;
             } else {
-                cov = u16::MAX
+                cov = u16::MAX;
+                count += 1;
             }
             pc.node.push(no);
             pc.coverage.push(cov);
