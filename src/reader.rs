@@ -11,14 +11,14 @@ use crate::core::PackCompact;
 
 // Use this as a library for reading the binary files
 
-/// Reading th
+/// Data structure for a bit-binary file
 pub struct ReaderBit {
     pub kind: bool,             // 0 = node, 1 == cov
     pub name: String,
     pub data: BitVec<u8, Msb0>,
 }
 
-
+/// Data structure for a u16 file
 pub struct ReaderU16 {
     pub kind: bool,              // 0 = node, 1 == cov
     pub name: String,
@@ -116,20 +116,15 @@ pub fn read_simple_u32(filename: &str) -> Vec<u32>{
     return vec_nodes
 }
 
-pub fn read_simple_u16(filename: &str) -> Vec<u16> {
-    let buf = get_file_as_byte_vec(filename);
-    let mut vec_nodes: Vec<u16> = vec![0; buf.len() / 2];
-    BigEndian::read_u16_into(&buf, &mut vec_nodes);
-
-    return vec_nodes
-}
 
 /// Wrapper for meta + coverage combination
 /// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_meta(filename1: &str, filename2: &str) -> PackCompact{
     let nodes = read_simple_u32(filename1);
-    let cov = read_simple_u16(filename2);
-    let pc: PackCompact = PackCompact{node: nodes, coverage: cov, coverage_normalized: Vec::new(), node_coverage: Vec::new()};
+    let buff = get_file_as_byte_vec(filename2);
+    let cov = wrapper_u16(&buff);
+
+    let pc: PackCompact = PackCompact{node: nodes, coverage: cov[0].data.clone(), coverage_normalized: Vec::new(), node_coverage: Vec::new()};
     pc
 }
 

@@ -17,7 +17,7 @@ use crate::core::PackCompact;
 use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
-use log::{debug, info, LevelFilter, warn};
+use log::{info, LevelFilter, warn};
 use std::io::Write;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
@@ -103,8 +103,10 @@ fn main() {
                 .long("index")
                 .about("Index file from 'packing index'")
                 .takes_value(true))
-            .arg(Arg::new("compressed pack (sequence)")
+            .arg(Arg::new("compressed pack")
+                .long("compressed")
                 .short('c')
+                .about("Compressed pack file (only sequence). Original can only be accessed if the file is not normalized.")
                 .takes_value(true))
 
             // Type
@@ -274,9 +276,9 @@ fn main() {
             }
             //READ COVERAGE AND META
             else {
-                if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("meta").unwrap()).exists() {
-                    p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("coverage").unwrap());
-                    let name: &str = matches.value_of("coverage").unwrap();
+                if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("compressed pack").unwrap()).exists() {
+                    p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("compressed pack").unwrap());
+                    let name: &str = matches.value_of("compressed pack").unwrap();
                     let s2: Vec<&str> = name.split("/").collect();
                     s = s2.last().unwrap().clone();
                 } else {
@@ -287,10 +289,12 @@ fn main() {
 
         if no_file {
             info!("There is no input file");
+            info!("[-h, --help] for help information");
             process::exit(0x0100);
         }
         if p.coverage.len() == 0 {
-            info!("There is a problem with the input files. Test packing info");
+            info!("There is a problem with the input files. Run 'packing info' on your file.");
+            info!("[-h, --help] for help information");
             process::exit(0x0100);
         } else {
             info!("File is {}", s)
