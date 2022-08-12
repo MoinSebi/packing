@@ -132,7 +132,7 @@ OPTIONS:
 Alterantive: 
 ./packing index -p test.pack -o test.pi 
 
-./packing convert -p test.pack -t sequence -o test.pb
+./packing convert -p test.pack -o test.pb
   
 ```
 

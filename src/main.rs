@@ -160,7 +160,7 @@ fn main() {
             .arg(Arg::new("type")
                 .short('t')
                 .long("type")
-                .about("Type of output: nodes|sequence|pack (default: nodes)")
+                .about("Type of output: nodes|sequence|pack (default: sequence)")
                 .takes_value(true))
 
             .arg(Arg::new("out")
@@ -311,7 +311,7 @@ fn main() {
         }
 
 
-        let mut out_type = "node";
+        let mut out_type = "sequence";
         if matches.is_present("type") {
             let ty = matches.value_of("type").unwrap();
             if ty == "node" {
