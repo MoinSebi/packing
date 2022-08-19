@@ -24,8 +24,6 @@ use crate::info::info::stats_index;
 use crate::reader::wrapper_meta;
 
 fn main() {
-
-
     let matches = App::new("panSV")
         .version("0.1.0")
         .author("Sebastian V")
@@ -41,7 +39,6 @@ fn main() {
             .short('q')
             .about("No messages")
             .global(true))
-
 
 
         .subcommand(App::new("info")
@@ -62,7 +59,6 @@ fn main() {
                 .short('a')
                 .long("all")
                 .about("Check all entries (for concatenated index)")))
-
 
 
         .subcommand(App::new("index")
@@ -88,7 +84,6 @@ fn main() {
                 .about("Output file")
                 .takes_value(true)
                 .required(true)))
-
 
 
         .subcommand(App::new("convert")
@@ -120,7 +115,7 @@ fn main() {
             .arg(Arg::new("relative threshold")
                 .short('r')
                 .long("threshold")
-                .about("Percentile (can be combined with 'normalize' flag" )
+                .about("Percentile (can be combined with 'normalize' flag")
                 .takes_value(true))
             .arg(Arg::new("absolute threshold")
                 .short('a')
@@ -170,7 +165,6 @@ fn main() {
                 .takes_value(true)))
 
 
-
         .get_matches();
 
     /*
@@ -188,15 +182,12 @@ fn main() {
     let mut level = LevelFilter::Info;
     // Checking verbose
     // Ugly, but needed - May end up in a small library later
-    if matches.is_present("quiet"){
+    if matches.is_present("quiet") {
         level = LevelFilter::Warn;
-    }
-
-    else if matches.is_present("verbose"){
-        if matches.value_of("verbose").unwrap() == "v1"{
+    } else if matches.is_present("verbose") {
+        if matches.value_of("verbose").unwrap() == "v1" {
             level = LevelFilter::Debug;
-        }
-        else if matches.value_of("verbose").unwrap() == "v"{
+        } else if matches.value_of("verbose").unwrap() == "v" {
             level = LevelFilter::Trace
         }
     }
@@ -215,8 +206,6 @@ fn main() {
         .init();
 
 
-
-
     // Collect the name
     info!("Running packing tool");
 
@@ -224,7 +213,7 @@ fn main() {
     // INDEX
     if let Some(ref matches) = matches.subcommand_matches("index") {
         debug!("Indexing");
-        if matches.is_present("gfa")  {
+        if matches.is_present("gfa") {
             debug!("GFA");
             let j = matches.value_of("gfa").unwrap();
             if Path::new(matches.value_of("gfa").unwrap()).exists() {
@@ -235,19 +224,14 @@ fn main() {
                 warn!("No file found");
                 process::exit(0x0100);
             }
-
-        } else if matches.is_present("pack"){
+        } else if matches.is_present("pack") {
             debug!("PACK");
             let o = matches.value_of("output").unwrap();
-            let p =  parse_smart(matches.value_of("pack").unwrap());
+            let p = parse_smart(matches.value_of("pack").unwrap());
             let buf = p.compress_only_node();
             writer_compress_zlib(&buf, o);
-
-
-
         } else {
             info!("No input")
-
         }
         process::exit(0x0100);
     }
@@ -302,7 +286,7 @@ fn main() {
         }
 
         // If name is set as argument, replace filename
-        if matches.is_present("name"){
+        if matches.is_present("name") {
             s = matches.value_of("name").unwrap();
         }
 
@@ -370,11 +354,11 @@ fn main() {
         let mut stats: &str = "nothing";
         if matches.is_present("stats") {
             if (thresh != 0) & !absolute {
-                let m_m = matches.value_of("stats").unwrap();
-                if m_m == "mean" {
-                    stats = m_m
-                } else if m_m == "median" {
-                    stats = m_m
+                let arg_stats = matches.value_of("stats").unwrap();
+                if arg_stats == "mean" {
+                    stats = arg_stats
+                } else if arg_stats == "median" {
+                    stats = arg_stats
                 } else {
                     warn!("This metric is not available");
                     warn!("Normalized by percentile");
@@ -396,6 +380,7 @@ fn main() {
         if !absolute {
             absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
         } else {
+            p.node_coverage = p.get_node_cov_mean();
             absolute_thresh = thresh;
         }
 
@@ -420,8 +405,7 @@ fn main() {
         let mut bb = make_header(&(out_type == "node"), &absolute_thresh, &buffer, s);
         bb.extend(buffer);
         writer_compress_zlib(&bb, matches.value_of("out").unwrap());
-
-
+    }
 }
 
 
