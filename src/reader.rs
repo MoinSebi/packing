@@ -5,7 +5,7 @@ use std::{fs};
 use bitvec::order::{Msb0};
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
-use log::info;
+use log::{debug, info};
 use crate::helper::{byte_to_string, zstd_decode};
 use crate::core::PackCompact;
 
@@ -50,13 +50,13 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<ReaderBit>{
     // total length 73 + len
     let length = BigEndian::read_u32(& buffer[3..7]);
     let chunks = buffer.chunks((length + 73) as usize );
-    eprintln!("Number of samples: {}", chunks.len());
     let mut result: Vec<ReaderBit> = Vec::new();
+    info!("Number of samples: {}", chunks.len());
 
     for chunk in chunks.into_iter(){
 
         let (kind, _length, _thresh, name) = get_meta(chunk);
-        info!("Name {}", name);
+        debug!("Name {}", name);
         let bv: BitVec<u8, Msb0> = BitVec::from_slice(&chunk[73..]);
         result.push(ReaderBit {name, kind, data: bv});
     }
@@ -74,11 +74,11 @@ pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<ReaderU16>{
     let length = BigEndian::read_u32(& buffer[3..7]);
     let chunks = buffer.chunks((length + 73) as usize );
 
-    eprintln!("Number of samples: {}", chunks.len());
+    info!("Number of samples: {}", chunks.len());
     let mut result: Vec<ReaderU16> = Vec::new();
     for chunk in chunks.into_iter(){
         let (kind, _length, _thresh, name) = get_meta(chunk);
-        info!("Name {}", name);
+        debug!("Name {}", name);
         let mut data = vec![0; chunk[73..].len()/2];
         BigEndian::read_u16_into(&chunk[73..], & mut data);
         result.push(ReaderU16 {name, kind, data});
