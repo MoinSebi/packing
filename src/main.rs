@@ -335,24 +335,26 @@ fn main() {
                 warn!("Using default value: node");
             }
         }
+
+        // Write the pack
         if out_type == "pack" {
             write_pack(&p, matches.value_of("out").unwrap());
             process::exit(0x0100);
         }
 
 
-        // Modify
-        // Bit or u16
-        // Normalize or presence-absence
+        // If you want a binary file
         let mut bin = false;
         if matches.is_present("binary") {
             bin = true;
         }
+        // Normalize the file
         let mut normalize = false;
         if matches.is_present("normalize") {
             normalize = true;
         }
 
+        // Checking the for the real threshold.
         let mut absolute = false;
         let mut thresh: u16 = 0;
         let absolute_thresh;
@@ -363,6 +365,7 @@ fn main() {
         if matches.is_present("relative threshold") {
             thresh = matches.value_of("relative threshold").unwrap().parse().unwrap();
         }
+
 
         let mut stats: &str = "nothing";
         if matches.is_present("stats") {
@@ -383,10 +386,13 @@ fn main() {
             }
         }
 
+        // Want to include also the "zero" covered bases?
         let mut include_all = true;
         if matches.is_present("non-covered") {
             include_all = false;
         }
+
+        // Absolute threshold is adjusted is made with thresh
         if !absolute {
             absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
         } else {
@@ -394,7 +400,6 @@ fn main() {
         }
 
         let mut output: Vec<u16>;
-
         if out_type == "node" {
             output = p.node_coverage;
         } else {
@@ -404,14 +409,15 @@ fn main() {
         if normalize {
             output = normalizeing(output, &absolute_thresh);
         }
+
+
         let buffer: Vec<u8>;
         if bin {
-
             buffer = bitbit(output, &absolute_thresh);
         } else {
             buffer = vec_u16_u8(&output);
         }
-        let mut bb = make_header(&(out_type == "node"), & absolute_thresh, &buffer, s);
+        let mut bb = make_header(&(out_type == "node"), &absolute_thresh, &buffer, s);
         bb.extend(buffer);
         writer_compress_zlib(&bb, matches.value_of("out").unwrap());
 

@@ -20,7 +20,7 @@ pub fn parse_smart(filename: &str) -> PackCompact {
     let reader = BufReader::new(file);
     let mut pc: PackCompact = PackCompact::new();
     let mut count = 0;
-        for (i, line) in reader.lines().enumerate(){
+    for (i, line) in reader.lines().enumerate(){
         let l = line.unwrap();
         if i != 0{
             let line_split: Vec<&str> = l.split("\t").collect();
@@ -37,7 +37,7 @@ pub fn parse_smart(filename: &str) -> PackCompact {
 
         }
     }
-    info!("{} entries were truncated.", count);
+    info!("{} entries have been truncated (have a coverage above 65,535).", count);
     pc
 }
 
