@@ -42,9 +42,11 @@ fn main() {
 
 
         .subcommand(App::new("info")
-            .about("Information about index or binary files")
+            .about("Information about index or binary files (not compressed pack)")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
+            .help_heading("Input options")
+
             .arg(Arg::new("binary")
                 .short('b')
                 .long("binary")
@@ -55,6 +57,8 @@ fn main() {
                 .long("index")
                 .about("Information about the index")
                 .takes_value(true))
+            .help_heading("Testing options")
+
             .arg(Arg::new("all")
                 .short('a')
                 .long("all")
