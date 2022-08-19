@@ -1,7 +1,7 @@
 # VGPACK to compressed binary
 Small helper tool for reducing storage size of vg packs (tabular output).
 Can also be used as a library for reading the produced binary files. Part of [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
-I use .pb "pack binary", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references. 
+I use .pb "pack binary", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
 
 

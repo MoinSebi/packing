@@ -66,7 +66,7 @@ pub fn byte_to_string(input: &[u8]) -> String {
 
 
 
-pub fn normalizeing(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u16>{
+pub fn normalizing(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u16>{
 
     let mut ww :  Vec<u16> = Vec::new();
     for x in vecc.iter(){
@@ -76,7 +76,7 @@ pub fn normalizeing(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u16>{
 }
 
 
-pub fn bitbit(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u8>{
+pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u8>{
 
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter(){

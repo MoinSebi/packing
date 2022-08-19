@@ -11,7 +11,7 @@ mod info;
 use clap::{App, AppSettings, Arg};
 use crate::vg_parser::{parse_smart};
 use crate::writer::{write_pack, writer_compress_zlib};
-use crate::helper::{vec_u16_u8,normalizeing, bitbit, make_header};
+use crate::helper::{vec_u16_u8, normalizing, vec2binary, make_header};
 use std::{ process};
 use crate::core::PackCompact;
 use std::path::Path;
@@ -128,7 +128,6 @@ fn main() {
                 .takes_value(true))
             // If you normalize, pls use me
             .arg(Arg::new("normalize")
-                .short('n')
                 .long("normalize")
                 .about("Normalize everything"))
             .arg(Arg::new("binary")
@@ -146,7 +145,7 @@ fn main() {
             .arg(Arg::new("type")
                 .short('t')
                 .long("type")
-                .about("Type of output: node|sequence|pack (default: sequence)")
+                .about("Type of output: node|sequence|pack [default: sequence]")
                 .takes_value(true))
             .arg(Arg::new("name")
                 .short('n')
@@ -326,6 +325,7 @@ fn main() {
 
         // Write the pack
         if out_type == "pack" {
+            debug!("Writing pack file");
             write_pack(&p, matches.value_of("out").unwrap());
             process::exit(0x0100);
         }
@@ -396,13 +396,13 @@ fn main() {
         }
 
         if normalize {
-            output = normalizeing(output, &absolute_thresh);
+            output = normalizing(output, &absolute_thresh);
         }
 
 
         let buffer: Vec<u8>;
         if bin {
-            buffer = bitbit(output, &absolute_thresh);
+            buffer = vec2binary(output, &absolute_thresh);
         } else {
             buffer = vec_u16_u8(&output);
         }

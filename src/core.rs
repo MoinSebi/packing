@@ -93,7 +93,6 @@ impl PackCompact {
         let mut node_id = self.node[0];
         let mut node_mean: Vec<u16> = Vec::new();
         let mut result: Vec<u16> = Vec::new();
-        println!("{}", self.coverage.len());
         for x in 0..self.coverage.len() {
             if self.node[x] != node_id {
                 result.push(mean_vec_u16_u16(&node_mean));
