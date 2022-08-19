@@ -147,7 +147,7 @@ fn main() {
             .arg(Arg::new("type")
                 .short('t')
                 .long("type")
-                .about("Type of output: nodes|sequence|pack (default: sequence)")
+                .about("Type of output: node|sequence|pack (default: sequence)")
                 .takes_value(true))
             .arg(Arg::new("name")
                 .short('n')
@@ -320,6 +320,7 @@ fn main() {
         }
 
 
+        // Checking the output base (sequence, nodes) or pack file
         let mut out_type = "sequence";
         if matches.is_present("type") {
             let ty = matches.value_of("type").unwrap();
