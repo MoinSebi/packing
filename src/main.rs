@@ -17,7 +17,7 @@ use crate::core::PackCompact;
 use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
-use log::{info, LevelFilter, warn};
+use log::{debug, info, LevelFilter, warn};
 use std::io::Write;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
@@ -114,9 +114,8 @@ fn main() {
                 .about("Compressed pack file (only sequence). Original can only be accessed if the file is not normalized.")
                 .takes_value(true))
 
+
             .help_heading("Normalization parameters")
-
-
             // Modification
             .arg(Arg::new("relative threshold")
                 .short('r')
@@ -145,9 +144,16 @@ fn main() {
                 .long("stats")
                 .about("Normalize by mean or median (always in combination relative threshold)")
                 .takes_value(true))
-
-
-
+            .arg(Arg::new("type")
+                .short('t')
+                .long("type")
+                .about("Type of output: nodes|sequence|pack (default: sequence)")
+                .takes_value(true))
+            .arg(Arg::new("name")
+                .short('n')
+                .long("name")
+                .about("Name of the sample [default: name of the file]")
+                .takes_value(true))
 
 
             //Output
@@ -156,13 +162,6 @@ fn main() {
             // ReaderBit and u16 with stats function
             // You iterate and lose information directly
             .help_heading("Output options")
-            // Type
-            .arg(Arg::new("type")
-                .short('t')
-                .long("type")
-                .about("Type of output: nodes|sequence|pack (default: sequence)")
-                .takes_value(true))
-
             .arg(Arg::new("out")
                 .short('o')
                 .long("out")
@@ -219,12 +218,14 @@ fn main() {
 
 
     // Collect the name
-    info!("Packing tool");
+    info!("Running packing tool");
 
 
     // INDEX
     if let Some(ref matches) = matches.subcommand_matches("index") {
+        debug!("Indexing");
         if matches.is_present("gfa")  {
+            debug!("GFA");
             let j = matches.value_of("gfa").unwrap();
             if Path::new(matches.value_of("gfa").unwrap()).exists() {
                 let o = matches.value_of("output").unwrap();
@@ -232,9 +233,11 @@ fn main() {
                 writer_compress_zlib(&buf, o);
             } else {
                 warn!("No file found");
+                process::exit(0x0100);
             }
 
         } else if matches.is_present("pack"){
+            debug!("PACK");
             let o = matches.value_of("output").unwrap();
             let p =  parse_smart(matches.value_of("pack").unwrap());
             let buf = p.compress_only_node();
@@ -244,11 +247,12 @@ fn main() {
 
         } else {
             info!("No input")
+
         }
         process::exit(0x0100);
-
     }
 
+    // Info
     if let Some(ref matches) = matches.subcommand_matches("info") {
         info!("Index info");
         if matches.is_present("index") | (matches.is_present("binary")) {
@@ -295,6 +299,11 @@ fn main() {
                     no_file = true;
                 }
             }
+        }
+
+        // If name is set as argument, replace filename
+        if matches.is_present("name"){
+            s = matches.value_of("name").unwrap();
         }
 
         if no_file {
@@ -405,61 +414,6 @@ fn main() {
         bb.extend(buffer);
         writer_compress_zlib(&bb, matches.value_of("out").unwrap());
 
-        // Modify the vector
-
-
-        // // THE REAL OUTPUT
-        // // ABSOLUTE THRESHOLD -> NO NORMALIZE
-        // // THRESHOLD -> NORMALIZE
-        // let mut mean_node_out: Vec<u8>;
-        // if matches.is_present("sequence"){
-        //     info!("USING SEQUENCE");
-        //     if matches.is_present("absolute threshold"){
-        //         info!("Absolute threshold");
-        //         let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
-        //         mean_node_out = p.coverage2byte_thresh_bit(&thresh);
-        //         write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-        //     } else  if matches.is_present("threshold"){
-        //         info!("Threshold");
-        //         let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
-        //         let thresh = t/ 100 as f32;
-        //         mean_node_out = p.coverage2byte_thresh_normalized(&thresh);
-        //         write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-        //     } else if matches.is_present("normalized"){
-        //         info!("Normalized");
-        //         mean_node_out = p.coverage2byte_normalized();
-        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-        //     } else {
-        //         mean_node_out = p.coverage2byte();
-        //
-        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-        //     }
-        // } else {
-        //     info!("USING NODES");
-        //     if matches.is_present("absolute threshold") {
-        //         info!("Absolute threshold");
-        //         let thresh: u16 = matches.value_of("absolute threshold").unwrap().parse().unwrap();
-        //         mean_node_out = binary2u8(&p.node2byte_thresh(&thresh));
-        //         write_file(s, &mean_node_out, thresh, matches.value_of("out").unwrap(), true);
-        //     } else  if matches.is_present("threshold"){
-        //         info!("Threshold");
-        //         let t: f32  = matches.value_of("threshold").unwrap().parse().unwrap();
-        //         // This is very important
-        //         let thresh = t/ 100 as f32;
-        //         mean_node_out = binary2u8(&p.node2byte_thresh_normalized(&thresh));
-        //         write_file(s, &mean_node_out, 1, matches.value_of("out").unwrap(), true)
-        //     } else if matches.is_present("normalized") {
-        //         info!("Normalized");
-        //         mean_node_out = vec_f32_u82(&p.node2byte_normalized());
-        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-        //     } else {
-        //         mean_node_out = vec_u16_u8(&p.node2byte());
-        //         write_file(s, &mean_node_out, 0, matches.value_of("out").unwrap(), false);
-        //     }
-        // }
-    }
-
-    // Read input:
 
 }
 
