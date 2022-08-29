@@ -355,6 +355,7 @@ fn main() {
         }
 
 
+
         let mut stats: &str = "nothing";
         if matches.is_present("stats") {
             if (thresh != 0) & !absolute {
@@ -374,6 +375,7 @@ fn main() {
             }
         }
 
+
         // Want to include also the "zero" covered bases?
         let mut include_all = true;
         if matches.is_present("non-covered") {
@@ -387,6 +389,7 @@ fn main() {
             p.node_coverage = p.get_node_cov_mean();
             absolute_thresh = thresh;
         }
+
 
         let mut output: Vec<u16>;
         if out_type == "node" {

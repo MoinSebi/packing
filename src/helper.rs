@@ -19,7 +19,7 @@ pub fn vec_u16_u8(vecc: &Vec<u16>) -> Vec<u8>{
 
 /// Mean of a U16 vector and returns a u16
 pub fn mean_vec_u16_u16(val: &Vec<u16>) -> u16{
-    let su: u16= val.iter().sum();
+    let su: u64= val.iter().fold(0, |mut sum, &val| {sum += val as u64; sum});
     let j:u16  = ((su as f64)/(val.len() as f64)).round() as u16;
     j
 }
