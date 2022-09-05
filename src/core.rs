@@ -107,39 +107,6 @@ impl PackCompact {
         result
     }
 
-    // #[allow(dead_code)]
-    // // This might be overkill - keep it for later
-    // pub fn compress_smart(&self) -> Vec<u8>{
-    //     let mut buf: Vec<u8> = Vec::new();
-    //     let mut node: &u32 = &0;
-    //     let mut repeats: u32 = 0;
-    //     let mut cov: Vec<u32> = Vec::new();
-    //
-    //     for x in 0..self.coverage.len(){
-    //        if (self.node[x] != *node) & (repeats != 0){
-    //            buf.extend(transform_u32_to_array_of_u8(node.clone()));
-    //            buf.extend(transform_u32_to_array_of_u8(repeats));
-    //            buf.extend(vec_u16_u82(&cov));
-    //            node = &self.node[x];
-    //            repeats = 1;
-    //            cov = vec![self.coverage[x]];
-    //
-    //        }
-    //         else {
-    //             repeats += 1;
-    //             cov.push(self.coverage[x].clone());
-    //             node = &self.node[x];
-    //         }
-    //     }
-    //     buf.extend(transform_u32_to_array_of_u8(node.clone()));
-    //     buf.extend(transform_u32_to_array_of_u8(repeats));
-    //     buf.extend(vec_u16_u82(&cov));
-    //     //eprintln!("2 {}", buf.len());
-    //     buf
-    // }
-
-
-
 }
 
 
