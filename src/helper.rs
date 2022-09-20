@@ -116,7 +116,7 @@ pub fn make_header(node: &bool, thresh: &u16, bytes: &Vec<u8>, name: &str) -> Ve
     }
 
     for _x in 0..(64 - char_vec.len()){
-        buff.push(0);
+        buff.push(20);
     }
     return buff;
 }
