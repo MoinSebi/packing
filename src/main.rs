@@ -19,6 +19,7 @@ use chrono::Local;
 use env_logger::{Builder, Target};
 use log::{debug, info, LevelFilter, warn};
 use std::io::Write;
+use packing_lib::rename::rename::test;
 use crate::index::index_main::make_index;
 use crate::info::info::stats_index;
 use crate::reader::wrapper_meta;
@@ -88,6 +89,8 @@ fn main() {
                 .about("Output file")
                 .takes_value(true)
                 .required(true)))
+
+
         .subcommand(App::new("rename")
             .about("Rename compressed data")
             .version("0.1.0")
@@ -95,16 +98,19 @@ fn main() {
             .arg(Arg::new("input")
                 .short('i')
                 .long("input")
+                .required(true)
                 .about("Compressed input")
                 .takes_value(true))
             .arg(Arg::new("output")
                 .short('o')
                  .long("output")
                  .about("Output")
+                 .required(true)
                  .takes_value(true))
             .arg(Arg::new("name")
                 .short('n')
                 .long("name")
+                .required(true)
                 .about("New name")
                 .takes_value(true)))
 
@@ -272,6 +278,12 @@ fn main() {
                 }
             }
         }
+    }
+
+    // Rename
+    if let Some(ref matches) = matches.subcommand_matches("rename") {
+        info!("Renaming");
+        test(matches.value_of("input").unwrap(), matches.value_of("name").unwrap().to_string(), matches.value_of("output").unwrap())
     }
 
     // CONVERT
