@@ -59,6 +59,7 @@ pub fn stats(filename: &str, exact: bool, check_all: bool) {
         println!("Threshold: Node");
 
     }
+    println!("Name: {}", meta.3);
     println!("Threshold: {}", meta.2);
     println!("Bytes: {}", meta.1 );
     println!("Length: {}", length);

@@ -3,6 +3,7 @@ pub mod vg_parser;
 pub mod helper;
 pub mod writer;
 pub mod reader;
+pub mod rename;
 
 
 
