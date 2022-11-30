@@ -1,12 +1,13 @@
 use std::collections::HashSet;
+use log::info;
 use crate::reader::{get_file_as_byte_vec, get_meta, read_simple_u32, wrapper_bool, wrapper_u16};
 
 /// Information about the a index file
 pub fn stats_index(filename: &str){
     let nodes = read_simple_u32(filename);
     let nodes_hs: HashSet<u32> = nodes.iter().cloned().collect();
-    println!("Number of nodes: {}", nodes_hs.len());
-    println!("Number of entries: {}", nodes.len());
+    info!("Number of nodes: {}", nodes_hs.len());
+    info!("Number of entries: {}", nodes.len());
 
 }
 
@@ -51,26 +52,26 @@ pub fn stats(filename: &str, exact: bool, check_all: bool) {
     } else {
         length = meta.1/2
     }
-    println!("Number of elements: {}", h);
+    info!("Number of elements: {}", h);
     if meta.0{
-        println!("Threshold: Sequence");
+        info!("Threshold: Sequence");
 
     } else {
-        println!("Threshold: Node");
+        info!("Threshold: Node");
 
     }
-    println!("Name: {}", meta.3);
-    println!("Threshold: {}", meta.2);
-    println!("Bytes: {}", meta.1 );
-    println!("Length: {}", length);
+    info!("Name: {}", meta.3);
+    info!("Threshold: {}", meta.2);
+    info!("Bytes: {}", meta.1 );
+    info!("Length: {}", length);
     if exact{
-        println!("Length measured {}", length_measured);
+        info!("Length measured {}", length_measured);
     }
     if check_all{
         if allgood{
-            println!("All length are the same.")
+            info!("All length are the same.")
         } else {
-            println!("ERROR! Not the same length. ")
+            info!("ERROR! Not the same length. ")
         }
     }
 

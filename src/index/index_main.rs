@@ -1,4 +1,5 @@
 use gfaR_wrapper::{NGfa};
+use log::info;
 use crate::helper::transform_u32_to_array_of_u8;
 
 
@@ -23,7 +24,7 @@ pub fn make_index(filename: &str) -> Vec<u8>{
         }
 
     }
-    println!("count {}", count);
+    info!("Total length: {}", count);
     return buf
 
 }
