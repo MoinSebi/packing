@@ -169,7 +169,7 @@ fn main() {
             .arg(Arg::new("type")
                 .short('t')
                 .long("type")
-                .about("Type of output: node|sequence|pack [default: sequence]")
+                .about("Type of output: node|sequence|pack [default: node]")
                 .takes_value(true))
             .arg(Arg::new("name")
                 .short('n')
@@ -270,7 +270,6 @@ fn main() {
             if matches.is_present("index") {
                 stats_index(matches.value_of("index").unwrap())
             } else {
-                println!("{}", matches.value_of("binary").unwrap());
                 if matches.is_present("all") {
                     info::info::stats(matches.value_of("binary").unwrap(), true, true);
                 } else {
@@ -338,7 +337,7 @@ fn main() {
 
 
         // Checking the output base (sequence, nodes) or pack file
-        let mut out_type = "sequence";
+        let mut out_type = "node";
         if matches.is_present("type") {
             let ty = matches.value_of("type").unwrap();
             if ty == "node" {
