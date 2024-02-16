@@ -1,6 +1,13 @@
-# VGPACK to compressed binary
-Small helper tool for reducing storage size of vg packs (tabular output).
-Can also be used as a library for reading the produced binary files. Part of [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
+# Packing - Compressing table-like pack format
+Tool for binary representation of coverage and presence-absence information from vb pack files.
+Can either be used for reduced storage or in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
+
+**Data fromats**  
+- ```pb``` pack binary: Binary representation of coverage. Converting pb to pack is lossy (max coverage 6535)
+- ```pt``` pack threshold: Represents presence-absence information. Header contains the threshold and the name of the sample.
+- ```pi```pack index: Index of the graph structure.  
+
+
 I use .pb "pack binary", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
 
@@ -15,7 +22,7 @@ cargo build --release
 ```
 ___
 ### Usage
-#### General
+#### subcommands
 ```
 packing-index 0.1.0
 
@@ -34,6 +41,8 @@ OPTIONS:
 
 ```
 #### Index
+
+Index a graph or pack file. Index is needed if you want to convert your pb to pack (tabular) later. 
 ``` 
 packing-index 0.1.0
 
@@ -59,6 +68,7 @@ Output options:
 
 ```
 #### Info
+Information about the index or binary file.
 ``` 
 packing-info 0.1.0
 
@@ -84,7 +94,8 @@ Testing options:
 ```
 
 #### Convert
-``` 
+Convert a pack file (tabular) to a binary file or vice versa. This command can also perform binary operations (e.g. presence-absence).
+```
 packing-convert 0.1.0
 
 Convert VG PACK format for a compact index structure (partially reversible)
