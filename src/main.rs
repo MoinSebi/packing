@@ -3,7 +3,9 @@ mod core;
 mod index;
 mod info;
 mod rename;
+mod view;
 
+use std::env::args;
 use crate::convert::convert_main::convert_main;
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
@@ -13,12 +15,13 @@ use clap::{App, AppSettings, Arg};
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 use std::io::Write;
+use crate::view::view_main::view_main;
 
 fn main() {
-    let matches = App::new("panSV")
+    let matches = App::new("packing")
         .version("0.1.0")
         .author("Sebastian V")
-        .about("packing")
+        .about("Compressing VG Pack files")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(Arg::new("verbose")
             .short('v')
@@ -179,6 +182,58 @@ fn main() {
                 .long("non-compressed")
                 .about("Non-compressed output")))
 
+
+        .subcommand(App::new("view")
+            .about("Shows the compressed binary data in plain text")
+            .version("0.1.0")
+            .arg(Arg::new("compressed pack")
+                .short('p')
+                .long("pack")
+                .about("compressed pack file")
+                .takes_value(true)
+                .required(true))
+            .arg(Arg::new("index")
+                .short('i')
+                .long("index")
+                .about("Index file")
+                .takes_value(true))
+            .arg(Arg::new("output")
+                .short('o')
+                .long("output")
+                .about("Output file name")
+                .takes_value(true))
+        )
+
+        .subcommand(App::new("stats")
+            .about("Statistics on pack files")
+            .version("0.1.0")
+
+            .help_heading("Input options")
+            .arg(Arg::new("pack")
+                .short('p')
+                .long("pack")
+                .about("vg pack file")
+                .takes_value(true))
+            .arg(Arg::new("index")
+                .short('i')
+                .long("index")
+                .about("Index file from 'packing index'")
+                .takes_value(true))
+            .arg(Arg::new("compressed pack")
+                .long("compressed")
+                .short('c')
+                .about("Compressed pack file (only sequence). Original can only be accessed if the file is not normalized.")
+                .takes_value(true))
+
+            .arg(Arg::new("output")
+                .short('o')
+                .long("output")
+                .about("Output file name")
+                .takes_value(true))
+
+        )
+
+
         .get_matches();
 
     /*
@@ -240,5 +295,8 @@ fn main() {
     // CONVERT
     if let Some(matches) = matches.subcommand_matches("convert") {
         convert_main(matches);
+    }
+    if let Some(matches) = matches.subcommand_matches("view") {
+        view_main(matches);
     }
 }

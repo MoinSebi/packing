@@ -43,7 +43,7 @@ impl OutputType {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum Method {
     Mean,
     Median,

@@ -25,32 +25,6 @@ pub fn writer_compress_zlib(buf: &Vec<u8>, filename: &str) {
     file.write_all(&u).expect("Not able to write ");
 }
 
-/// Writing normal pack file using the PackCompact structure
-pub fn write_pack(pc: &PackCompact, filename: &str) {
-    let f = File::create(filename).expect("Unable to create file");
-    let mut f = BufWriter::new(f);
-    writeln!(
-        f,
-        "seq.pos\tnode.id\tnode.offset\tcoverage"
-    )
-    .expect("Can not write file");
-
-    let mut node = 0;
-    for x in 0..pc.coverage.len() {
-        if x == 0 {
-            writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x])
-                .expect("Can not write file");
-        } else if pc.node[x] == pc.node[x - 1] {
-            node += 1;
-            writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x])
-                .expect("Can not write file");
-        } else {
-            node = 0;
-            writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x])
-                .expect("Can not write file");
-        }
-    }
-}
 
 impl PackCompact {
     pub fn write_pack(&self, filename: &str) {

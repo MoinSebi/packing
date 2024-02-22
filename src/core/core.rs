@@ -4,6 +4,7 @@ use crate::convert::helper::{
 };
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
+use crate::convert::convert_helper::Method;
 
 
 /// VG pack representation + additional information.
@@ -15,6 +16,12 @@ pub struct PackCompact {
     pub node_coverage: Vec<u16>,        // Coverage of nodes
     pub bin_coverage: BitVec<u8, Msb0>, // Binary coverage
     pub name: String,                   // Name of the pack/sample
+    pub is_sequence: bool,
+    pub is_binary: bool,
+    pub method: Method,
+    pub relative: u16,
+    pub threshold: u16,
+    pub length: u32,
 }
 
 impl PackCompact {
@@ -28,6 +35,13 @@ impl PackCompact {
             node_coverage: Vec::new(),
             bin_coverage: BitVec::new(),
             name: String::new(),
+            is_sequence: false,
+            is_binary: false,
+            method: Method::Nothing,
+            relative: 0,
+            threshold: 0,
+            length: 0,
+
         }
     }
 

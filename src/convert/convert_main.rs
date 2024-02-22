@@ -5,12 +5,12 @@ use crate::convert::helper::{
 use crate::core::reader::read_input;
 use crate::core::writer::{writer_compress, writer_compress_zlib};
 use clap::ArgMatches;
-use log::{debug, info};
+use log::{debug, info, warn};
 
 use std::process;
 
 pub fn convert_main(matches: &ArgMatches) {
-    let mut pc = read_input(matches);
+    let (mut pc, index_present) = read_input(matches);
 
     let bin = matches.is_present("binary");
     let normalize = matches.is_present("normalize");
@@ -34,6 +34,17 @@ pub fn convert_main(matches: &ArgMatches) {
     info!("Include all: {}", include_all);
     info!("Binary: {}", bin);
     info!("Normalize: {}", normalize);
+
+    if !index_present{
+        warn!("There is no index file.");
+        process::exit(0x0100);
+
+    }
+
+    if pc.bin_coverage.len() > 0 {
+        warn!("You loaded a presence/absence file. You are not able to further convert it.");
+        process::exit(0x0100);    }
+
 
     let mut real_thresh = 0;
 
@@ -96,7 +107,7 @@ pub fn convert_main(matches: &ArgMatches) {
     let mut bb = make_header(
         out_type,
         bin,
-        Method::Nothing,
+        method.clone(),
         relative_thresh,
         &absolute_thresh,
         number_entries as u32,

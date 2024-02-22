@@ -1,6 +1,4 @@
 use assert_cmd::Command;
-use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_meta, wrapper_u16};
-use packing_lib::vg_parser::parse_smart;
 use predicates::prelude::predicate;
 
 #[test]

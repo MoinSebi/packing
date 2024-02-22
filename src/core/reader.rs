@@ -8,6 +8,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::{fs, process};
+use crate::convert::convert_helper::Method;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -43,6 +44,7 @@ pub fn get_meta(buffer: &[u8]) -> (bool, bool, u8, u16, u16, u32, u32, String) {
     let r = BigEndian::read_u16(&buffer[5..7]);
     let thresh = BigEndian::read_u16(&buffer[7..9]);
     let length = BigEndian::read_u32(&buffer[9..13]);
+
     let mut bytes = length * 2;
     if bin == 1 {
         bytes = length.div_ceil(8);
@@ -110,29 +112,36 @@ pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
     p
 }
 
-pub fn read_input(matches: &clap::ArgMatches) -> PackCompact {
+pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
     let mut p: PackCompact = PackCompact::new();
     let mut no_file = false;
+    let mut index_present = false;
     // Determine Input format
     if matches.is_present("pack")
-        | (matches.is_present("index") & matches.is_present("compressed pack"))
+        | (matches.is_present("index") & matches.is_present("compressed pack") | matches.is_present("compressed pack"))
     {
         // READ "NORMAL" PACK FILE
         if matches.is_present("pack") {
             if Path::new(matches.value_of("pack").unwrap()).exists() {
                 p = PackCompact::parse_pack(matches.value_of("pack").unwrap());
+                index_present = true;
             } else {
                 no_file = true;
             }
         }
         //READ COVERAGE AND META
-        else if Path::new(matches.value_of("index").unwrap()).exists()
-            & Path::new(matches.value_of("compressed pack").unwrap()).exists()
-        {
-            p = wrapper_compressed(
-                matches.value_of("index").unwrap(),
-                matches.value_of("compressed pack").unwrap(),
-            );
+            else if matches.is_present("index") && matches.is_present("compressed pack"){
+                 if Path::new(matches.value_of("index").unwrap()).exists()
+                    & Path::new(matches.value_of("compressed pack").unwrap()).exists()
+                {
+                    p = wrapper_compressed(
+                        matches.value_of("index").unwrap(),
+                        matches.value_of("compressed pack").unwrap(),
+                    );
+                    index_present = true;
+                }
+        } else if Path::new(matches.value_of("compressed pack").unwrap()).exists() {
+            p = PackCompact::wrapp(matches.value_of("compressed pack").unwrap());
         } else {
             no_file = true;
         }
@@ -142,7 +151,7 @@ pub fn read_input(matches: &clap::ArgMatches) -> PackCompact {
         info!("[-h, --help] for help information");
         process::exit(0x0100);
     }
-    p
+    (p, index_present)
 }
 
 impl PackCompact {
@@ -185,17 +194,24 @@ impl PackCompact {
             node_coverage: Vec::new(),
             bin_coverage: bv,
             coverage: Vec::new(),
+            is_sequence: _kind,
+            is_binary: _bin,
+            method: Method::from_u8(_method),
+            relative: _relative,
+            threshold: _thresh,
+            length: _length,
+
         }
     }
 
     pub fn wrapp(file_pc: &str) -> Self {
+        println!("wrapp");
         let buff = unpack_zstd_to_byte(file_pc);
         let meta = get_meta(&buff);
         if meta.1 {
-            
             Self::read_bin_coverage(&buff)
         } else {
-            
+
             Self::read_u16(&buff)
         }
     }
@@ -212,6 +228,12 @@ impl PackCompact {
             node_coverage: Vec::new(),
             bin_coverage: BitVec::new(),
             coverage: data,
+            is_sequence: _kind,
+            is_binary: _bin,
+            method: Method::from_u8(_method),
+            relative: _relative,
+            threshold: _thresh,
+            length: _length,
         }
     }
 }

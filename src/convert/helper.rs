@@ -98,7 +98,7 @@ pub fn make_header(
     let mut buff: Vec<u8> = vec![53, 56];
 
     // Is node?
-    if OutputType::Node == node {
+    if OutputType::Sequence == node {
         buff.push(1);
     } else {
         buff.push(0);

@@ -20,7 +20,7 @@ pub fn stats(filename: &str) {
     let g: Vec<u8> = unpack_zstd_to_byte(filename);
     let meta = get_meta(&g);
 
-    info!("Entry type: {}", if meta.0 { "Node" } else { "Sequence" });
+    info!("Entry type: {}", if meta.0 { "Sequence" } else { "Node" });
     info!(
         "Data type: {}",
         if meta.1 { "Binary" } else { "Value (u16)" }
