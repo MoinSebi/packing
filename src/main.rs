@@ -1,28 +1,19 @@
-
-mod core;
-mod vg_parser;
-mod helper;
-mod writer;
-mod reader;
 mod index;
 mod info;
+mod convert;
+mod rename;
+mod core;
 
 
 use clap::{App, AppSettings, Arg};
-use crate::vg_parser::{parse_smart};
-use crate::writer::{write_pack, writer_compress_zlib};
-use crate::helper::{vec_u16_u8, normalizing, vec2binary, make_header};
-use std::{ process};
-use crate::core::PackCompact;
-use std::path::Path;
 use chrono::Local;
 use env_logger::{Builder, Target};
-use log::{debug, info, LevelFilter, warn};
+use log::{debug, info, LevelFilter};
 use std::io::Write;
-use packing_lib::rename::rename::test;
-use crate::index::index_main::make_index;
-use crate::info::info::stats_index;
-use crate::reader::wrapper_meta;
+use crate::convert::convert_main::convert_main;
+use crate::index::index_main::index_main;
+use crate::info::info_main::info_main;
+use crate::rename::rename::rename_main;
 
 fn main() {
     let matches = App::new("panSV")
@@ -58,12 +49,7 @@ fn main() {
                 .long("index")
                 .about("Information about the index")
                 .takes_value(true))
-            .help_heading("Testing options")
-
-            .arg(Arg::new("all")
-                .short('a')
-                .long("all")
-                .about("Check all entries (for concatenated index)")))
+        )
 
 
         .subcommand(App::new("index")
@@ -92,7 +78,7 @@ fn main() {
 
 
         .subcommand(App::new("rename")
-            .about("Rename compressed data")
+            .about("Change the name in the header of pc or pa")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
             .arg(Arg::new("input")
@@ -189,8 +175,10 @@ fn main() {
                 .long("out")
                 .about("Output name")
                 .default_value("pack")
-                .takes_value(true)))
-
+                .takes_value(true))
+            .arg(Arg::new("non-compressed")
+                .long("non-compressed")
+                .about("Non-compressed output")))
 
         .get_matches();
 
@@ -236,211 +224,24 @@ fn main() {
     // Collect the name
     info!("Running packing tool");
 
-
     // INDEX
     if let Some(ref matches) = matches.subcommand_matches("index") {
-        debug!("Indexing");
-        if matches.is_present("gfa") {
-            debug!("GFA");
-            let j = matches.value_of("gfa").unwrap();
-            if Path::new(matches.value_of("gfa").unwrap()).exists() {
-                let o = matches.value_of("output").unwrap();
-                let buf = make_index(&j);
-                writer_compress_zlib(&buf, o);
-            } else {
-                warn!("No file found");
-                process::exit(0x0100);
-            }
-        } else if matches.is_present("pack") {
-            debug!("PACK");
-            let o = matches.value_of("output").unwrap();
-            let p = parse_smart(matches.value_of("pack").unwrap());
-            let buf = p.compress_only_node();
-            writer_compress_zlib(&buf, o);
-        } else {
-            info!("No input")
-        }
-        process::exit(0x0100);
+        index_main(matches);
     }
 
     // Info
-    if let Some(ref matches) = matches.subcommand_matches("info") {
-        info!("Index info");
-        if matches.is_present("index") | (matches.is_present("binary")) {
-            if matches.is_present("index") {
-                stats_index(matches.value_of("index").unwrap())
-            } else {
-                if matches.is_present("all") {
-                    info::info::stats(matches.value_of("binary").unwrap(), true, true);
-                } else {
-                    info::info::stats(matches.value_of("binary").unwrap(), true, false);
-                }
-            }
-        }
+    else if let Some(ref matches) = matches.subcommand_matches("info") {
+        info_main(matches);
     }
 
     // Rename
     if let Some(ref matches) = matches.subcommand_matches("rename") {
-        info!("Renaming");
-        test(matches.value_of("input").unwrap(), matches.value_of("name").unwrap().to_string(), matches.value_of("output").unwrap())
+        rename_main(matches);
     }
 
     // CONVERT
     if let Some(ref matches) = matches.subcommand_matches("convert") {
-        let mut s = "";
-        let mut p: PackCompact = PackCompact::new();
-        let mut no_file = false;
-        // Determine Input format
-        if matches.is_present("pack") | (matches.is_present("index") & matches.is_present("compressed pack")) {
-            // READ "NORMAL" PACK FILE
-            if matches.is_present("pack") {
-                if Path::new(matches.value_of("pack").unwrap()).exists() {
-                    p = parse_smart(matches.value_of("pack").unwrap());
-                    let name: &str = matches.value_of("pack").unwrap();
-                    let s2: Vec<&str> = name.split("/").collect();
-                    s = s2.last().unwrap().clone();
-                } else {
-                    no_file = true;
-                }
-            }
-            //READ COVERAGE AND META
-            else {
-                if Path::new(matches.value_of("index").unwrap()).exists() & Path::new(matches.value_of("compressed pack").unwrap()).exists() {
-                    p = wrapper_meta(matches.value_of("index").unwrap(), matches.value_of("compressed pack").unwrap());
-                    let name: &str = matches.value_of("compressed pack").unwrap();
-
-                    let s2: Vec<&str> = name.split("/").collect();
-                    s = s2.last().unwrap().clone();
-                } else {
-                    no_file = true;
-                }
-            }
-        }
-
-        // If name is set as argument, replace filename
-        if matches.is_present("name") {
-            s = matches.value_of("name").unwrap();
-        }
-
-        if no_file {
-            info!("There is no input file");
-            info!("[-h, --help] for help information");
-            process::exit(0x0100);
-        }
-        if p.coverage.len() == 0 {
-            info!("There is a problem with the input files. Run 'packing info' on your file.");
-            info!("[-h, --help] for help information");
-            process::exit(0x0100);
-        } else {
-            info!("File is {}", s)
-        }
-
-
-        // Checking the output base (sequence, nodes) or pack file
-        let mut out_type = "node";
-        if matches.is_present("type") {
-            let ty = matches.value_of("type").unwrap();
-            if ty == "node" {
-                out_type = "node";
-            } else if ty == "sequence" {
-                out_type = "sequence";
-            } else if ty == "pack" {
-                out_type = "pack"
-            } else {
-                warn!("Not one of the available output types");
-                warn!("Using default value: node");
-            }
-        }
-
-        // Write the pack
-        if out_type == "pack" {
-            debug!("Writing pack file");
-            write_pack(&p, matches.value_of("out").unwrap());
-            process::exit(0x0100);
-        }
-
-
-        // If you want a binary file
-        let mut bin = false;
-        if matches.is_present("binary") {
-            bin = true;
-        }
-        // Normalize the file
-        let mut normalize = false;
-        if matches.is_present("normalize") {
-            normalize = true;
-        }
-
-        // Checking the for the real threshold.
-        let mut absolute = false;
-        let mut thresh: u16 = 0;
-        let absolute_thresh;
-        if matches.is_present("absolute threshold") {
-            absolute = true;
-            thresh = matches.value_of("absolute threshold").unwrap().parse().unwrap();
-        }
-        if matches.is_present("relative threshold") {
-            thresh = matches.value_of("relative threshold").unwrap().parse().unwrap();
-        }
-
-
-
-        let mut stats: &str = "nothing";
-        if matches.is_present("stats") {
-            if (thresh != 0) & !absolute {
-                let arg_stats = matches.value_of("stats").unwrap();
-                if arg_stats == "mean" {
-                    stats = arg_stats
-                } else if arg_stats == "median" {
-                    stats = arg_stats
-                } else {
-                    warn!("This metric is not available");
-                    warn!("Normalized by percentile");
-                }
-            } else {
-                warn!("You have not set additional threshold");
-                warn!("Relative threshold is 100% (normalized by mean)");
-                thresh = 100;
-            }
-        }
-
-
-        // Want to include also the "zero" covered bases?
-        let mut include_all = true;
-        if matches.is_present("non-covered") {
-            include_all = false;
-        }
-
-        // Absolute threshold is adjusted is made with thresh
-        if !absolute {
-            absolute_thresh = p.get_real_threshold(out_type == "node", include_all, thresh, stats);
-        } else {
-            p.node_coverage = p.get_node_cov_mean();
-            absolute_thresh = thresh;
-        }
-
-
-        let mut output: Vec<u16>;
-        if out_type == "node" {
-            output = p.node_coverage;
-        } else {
-            output = p.coverage;
-        }
-
-        if normalize {
-            output = normalizing(output, &absolute_thresh);
-        }
-
-
-        let buffer: Vec<u8>;
-        if bin {
-            buffer = vec2binary(output, &absolute_thresh);
-        } else {
-            buffer = vec_u16_u8(&output);
-        }
-        let mut bb = make_header(&(out_type == "node"), &absolute_thresh, &buffer, s);
-        bb.extend(buffer);
-        writer_compress_zlib(&bb, matches.value_of("out").unwrap());
+        convert_main(matches);
     }
 }
 

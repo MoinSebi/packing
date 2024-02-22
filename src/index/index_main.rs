@@ -1,32 +1,30 @@
-use gfa_reader::{NCGfa};
-use log::info;
-use crate::helper::transform_u32_to_array_of_u8;
+use std::path::Path;
+use std::process;
+use clap::ArgMatches;
+use log::{warn};
+use crate::core::core::PackCompact;
+use crate::core::writer::writer_compress_zlib;
+use crate::index::index_wrapper::make_index;
+use crate::info;
 
-
-/// Read GFA and get nodes + sequences
-/// Same order than VG --> sort(node, sequence)
-pub fn make_index(filename: &str) -> Vec<u8>{
-
-    let mut graph: NCGfa<()> = NCGfa::new();
-    graph.parse_gfa_file(filename, false);
-
-    let mut nodes: Vec<_> = graph.nodes.iter().map(|u| (u.id, u.seq.len())).collect();
-    println!("Node length {}", nodes.len());
-    nodes.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-
-
-    let mut buf = Vec::new();
-    let mut count = 0;
-    for x in nodes.iter() {
-        for _y in 0..x.1 {
-            count += 1;
-            buf.extend(transform_u32_to_array_of_u8(x.0.clone()));
+pub fn index_main(matches: &ArgMatches) {
+    if matches.is_present("gfa") {
+        let j = matches.value_of("gfa").unwrap();
+        if Path::new(matches.value_of("gfa").unwrap()).exists() {
+            let o = matches.value_of("output").unwrap();
+            let buf = make_index(&j);
+            writer_compress_zlib(&buf, o);
+        } else {
+            warn!("No file found");
+            //process::exit(0x0100);
         }
-
+    } else if matches.is_present("pack") {
+        let o = matches.value_of("output").unwrap();
+        let p = PackCompact::parse_pack(matches.value_of("pack").unwrap());
+        let buf = p.node2buffer();
+        writer_compress_zlib(&buf, o);
+    } else {
+        info!("No input")
     }
-    info!("Total length: {}", count);
-    return buf
-
+    //process::exit(0x0100);
 }
-
-

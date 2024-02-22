@@ -1,25 +1,33 @@
-use crate::reader::get_file_as_byte_vec;
-use crate::writer::writer_compress_zlib;
+use clap::ArgMatches;
+use log::info;
+use crate::convert::convert_helper::{Method, OutputType};
+use crate::convert::helper::make_header;
+use crate::core::core::PackCompact;
+use crate::core::reader::{get_meta, unpack_zstd_to_byte};
+use crate::core::writer::writer_compress_zlib;
 
-pub fn test(filename: &str, name: String, filename2: &str){
-    let char_vec: Vec<char> = name.chars().collect();
+pub fn rename_main(matches: &ArgMatches) {
+    info!("Renaming");
+    let mut filename = matches.value_of("input").unwrap();
+    let new_name = matches.value_of("name").unwrap();
+    let out = matches.value_of("output").unwrap();
+    let g: Vec<u8> = unpack_zstd_to_byte(filename);
+    let meta = get_meta(&g);
+    let mut p = PackCompact::wrapp(filename);
 
-    let mut namev = Vec::new();
-    for c in char_vec.iter() {
-        namev.push(c.clone() as u8);
-    }
-    for _x in 0..(64 - char_vec.len()){
-        namev.push(20);
-    }
-
-
-    let buf: Vec<u8> = get_file_as_byte_vec(filename);
-    let mut bb: Vec<u8> = Vec::new();
-    bb.extend(&buf[..9]);
-    bb.extend(&namev);
-    bb.extend(&buf[73..]);
-    writer_compress_zlib(&bb, filename2);
+    let nodes = if meta.0 {OutputType::Node} else {OutputType::Sequence};
+    let bin = if meta.1 {true} else {false};
+    let method = Method::from_u8(meta.2);
 
 
+
+    let mut header = make_header(nodes, bin, method, meta.3, &meta.4, meta.6 , new_name);
+    header.extend(&g[77..]);
+    writer_compress_zlib(&header, out);
 }
+
+pub fn rename(pc: &mut PackCompact, new_name: &str) {
+    pc.name = new_name.to_string();
+}
+
 

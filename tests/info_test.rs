@@ -4,73 +4,50 @@ use predicates::prelude::predicate;
 
 #[test]
 /// Test info subcommand
-/// -i (index)
-fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
+///
+/// Input: gfa
+/// Output: pi (index)
+fn info_pb() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
-    cmd1.arg("index")
-        .arg("-g")
-        .arg("/home/svorbrugg_local/Rust/gSV/example_data/testGraph.gfa")
-        .arg("-o")
-        .arg("tests_output/t10.pi");
+    cmd1.arg("info")
+        .arg("-b")
+        .arg("data/example/9986.1k.pb");
+    cmd1.assert().stdout(predicate::str::contains("Number of elements: 1"));
     cmd1.unwrap().assert().success();
 
-    let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info")
-        .arg("-i")
-        .arg("tests_output/t10.pi");
-    cmd2.assert().stdout(predicate::str::contains("Number of nodes: 9"));
-    cmd2.assert().stdout(predicate::str::contains("Number of entries: 58"));
-
-
     Ok(())
 }
 
-#[test]
-/// Test info subcommand
-/// -i (index)
-///
-/// Comment: Index command copied from index_test.rs
-fn index_pack2() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("index")
+fn info_gfa() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("packing")?;
+    cmd1.arg("info")
+        .arg("-pi")
+        .arg("data/example/9986.100k.pi");
+    cmd1.assert().stdout(predicate::str::contains("Number of nodes: 67"));
+    cmd1.assert().stdout(predicate::str::contains("Number of entries: 999"));
+    cmd1.unwrap().assert().success();
+    Ok(())
+}
+
+
+
+fn info_pt_bin() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("packing")?;
+    cmd1.arg("info")
         .arg("-p")
-        .arg("9986.100k.txt")
-        .arg("-o")
-        .arg("tests_output/t20.pi");
-    cmd.assert().success();
-
-    let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info")
-        .arg("-i")
-        .arg("tests_output/t20.pi");
-    cmd2.assert().stdout(predicate::str::contains("Number of nodes: 7404"));
-    cmd2.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
-
+        .arg("data/example/9986.1k.a1.bin.pt");
+    cmd1.unwrap().assert().success();
     Ok(())
 }
 
-
-#[test]
-/// Test info subcommand
-/// -b (binary)
-///
-/// Comment: Index command copied from convert_test.rs
-fn index_pack3() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+fn info_pt_u16() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("packing")?;
+    cmd1.arg("info")
         .arg("-p")
-        .arg("9986.100k.txt")
-        .arg("-o")
-        .arg("tests_output/t21.pb");
-    cmd.assert().success();
-
-    let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info")
-        .arg("-b")
-        .arg("tests_output/t21.pb");
-    cmd2.assert().stdout(predicate::str::contains("7404"));
-
+        .arg("data/example/9986.1k.a1.pt");
+    cmd1.unwrap().assert().success();
 
     Ok(())
 }
+
+

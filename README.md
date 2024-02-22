@@ -3,8 +3,8 @@ Tool for binary representation of coverage and presence-absence information from
 Can either be used for reduced storage or in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
 
 **Data fromats**  
-- ```pb``` pack binary: Binary representation of coverage. Converting pb to pack is lossy (max coverage 6535)
-- ```pt``` pack threshold: Represents presence-absence information. Header contains the threshold and the name of the sample.
+- ```pc``` pack compressed: Compressed representation of a pack file. Alternatively also a normalized pack file.
+- ```pb``` pack binary: Represents presence-absence information. Header contains the threshold and the name of the sample.
 - ```pi```pack index: Index of the graph structure.  
 
 
@@ -181,15 +181,18 @@ Nothing (percentile)
 ## For index and presence-absence
 ### Magic bytes explained (in this order): 
 - 2 bytes identifier
-- 1 byte coverage|node byte  (1 = cov, 0 = node) 
+- 1 byte coverage|node byte  (1 = cov, 0 = node)
+- 1 byte presence-absence byte (1 = pa, 0 = value)
+- 1 byte type for normalization
+- 2 byte relative threshold (u16)
 - 4 bytes total length of the data set (u32)
 - 2 bytes threshold (u16)
 - 64 byte name of sample
 
-In total: 73 bytes
+In total: 77 bytes
 
 ### Additional information:    
-
+If normalization is nothing, and relative threshold as well, then it is a compressed pack file
 **Threshold** == 0 --> 1 sample = 1 bit  
 **Threshold** > 0 --> 1 sample = 2 byte (u16)        
   
