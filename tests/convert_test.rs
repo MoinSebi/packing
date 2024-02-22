@@ -1,7 +1,4 @@
 use assert_cmd::Command;
-use predicates::prelude::predicate;
-use packing_lib::reader::{get_file_as_byte_vec, wrapper_bool, wrapper_meta, wrapper_u16};
-use packing_lib::vg_parser::parse_smart;
 
 
 //--------------------------------------------------------------------------------------
@@ -13,7 +10,6 @@ use packing_lib::vg_parser::parse_smart;
 /// Type: sequence
 /// Threshold: 1
 fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -25,8 +21,6 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("--binary")
         .arg("-v");
     cmd.assert().success();
-    let o = get_file_as_byte_vec("./data/test/9986.sequence.a1.pt");
-    let p = wrapper_bool(&o);
 
     Ok(())
 }
@@ -39,7 +33,6 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Type: sequence
 /// Threshold: 1
 fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -53,7 +46,6 @@ fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
     Ok(())
 }
 
@@ -64,7 +56,6 @@ fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
 /// -s (stats) median
 /// -b (binary) (bit)
 fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -81,14 +72,9 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
     Ok(())
-//    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
+    //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-
-
-
 
 #[test]
 /// Test convert subcommand with
@@ -99,7 +85,6 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
 /// Modifier:
 ///     - absolute threshold: 2
 fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -114,13 +99,9 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
     Ok(())
-//    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
+    //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-
-
 
 //--------------------------------------------------------------------------------------
 #[test]
@@ -131,7 +112,6 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// Type: sequence
 /// Threshold: 1
 fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -142,7 +122,6 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("node")
         .arg("-v");
     cmd.assert().success();
-
 
     Ok(())
 }
@@ -155,7 +134,6 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Type: sequence
 /// Threshold: 1
 fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -169,7 +147,6 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
     Ok(())
 }
 
@@ -180,7 +157,6 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
 /// -s (stats) median
 /// -b (binary) (bit)
 fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -197,15 +173,9 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
-
     Ok(())
-//    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
+    //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-
-
-
 
 #[test]
 /// Test convert subcommand with
@@ -216,7 +186,6 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
 /// Modifier:
 ///     - absolute threshold: 2
 fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -231,15 +200,9 @@ fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
-
     Ok(())
-//    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
+    //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-
-
-
 
 #[test]
 /// Test convert subcommand with
@@ -247,7 +210,6 @@ fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// -r (relative threshold) 50
 /// --normalize (u16)
 fn convert_pt_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -262,7 +224,5 @@ fn convert_pt_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
     Ok(())
-//    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
-
+    //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-

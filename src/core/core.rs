@@ -1,8 +1,10 @@
+
+use crate::convert::helper::{
+    mean_vec_u16_u16, transform_u32_to_array_of_u8,
+};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
-use log::{info, warn};
-use crate::convert::convert_helper::{Method, OutputType};
-use crate::convert::helper::{mean_vec_u16_u16, median_vec_u16_16, remove_zero, transform_u32_to_array_of_u8};
+
 
 /// VG pack representation + additional information.
 ///
@@ -11,7 +13,7 @@ pub struct PackCompact {
     pub node: Vec<u32>,                 // Node ids (also duplicated)
     pub coverage: Vec<u16>,             // Coverage of the nodes
     pub node_coverage: Vec<u16>,        // Coverage of nodes
-    pub bin_coverage: BitVec<u8, Msb0>,         // Binary coverage
+    pub bin_coverage: BitVec<u8, Msb0>, // Binary coverage
     pub name: String,                   // Name of the pack/sample
 }
 
@@ -29,7 +31,6 @@ impl PackCompact {
         }
     }
 
-
     // Compression of data
     //------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,15 +46,12 @@ impl PackCompact {
         buffer
     }
 
-
-
-
     /// Calculate the average of the coverage for each node
     ///
     /// - Include 0
     /// - Add to struct
     /// - Always average method
-    pub fn calc_node_cov(&mut self){
+    pub fn calc_node_cov(&mut self) {
         let mut node_id = self.node[0];
         let mut node_mean: Vec<u16> = Vec::new();
         let mut result: Vec<u16> = Vec::new();
@@ -62,17 +60,12 @@ impl PackCompact {
                 result.push(mean_vec_u16_u16(&node_mean));
 
                 node_id = self.node[x];
-                node_mean = vec![self.coverage[x] as u16];
+                node_mean = vec![self.coverage[x]];
             } else {
-                node_mean.push(self.coverage[x] as u16)
+                node_mean.push(self.coverage[x])
             }
         }
         result.push(mean_vec_u16_u16(&node_mean));
         self.node_coverage = result
     }
 }
-
-
-
-
-

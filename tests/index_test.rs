@@ -1,7 +1,6 @@
 use assert_cmd::assert::OutputAssertExt;
 use assert_cmd::Command;
 
-
 #[test]
 /// Test info subcommand
 ///
@@ -18,7 +17,6 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
 #[test]
 /// Test info subcommand
 ///
@@ -34,4 +32,3 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     cmd1.unwrap().assert().success();
     Ok(())
 }
-

@@ -1,27 +1,32 @@
-use std::path::Path;
-use std::process;
-use clap::ArgMatches;
-use log::{debug, info, warn};
 use crate::convert::convert_helper::{Method, OutputType};
-use crate::convert::helper::{get_real_threshold, make_header, normalize_u16_u16, vec2binary, vec_u16_to_u8};
+use crate::convert::helper::{
+    get_real_threshold, make_header, normalize_u16_u16, vec2binary, vec_u16_to_u8,
+};
 use crate::core::reader::read_input;
 use crate::core::writer::{writer_compress, writer_compress_zlib};
+use clap::ArgMatches;
+use log::{debug, info};
+
+use std::process;
 
 pub fn convert_main(matches: &ArgMatches) {
-
-
-
-
     let mut pc = read_input(matches);
 
-    let mut bin = matches.is_present("binary");
-    let mut normalize = matches.is_present("normalize");
-    let absolute_thresh: u16 = matches.value_of("absolute threshold").unwrap_or("0").parse().unwrap();
-    let relative_thresh: u16 = matches.value_of("relative threshold").unwrap_or("100").parse().unwrap();
+    let bin = matches.is_present("binary");
+    let normalize = matches.is_present("normalize");
+    let absolute_thresh: u16 = matches
+        .value_of("absolute threshold")
+        .unwrap_or("0")
+        .parse()
+        .unwrap();
+    let relative_thresh: u16 = matches
+        .value_of("relative threshold")
+        .unwrap_or("100")
+        .parse()
+        .unwrap();
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
-
 
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
@@ -30,17 +35,14 @@ pub fn convert_main(matches: &ArgMatches) {
     info!("Binary: {}", bin);
     info!("Normalize: {}", normalize);
 
-
     let mut real_thresh = 0;
-
 
     // If name is set as argument, replace filename
     if matches.is_present("name") {
         pc.name = matches.value_of("name").unwrap().to_string();
     }
 
-
-    if pc.coverage.len() == 0 {
+    if pc.coverage.is_empty() {
         info!("There is a problem with the input files. Run 'packing info' on your file.");
         info!("[-h, --help] for help information");
         process::exit(0x0100);
@@ -48,12 +50,10 @@ pub fn convert_main(matches: &ArgMatches) {
         info!("File is {}", pc.name)
     }
 
-
     // Checking the output base (sequence, nodes) or pack file
     let mut out_type = OutputType::Sequence;
     if matches.is_present("type") {
         out_type = OutputType::from_str(matches.value_of("type").unwrap());
-
     }
 
     info!("Output type: {}", out_type.to_string());
@@ -64,13 +64,6 @@ pub fn convert_main(matches: &ArgMatches) {
         pc.write_pack(matches.value_of("out").unwrap());
         process::exit(0x0100);
     }
-
-
-
-
-
-
-
 
     // Absolute threshold is adjusted is made with thresh
     if absolute_thresh == 0 {
@@ -100,7 +93,15 @@ pub fn convert_main(matches: &ArgMatches) {
     } else {
         buffer = vec_u16_to_u8(&output);
     }
-    let mut bb = make_header(out_type, bin, Method::Nothing, relative_thresh, &absolute_thresh, number_entries as u32, &pc.name);
+    let mut bb = make_header(
+        out_type,
+        bin,
+        Method::Nothing,
+        relative_thresh,
+        &absolute_thresh,
+        number_entries as u32,
+        &pc.name,
+    );
     bb.extend(buffer);
     if matches.is_present("non-compressed") {
         writer_compress(&bb, matches.value_of("out").unwrap());

@@ -17,7 +17,7 @@ impl OutputType {
                 warn!("Not one of the available output types");
                 warn!("Using default value: node");
                 OutputType::Node
-            },
+            }
         }
     }
 
@@ -30,7 +30,7 @@ impl OutputType {
                 warn!("Not one of the available output types");
                 warn!("Using default value: node");
                 OutputType::Node
-            },
+            }
         }
     }
 
@@ -43,11 +43,6 @@ impl OutputType {
     }
 }
 
-
-
-
-
-
 #[derive(PartialEq)]
 pub enum Method {
     Mean,
@@ -56,7 +51,7 @@ pub enum Method {
     Nothing,
 }
 
-impl Method{
+impl Method {
     pub fn from_str(s: &str) -> Method {
         match s {
             "mean" => Method::Mean,
@@ -67,11 +62,11 @@ impl Method{
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
                 Method::Nothing
-            },
+            }
         }
     }
 
-pub fn from_u8(s: u8) -> Method {
+    pub fn from_u8(s: u8) -> Method {
         match s {
             0 => Method::Nothing,
             1 => Method::Mean,
@@ -81,7 +76,7 @@ pub fn from_u8(s: u8) -> Method {
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
                 Method::Nothing
-            },
+            }
         }
     }
 

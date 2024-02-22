@@ -1,19 +1,18 @@
+mod convert;
+mod core;
 mod index;
 mod info;
-mod convert;
 mod rename;
-mod core;
 
-
-use clap::{App, AppSettings, Arg};
-use chrono::Local;
-use env_logger::{Builder, Target};
-use log::{debug, info, LevelFilter};
-use std::io::Write;
 use crate::convert::convert_main::convert_main;
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
 use crate::rename::rename::rename_main;
+use chrono::Local;
+use clap::{App, AppSettings, Arg};
+use env_logger::{Builder, Target};
+use log::{info, LevelFilter};
+use std::io::Write;
 
 fn main() {
     let matches = App::new("panSV")
@@ -209,40 +208,37 @@ fn main() {
 
     Builder::new()
         .format(|buf, record| {
-            writeln!(buf,
-                     "{} [{}] - {}",
-                     Local::now().format("%d/%m/%Y %H:%M:%S %p"),
-                     record.level(),
-                     record.args()
+            writeln!(
+                buf,
+                "{} [{}] - {}",
+                Local::now().format("%d/%m/%Y %H:%M:%S %p"),
+                record.level(),
+                record.args()
             )
         })
         .filter(None, level)
         .target(Target::Stderr)
         .init();
 
-
     // Collect the name
     info!("Running packing tool");
 
     // INDEX
-    if let Some(ref matches) = matches.subcommand_matches("index") {
+    if let Some(matches) = matches.subcommand_matches("index") {
         index_main(matches);
     }
-
     // Info
-    else if let Some(ref matches) = matches.subcommand_matches("info") {
+    else if let Some(matches) = matches.subcommand_matches("info") {
         info_main(matches);
     }
 
     // Rename
-    if let Some(ref matches) = matches.subcommand_matches("rename") {
+    if let Some(matches) = matches.subcommand_matches("rename") {
         rename_main(matches);
     }
 
     // CONVERT
-    if let Some(ref matches) = matches.subcommand_matches("convert") {
+    if let Some(matches) = matches.subcommand_matches("convert") {
         convert_main(matches);
     }
 }
-
-
