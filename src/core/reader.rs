@@ -146,6 +146,9 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
             no_file = true;
         }
     }
+    else{
+        no_file = true;
+    }
     if no_file {
         info!("There is no input file");
         info!("[-h, --help] for help information");

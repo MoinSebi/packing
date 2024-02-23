@@ -21,24 +21,6 @@ cd packing
 ```
 ___
 ### Usage
-#### subcommands
-```
-packing-index 0.1.0
-
-USAGE:
-packing index [OPTIONS] --output <output>
-
-FLAGS:
--h, --help       Print help information
--V, --version    Print version information
-
-OPTIONS:
--g, --gfa <gfa>          gfa for index
--o, --output <output>    Output file
--p, --pack <pack>        pack format after alignment
-
-
-```
 #### Index
 
 Index a graph or pack file. Index is needed if you want to convert your pb to pack (tabular) later. 
@@ -59,7 +41,7 @@ OPTIONS:
     -v <verbose>        -v = DEBUG | -vv = TRACE
 
 Input options:
-    -g, --gfa <gfa>      gfa for index
+    -g, --gfa <gfa>      Graphical Fragment Assembly file
     -p, --pack <pack>    pack format after alignment
 
 Output options:
@@ -85,11 +67,8 @@ OPTIONS:
     -v <verbose>        -v = DEBUG | -vv = TRACE
 
 Input options:
-    -b, --binary <binary>    Information about the binary
-    -i, --index <index>      Information about the index
-
-Testing options:
-    -a, --all    Check all entries (for concatenated index)
+    -c, --compressed <pack compressed>    Information about the binary
+    -i, --index <index>                   Information about the index
 ```
 
 #### Convert
@@ -103,42 +82,106 @@ USAGE:
     packing convert [FLAGS] [OPTIONS]
 
 FLAGS:
-    -b, --binary         Make a presence-absence binary file
-    -h, --help           Print help information
-    -n, --normalize      Normalize everything
-        --non-covered    Include non-covered entries (nodes or sequences) for dynamic normalizing
-                         calculations (e.g mean)
-    -q                   No messages
-    -V, --version        Print version information
+    -h, --help       Print help information
+    -q               No messages
+    -V, --version    Print version information
 
 OPTIONS:
+    -v <verbose>        -v = DEBUG | -vv = TRACE
+
+Input options:
+    -c, --compressed <pack compressed>    Compressed pack file.
+    -i, --index <index>                   Index file from 'packing index'
+    -p, --pack <pack>                     vg pack file
+
+Normalization parameters:
     -a, --absolute threshold <absolute threshold>
             Presence-absence according to absolute threshold
 
-    -c <compressed pack (sequence)>
-            
+    -b, --binary
+            Make a presence-absence file
 
-    -i, --index <index>
-            Index file from 'packing index'
+    -n, --name <name>
+            Name of the sample [default: name of the file]
 
-    -o, --out <out>
-            Output name [default: pack]
+        --non-covered
+            Include non-covered entries (nodes or sequences) for dynamic normalizing calculations
+            (e.g mean)
 
-    -p, --pack <pack>
-            vg pack file
+        --normalize
+            Normalize the data set (and return a value based pack)
 
     -r, --threshold <relative threshold>
             Percentile (can be combined with 'normalize' flag
 
     -s, --stats <stats>
-            Normalize by mean or median (always in combination relative threshold)
+            Normalization method (mean|median|percentile|nothing) [default: nothing]
 
-    -t, --type <type>
-            Type of output: nodes|sequence|pack (default: nodes)
+Output options:
+        --nc             Non-compressed output
+    -o, --out <out>      Output name [default: pack]
+    -t, --type <type>    Type of output: node|sequence|pack [default: sequence]
 
-    -v <verbose>
-            -v = DEBUG | -vv = TRACE
 ```
+
+#### View
+Information about the index or binary file.
+``` 
+packing-view 0.1.0
+
+Shows the compressed binary data in plain text
+
+USAGE:
+    packing view [FLAGS] [OPTIONS] --compressed <pack compressed>
+
+FLAGS:
+    -h, --help       Print help information
+    -q               No messages
+    -V, --version    Print version information
+
+OPTIONS:
+    -c, --compressed <pack compressed>    compressed pack file
+    -i, --index <index>                   Index file
+    -o, --output <output>                 Output file name
+    -v <verbose>                          -v = DEBUG | -vv = TRACE
+```
+
+
+#### Info
+Information about the index or binary file.
+``` 
+packing-stats 0.1.0
+
+Statistics on pack files
+
+USAGE:
+    packing stats [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help       Print help information
+    -q               No messages
+    -V, --version    Print version information
+
+OPTIONS:
+    -v <verbose>        -v = DEBUG | -vv = TRACE
+
+Input options:
+    -c, --compressed <pack compressed>
+            Compressed pack file. Original can only be accessed if the file is not normalized.
+
+    -i, --index <index>
+            Index file from 'packing index'
+
+    -o, --output <output>
+            Output file name
+
+    -p, --pack <pack>
+            vg pack file
+
+```
+
+
+
 --- 
 ### Usage
 
@@ -156,7 +199,7 @@ Coverage
 
 **Get pack file from index + coverage**
 ``` 
-./packing convert -i test.pi -c test.bp -t pack -o test.pack   
+./packing convert -i test.pi -c test.pc -t pack -o test.pack   
 ```
 
 **Presence-Absence file (-b)**    

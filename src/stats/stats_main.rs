@@ -8,6 +8,7 @@ use log::info;
 pub fn stats_main(matches: &ArgMatches) {
     info!("Stats main");
     let (mut pc, index_present) = read_input(matches);
+
     stats_wrapper(&mut pc, index_present);
 }
 
