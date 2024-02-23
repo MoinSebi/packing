@@ -21,6 +21,7 @@ impl OutputType {
         }
     }
 
+    #[allow(dead_code)]
     pub fn from_u8(s: u8) -> OutputType {
         match s {
             0 => OutputType::Node,

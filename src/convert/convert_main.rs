@@ -35,18 +35,17 @@ pub fn convert_main(matches: &ArgMatches) {
     info!("Binary: {}", bin);
     info!("Normalize: {}", normalize);
 
-    if !index_present{
+    if !index_present {
         warn!("There is no index file.");
         process::exit(0x0100);
-
     }
 
-    if pc.bin_coverage.len() > 0 {
+    if !pc.bin_coverage.is_empty() {
         warn!("You loaded a presence/absence file. You are not able to further convert it.");
-        process::exit(0x0100);    }
+        process::exit(0x0100);
+    }
 
-
-    let mut real_thresh = 0;
+    let real_thresh;
 
     // If name is set as argument, replace filename
     if matches.is_present("name") {
@@ -100,14 +99,14 @@ pub fn convert_main(matches: &ArgMatches) {
     let number_entries = output.len();
     let buffer: Vec<u8>;
     if bin {
-        buffer = vec2binary(output, &absolute_thresh);
+        buffer = vec2binary(output, &real_thresh);
     } else {
         buffer = vec_u16_to_u8(&output);
     }
     let mut bb = make_header(
         out_type,
         bin,
-        method.clone(),
+        method,
         relative_thresh,
         &absolute_thresh,
         number_entries as u32,

@@ -5,7 +5,6 @@ use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
 use log::{info, warn};
 
-
 /// u16 vector to u8 vector
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
     let mut buffer: Vec<u8> = vec![0; input_vec.len() * 2];
@@ -44,7 +43,7 @@ pub fn transform_u32_to_array_of_u8(x: u32) -> [u8; 4] {
     let b2: u8 = ((x >> 16) & 0xff) as u8;
     let b3: u8 = ((x >> 8) & 0xff) as u8;
     let b4: u8 = (x & 0xff) as u8;
-    
+
     [b1, b2, b3, b4]
 }
 
@@ -76,13 +75,13 @@ pub fn normalize_u16_u16(input_vec: Vec<u16>, absolute_thresh: &u16) -> Vec<u16>
 pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u8> {
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter() {
-        if x >= absolute_thresh {
+        if x > absolute_thresh {
             bv.push(true)
         } else {
             bv.push(false)
         }
     }
-    
+
     bv.into_vec()
 }
 
@@ -152,6 +151,10 @@ pub fn remove_zero(vecc: &mut Vec<u16>) {
     vecc.retain(|&x| x != 0);
 }
 
+pub fn remove_zero_new(vecc: &Vec<u16>) -> Vec<u16> {
+    vecc.iter().cloned().filter(|x| *x != 0).collect::<Vec<_>>()
+}
+
 /// Get the name of the file
 ///
 /// - Remove the "prefix" of a data path
@@ -159,7 +162,7 @@ pub fn remove_prefix_filename(filename: &str) -> String {
     let name: &str = filename;
 
     let s2: Vec<&str> = name.split('/').collect();
-    return s2.last().unwrap().clone().parse().unwrap();
+    return s2.last().unwrap().parse().unwrap();
 }
 
 /// Calculate the real threshold
@@ -202,8 +205,7 @@ pub fn get_real_threshold(
     let mut thresh = 0;
     if tt == Method::Percentile {
         work_on.sort();
-        thresh =
-            work_on[((work_on.len() as f64) * ((relative as f64) / 100_f64)).round() as usize];
+        thresh = work_on[((work_on.len() as f64) * ((relative as f64) / 100_f64)).round() as usize];
         info!("% {} Percentile is {}", relative, thresh);
         info!("Working threshold is {}", thresh);
         return thresh;

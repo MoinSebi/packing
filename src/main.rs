@@ -3,19 +3,21 @@ mod core;
 mod index;
 mod info;
 mod rename;
+mod stats;
 mod view;
 
-use std::env::args;
 use crate::convert::convert_main::convert_main;
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
-use crate::rename::rename::rename_main;
+use crate::rename::rename_main::rename_main1;
+use crate::stats::stats_main::stats_main;
+use crate::view::view_main::view_main;
 use chrono::Local;
 use clap::{App, AppSettings, Arg};
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
+
 use std::io::Write;
-use crate::view::view_main::view_main;
 
 fn main() {
     let matches = App::new("packing")
@@ -41,9 +43,9 @@ fn main() {
             .setting(AppSettings::ArgRequiredElseHelp)
             .help_heading("Input options")
 
-            .arg(Arg::new("binary")
-                .short('b')
-                .long("binary")
+            .arg(Arg::new("pack compressed")
+                .short('c')
+                .long("compressed")
                 .about("Information about the binary")
                 .takes_value(true))
             .arg(Arg::new("index")
@@ -63,7 +65,7 @@ fn main() {
                 .display_order(1)
                 .short('g')
                 .long("gfa")
-                .about("gfa for index")
+                .about("Graphical Fragment Assembly file")
                 .takes_value(true))
             .arg(Arg::new("pack")
                 .short('p')
@@ -83,11 +85,11 @@ fn main() {
             .about("Change the name in the header of pc or pa")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
-            .arg(Arg::new("input")
+            .arg(Arg::new("i")
                 .short('i')
                 .long("input")
                 .required(true)
-                .about("Compressed input")
+                .about("Either pb or pc file")
                 .takes_value(true))
             .arg(Arg::new("output")
                 .short('o')
@@ -119,10 +121,10 @@ fn main() {
                 .long("index")
                 .about("Index file from 'packing index'")
                 .takes_value(true))
-            .arg(Arg::new("compressed pack")
+            .arg(Arg::new("pack compressed")
                 .long("compressed")
                 .short('c')
-                .about("Compressed pack file (only sequence). Original can only be accessed if the file is not normalized.")
+                .about("Compressed pack file.")
                 .takes_value(true))
 
 
@@ -141,23 +143,18 @@ fn main() {
             // If you normalize, pls use me
             .arg(Arg::new("normalize")
                 .long("normalize")
-                .about("Normalize everything"))
+                .about("Normalize the data set (and return a value based pack)"))
             .arg(Arg::new("binary")
                 .short('b')
                 .long("binary")
-                .about("Make a presence-absence binary file"))
+                .about("Make a presence-absence file"))
             .arg(Arg::new("non-covered")
                 .long("non-covered")
                 .about("Include non-covered entries (nodes or sequences) for dynamic normalizing calculations (e.g mean)"))
             .arg(Arg::new("stats")
                 .short('s')
                 .long("stats")
-                .about("Normalize by mean or median (always in combination relative threshold)")
-                .takes_value(true))
-            .arg(Arg::new("type")
-                .short('t')
-                .long("type")
-                .about("Type of output: node|sequence|pack [default: node]")
+                .about("Normalization method (mean|median|percentile|nothing) [default: nothing]")
                 .takes_value(true))
             .arg(Arg::new("name")
                 .short('n')
@@ -178,17 +175,22 @@ fn main() {
                 .about("Output name")
                 .default_value("pack")
                 .takes_value(true))
+            .arg(Arg::new("type")
+                .short('t')
+                .long("type")
+                .about("Type of output: node|sequence|pack [default: sequence]")
+                .takes_value(true))
             .arg(Arg::new("non-compressed")
-                .long("non-compressed")
+                .long("nc")
                 .about("Non-compressed output")))
 
 
         .subcommand(App::new("view")
             .about("Shows the compressed binary data in plain text")
             .version("0.1.0")
-            .arg(Arg::new("compressed pack")
-                .short('p')
-                .long("pack")
+            .arg(Arg::new("pack compressed")
+                .short('c')
+                .long("compressed")
                 .about("compressed pack file")
                 .takes_value(true)
                 .required(true))
@@ -219,10 +221,11 @@ fn main() {
                 .long("index")
                 .about("Index file from 'packing index'")
                 .takes_value(true))
-            .arg(Arg::new("compressed pack")
+
+            .arg(Arg::new("pack compressed")
                 .long("compressed")
                 .short('c')
-                .about("Compressed pack file (only sequence). Original can only be accessed if the file is not normalized.")
+                .about("Compressed pack file. Original can only be accessed if the file is not normalized.")
                 .takes_value(true))
 
             .arg(Arg::new("output")
@@ -289,7 +292,7 @@ fn main() {
 
     // Rename
     if let Some(matches) = matches.subcommand_matches("rename") {
-        rename_main(matches);
+        rename_main1(matches);
     }
 
     // CONVERT
@@ -298,5 +301,8 @@ fn main() {
     }
     if let Some(matches) = matches.subcommand_matches("view") {
         view_main(matches);
+    }
+    if let Some(matches) = matches.subcommand_matches("stats") {
+        stats_main(matches);
     }
 }

@@ -9,7 +9,7 @@ use predicates::prelude::predicate;
 /// Output: pi (index)
 fn info_pb() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
-    cmd1.arg("info").arg("-b").arg("data/example/9986.1k.pb");
+    cmd1.arg("info").arg("-c").arg("data/example/9986.1k.pb");
     cmd1.assert()
         .stderr(predicate::str::contains("Entry type: Node"));
     cmd1.unwrap().assert().success();
@@ -33,7 +33,7 @@ fn info_gfa() -> Result<(), Box<dyn std::error::Error>> {
 fn info_pt_bin() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("info")
-        .arg("-b")
+        .arg("-c")
         .arg("data/example/9986.1k.a1.bin.pt");
     cmd1.unwrap().assert().success();
     Ok(())
@@ -42,7 +42,7 @@ fn info_pt_bin() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn info_pt_u16() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
-    cmd1.arg("info").arg("-b").arg("data/example/9986.1k.a1.pt");
+    cmd1.arg("info").arg("-c").arg("data/example/9986.1k.a1.pt");
     cmd1.unwrap().assert().success();
     Ok(())
 }

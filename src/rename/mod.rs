@@ -1,1 +1,1 @@
-pub mod rename;
+pub mod rename_main;

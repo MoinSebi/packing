@@ -1,3 +1,4 @@
+use crate::convert::convert_helper::Method;
 use crate::convert::helper::{byte_to_string, remove_prefix_filename};
 use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
@@ -8,7 +9,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::{fs, process};
-use crate::convert::convert_helper::Method;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -28,8 +28,6 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
     let mut buffer = vec![0; metadata.len() as usize];
     // THIS IS A FUCKING JOKE
     file.read_exact(&mut buffer).expect("buffer overflow");
-
-    
 
     zstd_decode(buffer)
 }
@@ -117,8 +115,10 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
     let mut no_file = false;
     let mut index_present = false;
     // Determine Input format
+
     if matches.is_present("pack")
-        | (matches.is_present("index") & matches.is_present("compressed pack") | matches.is_present("compressed pack"))
+        | (matches.is_present("index") & matches.is_present("pack compressed"))
+        | matches.is_present("pack compressed")
     {
         // READ "NORMAL" PACK FILE
         if matches.is_present("pack") {
@@ -130,18 +130,18 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
             }
         }
         //READ COVERAGE AND META
-            else if matches.is_present("index") && matches.is_present("compressed pack"){
-                 if Path::new(matches.value_of("index").unwrap()).exists()
-                    & Path::new(matches.value_of("compressed pack").unwrap()).exists()
-                {
-                    p = wrapper_compressed(
-                        matches.value_of("index").unwrap(),
-                        matches.value_of("compressed pack").unwrap(),
-                    );
-                    index_present = true;
-                }
-        } else if Path::new(matches.value_of("compressed pack").unwrap()).exists() {
-            p = PackCompact::wrapp(matches.value_of("compressed pack").unwrap());
+        else if matches.is_present("index") && matches.is_present("pack compressed") {
+            if Path::new(matches.value_of("index").unwrap()).exists()
+                & Path::new(matches.value_of("pack compressed").unwrap()).exists()
+            {
+                p = wrapper_compressed(
+                    matches.value_of("index").unwrap(),
+                    matches.value_of("pack compressed").unwrap(),
+                );
+                index_present = true;
+            }
+        } else if Path::new(matches.value_of("pack compressed").unwrap()).exists() {
+            p = PackCompact::wrapp(matches.value_of("pack compressed").unwrap());
         } else {
             no_file = true;
         }
@@ -184,10 +184,24 @@ impl PackCompact {
         pc
     }
 
+    /// Wrapper for PC reading.
+    pub fn wrapp(file_pc: &str) -> Self {
+        let buff = unpack_zstd_to_byte(file_pc);
+        let meta = get_meta(&buff);
+        if meta.1 {
+            Self::read_bin_coverage(&buff)
+        } else {
+            Self::read_u16(&buff)
+        }
+    }
+
     pub fn read_bin_coverage(buffer: &[u8]) -> Self {
-        let (_kind, _bin, _method, _relative, _thresh, _length, _bytes, name) = get_meta(buffer);
-        debug!("Name {}", name);
-        let bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[77..]);
+        let (_kind, _bin, _method, _relative, _thresh, _bytes, length, name) = get_meta(buffer);
+        debug!("Name1 {}", name);
+        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[77..]);
+        for _i in length as usize..bv.len() {
+            bv.pop();
+        }
         PackCompact {
             name,
             node: Vec::new(),
@@ -199,25 +213,12 @@ impl PackCompact {
             method: Method::from_u8(_method),
             relative: _relative,
             threshold: _thresh,
-            length: _length,
-
-        }
-    }
-
-    pub fn wrapp(file_pc: &str) -> Self {
-        println!("wrapp");
-        let buff = unpack_zstd_to_byte(file_pc);
-        let meta = get_meta(&buff);
-        if meta.1 {
-            Self::read_bin_coverage(&buff)
-        } else {
-
-            Self::read_u16(&buff)
+            length,
         }
     }
 
     pub fn read_u16(buffer: &[u8]) -> Self {
-        let (_kind, _bin, _method, _relative, _thresh, _length, _bytes, name) = get_meta(buffer);
+        let (_kind, _bin, _method, _relative, _thresh, _bytes, length, name) = get_meta(buffer);
 
         debug!("Name {}", name);
         let mut data = vec![0; buffer[77..].len() / 2];
@@ -233,7 +234,7 @@ impl PackCompact {
             method: Method::from_u8(_method),
             relative: _relative,
             threshold: _thresh,
-            length: _length,
+            length,
         }
     }
 }

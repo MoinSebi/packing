@@ -1,11 +1,7 @@
-
-use crate::convert::helper::{
-    mean_vec_u16_u16, transform_u32_to_array_of_u8,
-};
+use crate::convert::convert_helper::Method;
+use crate::convert::helper::{mean_vec_u16_u16, transform_u32_to_array_of_u8};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
-use crate::convert::convert_helper::Method;
-
 
 /// VG pack representation + additional information.
 ///
@@ -41,7 +37,6 @@ impl PackCompact {
             relative: 0,
             threshold: 0,
             length: 0,
-
         }
     }
 

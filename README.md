@@ -18,7 +18,6 @@ ___
 ```
 git clone https://github.com/MoinSebi/packing
 cd packing
-cargo build --release
 ```
 ___
 ### Usage
@@ -152,7 +151,7 @@ OR:
 ```
 Coverage
 ```
-./packing convert -p test.pack -o test.pb  
+./packing convert -p test.pack -o test.pc  
 ```
 
 **Get pack file from index + coverage**
@@ -183,18 +182,18 @@ Nothing (percentile)
 - 2 bytes identifier
 - 1 byte coverage|node byte  (1 = cov, 0 = node)
 - 1 byte presence-absence byte (1 = pa, 0 = value)
-- 1 byte type for normalization
+- 1 byte type for normalization (u16)
 - 2 byte relative threshold (u16)
-- 4 bytes total length of the data set (u32)
 - 2 bytes threshold (u16)
+- 4 bytes Number of entries (u32)
 - 64 byte name of sample
 
 In total: 77 bytes
 
-### Additional information:    
-If normalization is nothing, and relative threshold as well, then it is a compressed pack file
-**Threshold** == 0 --> 1 sample = 1 bit  
-**Threshold** > 0 --> 1 sample = 2 byte (u16)        
+### Additional information:
+- Nothing was changed (in comparison to the input), if Method == Nothing and real threshold == 0
+- If you are binary, there must be a real threshold
+- If the method == Nothing but there is a threshold, it was computed by a absolute threshold
   
 
 

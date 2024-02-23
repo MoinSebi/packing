@@ -6,7 +6,6 @@ use clap::ArgMatches;
 use log::warn;
 use std::path::Path;
 
-
 pub fn index_main(matches: &ArgMatches) {
     if matches.is_present("gfa") {
         let j = matches.value_of("gfa").unwrap();

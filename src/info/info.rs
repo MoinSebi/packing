@@ -4,7 +4,7 @@ use log::info;
 use std::collections::HashSet;
 
 /// Information about the a index file
-pub fn stats_index(filename: &str) {
+pub fn info_index(filename: &str) {
     let nodes = read_index(filename);
     let nodes_hs: HashSet<u32> = nodes.iter().cloned().collect();
     info!("Number of nodes: {}", nodes_hs.len());
@@ -16,7 +16,7 @@ pub fn stats_index(filename: &str) {
 /// TODO
 /// Mean and median coverage of all and covered nodes if single file
 /// Split files after cat
-pub fn stats(filename: &str) {
+pub fn info_compressed(filename: &str) {
     let g: Vec<u8> = unpack_zstd_to_byte(filename);
     let meta = get_meta(&g);
 

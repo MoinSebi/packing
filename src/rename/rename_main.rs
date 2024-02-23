@@ -6,7 +6,7 @@ use crate::core::writer::writer_compress_zlib;
 use clap::ArgMatches;
 use log::info;
 
-pub fn rename_main(matches: &ArgMatches) {
+pub fn rename_main1(matches: &ArgMatches) {
     info!("Renaming");
     let filename = matches.value_of("input").unwrap();
     let new_name = matches.value_of("name").unwrap();
@@ -26,8 +26,4 @@ pub fn rename_main(matches: &ArgMatches) {
     let mut header = make_header(nodes, bin, method, meta.3, &meta.4, meta.6, new_name);
     header.extend(&g[77..]);
     writer_compress_zlib(&header, out);
-}
-
-pub fn rename(pc: &mut PackCompact, new_name: &str) {
-    pc.name = new_name.to_string();
 }

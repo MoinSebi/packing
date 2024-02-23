@@ -1,14 +1,12 @@
-use crate::info::info::{stats, stats_index};
+use crate::info::info::{info_compressed, info_index};
 use clap::ArgMatches;
 
 pub fn info_main(matches: &ArgMatches) {
-    if matches.is_present("index") | (matches.is_present("binary")) {
+    if matches.is_present("index") | (matches.is_present("pack compressed")) {
         if matches.is_present("index") {
-            stats_index(matches.value_of("index").unwrap())
-        } else if matches.is_present("all") {
-            stats(matches.value_of("binary").unwrap());
+            info_index(matches.value_of("index").unwrap());
         } else {
-            stats(matches.value_of("binary").unwrap());
+            info_compressed(matches.value_of("pack compressed").unwrap());
         }
     }
 }
