@@ -25,8 +25,12 @@ pub fn convert_main(matches: &ArgMatches) {
         .parse()
         .unwrap();
     let method_string = matches.value_of("method").unwrap_or("nothing");
-    let method = Method::from_str(method_string);
+    let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
+
+    if absolute_thresh == 0 && method == Method::Nothing && matches.is_present("relative threshold") {
+        method = Method::Percentile;
+    }
 
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
@@ -66,6 +70,7 @@ pub fn convert_main(matches: &ArgMatches) {
         out_type = OutputType::from_str(matches.value_of("type").unwrap());
     }
 
+
     info!("Output type: {}", out_type.to_string());
 
     // Write the pack
@@ -74,7 +79,14 @@ pub fn convert_main(matches: &ArgMatches) {
         pc.write_pack(matches.value_of("out").unwrap());
         process::exit(0x0100);
     }
-
+    if matches.is_present("relative threshold") && relative_thresh == 0 {
+        warn!("Relative threshold is 0");
+        process::exit(0x0100);
+    }
+    if absolute_thresh == 0 && method == Method::Nothing && relative_thresh == 0 {
+        warn!("Relative threshold is 0");
+        process::exit(0x0100);
+    }
     // Absolute threshold is adjusted is made with thresh
     if absolute_thresh == 0 {
         real_thresh = get_real_threshold(&mut pc, out_type, include_all, relative_thresh, method);
@@ -86,16 +98,15 @@ pub fn convert_main(matches: &ArgMatches) {
     // The vector we work with
     let mut output: Vec<u16>;
     if out_type == OutputType::Node {
-        pc.calc_node_cov();
         output = pc.node_coverage;
     } else {
         output = pc.coverage;
+
     }
 
     if normalize {
         output = normalize_u16_u16(output, &real_thresh);
     }
-
     let number_entries = output.len();
     let buffer: Vec<u8>;
     if bin {
@@ -108,7 +119,7 @@ pub fn convert_main(matches: &ArgMatches) {
         bin,
         method,
         relative_thresh,
-        &absolute_thresh,
+        &real_thresh,
         number_entries as u32,
         &pc.name,
     );

@@ -18,7 +18,6 @@ path = "src/main.rs"
 
 [dependencies]
 clap = "=3.0.0-beta.4"
-getopts = "0.2"
 zstd = "0.9"
 gfa-reader = {git = "https://github.com/MoinSebi/gfa-reader"}
 log = "0.4.0"

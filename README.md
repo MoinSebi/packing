@@ -18,12 +18,13 @@ ___
 ```
 git clone https://github.com/MoinSebi/packing
 cd packing
+cargo build --release
 ```
 ___
 ### Usage
 #### Index
 
-Index a graph or pack file. Index is needed if you want to convert your pb to pack (tabular) later. 
+Index a graph or pack file. Index is needed if you want to convert reconvert from pc to pack.  
 ``` 
 packing-index 0.1.0
 
@@ -125,7 +126,7 @@ Output options:
 ```
 
 #### View
-Information about the index or binary file.
+Show the compressed file in plain text.
 ``` 
 packing-view 0.1.0
 
@@ -147,8 +148,8 @@ OPTIONS:
 ```
 
 
-#### Info
-Information about the index or binary file.
+#### Stats
+Calculate some stats. 
 ``` 
 packing-stats 0.1.0
 
@@ -180,8 +181,6 @@ Input options:
 
 ```
 
-
-
 --- 
 ### Usage
 
@@ -206,21 +205,21 @@ Coverage
 Absolute threshold: 
 ```
 On nodes: 
-./packing convert -i test.pi -c test.bp -t node -b -a 5 -o output.pt
+./packing convert -i test.pi -c test.pc -t node -b -a 5 -o output.pt
 On sequence:  
-./packing convert -i test.pi -c test.bp -b -a 5 -o output.a5.pt
+./packing convert -i test.pi -c test.pc -b -a 5 -o output.a5.pt
 ```
 Relative threshold: 
 ```
 Mean
-./packing convert -i test.pi -c test.bp -t node -s mean -b -r 50 -o output.mean.r50.pt
+./packing convert -i test.pi -c test.bp -t node -s mean -b -r 50 --method percentile -o output.mean.r50.pt
 Nothing (percentile)
 ./packing convert -i test.pi -c test.bp -t node -b -r 50 -o output.r50.pt
 ```
 
 ---
 
-## For index and presence-absence
+## PC - Pack Compressed - Header explained
 ### Magic bytes explained (in this order): 
 - 2 bytes identifier
 - 1 byte coverage|node byte  (1 = cov, 0 = node)
@@ -234,9 +233,10 @@ Nothing (percentile)
 In total: 77 bytes
 
 ### Additional information:
-- Nothing was changed (in comparison to the input), if Method == Nothing and real threshold == 0
-- If you are binary, there must be a real threshold
-- If the method == Nothing but there is a threshold, it was computed by a absolute threshold
+- If Method == Nothing and real threshold == 0 -> No changes to the input file, used for reduced storage
+- If you are binary, the "real" threshold is enforced: x > threshold
+- If the method == Nothing but there is a threshold, it was computed by the "absolute threshold"
+- Absolute threshold is always highest priority
   
 
 

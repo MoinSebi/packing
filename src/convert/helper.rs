@@ -203,10 +203,10 @@ pub fn get_real_threshold(
     }
 
     let mut thresh = 0;
-    if tt == Method::Percentile {
+    if tt == Method::Percentile{
         work_on.sort();
-        thresh = work_on[((work_on.len() as f64) * ((relative as f64) / 100_f64)).round() as usize];
-        info!("% {} Percentile is {}", relative, thresh);
+        thresh = work_on[((work_on.len() as f64-1.0) * ((relative as f64) / 100_f64)).round() as usize];
+        info!("{}% Percentile is {}", relative, thresh);
         info!("Working threshold is {}", thresh);
         return thresh;
     } else if tt == Method::Mean {
