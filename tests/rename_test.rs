@@ -3,14 +3,12 @@ use assert_cmd::Command;
 use predicates::prelude::predicate;
 use std::fs;
 
-
 #[test]
 /// Test stats
 ///
 /// Input: gfa
 /// Output: pi (index)
 fn view_2() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
@@ -39,10 +37,8 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
     cmd3.unwrap().assert().success();
     cmd3.assert().stderr(predicate::str::contains("test321313"));
 
-
     fs::remove_file("data/test/9986.1k.sequence.rename.pc")?;
     fs::remove_file("data/test/9986.sequence.pc")?;
-
 
     Ok(())
 }

@@ -4,8 +4,8 @@ use crate::core::reader::read_input;
 
 use clap::ArgMatches;
 use log::info;
-use std::io::{self, Write};
 use std::fs::File;
+use std::io::{self, Write};
 
 pub fn stats_main(matches: &ArgMatches) {
     info!("Stats main");
@@ -19,7 +19,7 @@ pub fn stats_main(matches: &ArgMatches) {
     }
 }
 
-fn write_to_file_or_stdout(file:  &mut Option<&mut File>, content: &str) -> io::Result<()> {
+fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::Result<()> {
     match file {
         Some(f) => {
             f.write_all(content.as_bytes())?;
@@ -32,35 +32,73 @@ fn write_to_file_or_stdout(file:  &mut Option<&mut File>, content: &str) -> io::
 }
 
 pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Option<&mut File>) {
-
     write_to_file_or_stdout(file2, &format!("Name: {}", pc.name)).expect("Can not write file");
     if pc.is_binary {
-        write_to_file_or_stdout(file2, &format!(
-            "Number presence entries {}",
-            pc.bin_coverage.iter().filter(|x| **x).count()
-        )).expect("Can not write file");
-        write_to_file_or_stdout(file2, &format!(
-            "Number absence entries {}",
-            pc.bin_coverage.iter().filter(|x| !**x).count()
-        )).expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!(
+                "Number presence entries {}",
+                pc.bin_coverage.iter().filter(|x| **x).count()
+            ),
+        )
+        .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!(
+                "Number absence entries {}",
+                pc.bin_coverage.iter().filter(|x| !**x).count()
+            ),
+        )
+        .expect("Can not write file");
     } else if pc.coverage.is_empty() {
-        write_to_file_or_stdout(file2, &format!(
-            "Average (with zeros) {}",
-            mean_vec_u16_u16(&pc.node_coverage)
-        )).expect("Can not write file");
-        write_to_file_or_stdout(file2, &format!(
-            "Median (with zeros) {}",
-            median_vec_u16_16(&pc.node_coverage)
-        )).expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!(
+                "Average (with zeros) {}",
+                mean_vec_u16_u16(&pc.node_coverage)
+            ),
+        )
+        .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!(
+                "Median (with zeros) {}",
+                median_vec_u16_16(&pc.node_coverage)
+            ),
+        )
+        .expect("Can not write file");
         let wo = remove_zero_new(&pc.node_coverage);
-        write_to_file_or_stdout(file2, &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo))).expect("Can not write file");
-        write_to_file_or_stdout(file2, &format!("Median (without zeros) {}", median_vec_u16_16(&wo))).expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo)),
+        )
+        .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (without zeros) {}", median_vec_u16_16(&wo)),
+        )
+        .expect("Can not write file");
     } else {
-        write_to_file_or_stdout(file2, &format!("Average (with zeros) {}", mean_vec_u16_u16(&pc.coverage))).expect("Can not write file");
-        write_to_file_or_stdout(file2, &format!("Median (with zeros) {}", median_vec_u16_16(&pc.coverage))).expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Average (with zeros) {}", mean_vec_u16_u16(&pc.coverage)),
+        )
+        .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (with zeros) {}", median_vec_u16_16(&pc.coverage)),
+        )
+        .expect("Can not write file");
         let wo = remove_zero_new(&pc.coverage);
-        write_to_file_or_stdout(file2, &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo))).expect("Can not write file");
-        write_to_file_or_stdout(file2, &format!("Median (without zeros) {}", median_vec_u16_16(&wo))).expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo)),
+        )
+        .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (without zeros) {}", median_vec_u16_16(&wo)),
+        )
+        .expect("Can not write file");
     }
 }
-

@@ -26,8 +26,6 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     cmd2.unwrap().assert().success();
     fs::remove_file("data/test/9986.1k.pi")?;
 
-
-
     Ok(())
 }
 
@@ -46,7 +44,9 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     cmd1.unwrap().assert().success();
 
     let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info").arg("-i").arg("data/test/testGraph_complex.test.pi");
+    cmd2.arg("info")
+        .arg("-i")
+        .arg("data/test/testGraph_complex.test.pi");
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 9"));
     cmd2.unwrap().assert().success();

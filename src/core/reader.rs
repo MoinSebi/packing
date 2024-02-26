@@ -145,8 +145,7 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
         } else {
             no_file = true;
         }
-    }
-    else{
+    } else {
         no_file = true;
     }
     if no_file {

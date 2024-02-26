@@ -28,7 +28,8 @@ pub fn convert_main(matches: &ArgMatches) {
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
 
-    if absolute_thresh == 0 && method == Method::Nothing && matches.is_present("relative threshold") {
+    if absolute_thresh == 0 && method == Method::Nothing && matches.is_present("relative threshold")
+    {
         method = Method::Percentile;
     }
 
@@ -70,7 +71,6 @@ pub fn convert_main(matches: &ArgMatches) {
         out_type = OutputType::from_str(matches.value_of("type").unwrap());
     }
 
-
     info!("Output type: {}", out_type.to_string());
 
     // Write the pack
@@ -101,7 +101,6 @@ pub fn convert_main(matches: &ArgMatches) {
         output = pc.node_coverage;
     } else {
         output = pc.coverage;
-
     }
 
     if normalize {
