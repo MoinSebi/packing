@@ -1,6 +1,5 @@
 use assert_cmd::assert::OutputAssertExt;
 use assert_cmd::Command;
-use predicates::prelude::predicate;
 use std::fs;
 
 #[test]
