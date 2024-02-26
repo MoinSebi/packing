@@ -221,14 +221,20 @@ Nothing (percentile)
 
 ## PC - Pack Compressed - Header explained
 ### Magic bytes explained (in this order): 
-- 2 bytes identifier
-- 1 byte coverage|node byte  (1 = cov, 0 = node)
-- 1 byte presence-absence byte (1 = pa, 0 = value)
-- 1 byte type for normalization (u16)
-- 2 byte relative threshold (u16)
-- 2 bytes threshold (u16)
-- 4 bytes Number of entries (u32)
-- 64 byte name of sample
+The header of the file is also compressed, therefore you can only read it which ```packing info``` or ```packing view```.
+
+| Field              | Description          | Possible values                                 | Type |
+|--------------------|----------------------|-------------------------------------------------|------|
+| MB                 | Magic bytes          | [35, 38]                                        | u16  |
+| Sequence           | Is sequence          | 1 (sequence), 0 (node)                          | u8   |
+| PA                 | Presence-absence     | 1 (PA), 0 (Value-based)                         | u8   |
+| NM                 | Normalization method | 0 (Nothing), 1 (Mean), 2(Median), 3(Percentile) | u8   |
+| relative_threshold | Relative threshold   | -                                               | u16  |
+| real_threshold     | Real threshold       | -                                               | u16  |
+| Length             | Number of entries    | -                                               | u32  |
+| Name               | Name of the sample   | -                                               | u64  |
+
+
 
 In total: 77 bytes
 
