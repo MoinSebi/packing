@@ -66,7 +66,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-r")
         .arg("50")
         .arg("-b")
-        .arg("-s")
+        .arg("-m")
         .arg("median")
         .arg("-v");
     cmd.assert().success();
@@ -167,7 +167,7 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-r")
         .arg("50")
         .arg("-b")
-        .arg("-s")
+        .arg("-m")
         .arg("median")
         .arg("-v");
     cmd.assert().success();

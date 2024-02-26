@@ -1,0 +1,48 @@
+use assert_cmd::assert::OutputAssertExt;
+use assert_cmd::Command;
+use predicates::prelude::predicate;
+use std::fs;
+
+
+#[test]
+/// Test stats
+///
+/// Input: gfa
+/// Output: pi (index)
+fn view_2() -> Result<(), Box<dyn std::error::Error>> {
+
+    let mut cmd = Command::cargo_bin("packing")?;
+    cmd.arg("convert")
+        .arg("-p")
+        .arg("data/example/9986.1k.txt")
+        .arg("-o")
+        .arg("data/test/9986.sequence.pc")
+        .arg("-t")
+        .arg("sequence");
+    cmd.assert().success();
+
+    let mut cmd2 = Command::cargo_bin("packing")?;
+    cmd2.arg("rename")
+        .arg("-i")
+        .arg("data/test/9986.sequence.pc")
+        .arg("-n")
+        .arg("test321313")
+        .arg("-o")
+        .arg("data/test/9986.1k.sequence.rename.pc");
+    cmd2.unwrap().assert().success();
+
+    let mut cmd3 = Command::cargo_bin("packing")?;
+
+    cmd3.arg("info")
+        .arg("-c")
+        .arg("data/test/9986.1k.sequence.rename.pc");
+    cmd3.unwrap().assert().success();
+    cmd3.assert().stderr(predicate::str::contains("test321313"));
+
+
+    fs::remove_file("data/test/9986.1k.sequence.rename.pc")?;
+    fs::remove_file("data/test/9986.sequence.pc")?;
+
+
+    Ok(())
+}

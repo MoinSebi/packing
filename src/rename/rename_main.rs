@@ -8,6 +8,7 @@ use log::info;
 
 pub fn rename_main1(matches: &ArgMatches) {
     info!("Renaming");
+    eprintln!("Renaming matches {:?}", matches.is_present("input"));
     let filename = matches.value_of("input").unwrap();
     let new_name = matches.value_of("name").unwrap();
     let out = matches.value_of("output").unwrap();
