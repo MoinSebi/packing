@@ -1,6 +1,6 @@
-use crate::convert::helper::transform_u32_to_array_of_u8;
 use gfa_reader::NCGfa;
 use log::info;
+use packing_lib::convert::helper::transform_u32_to_array_of_u8;
 
 /// Read GFA and get nodes + sequences
 /// Same order than VG --> sort(node, sequence)

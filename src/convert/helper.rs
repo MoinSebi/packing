@@ -1,9 +1,9 @@
-use crate::convert::convert_helper::{Method, OutputType};
-use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
 use log::{info, warn};
+use crate::convert::convert_helper::{Method, OutputType};
+use crate::core::core::PackCompact;
 
 /// u16 vector to u8 vector
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {

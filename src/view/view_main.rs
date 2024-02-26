@@ -1,4 +1,3 @@
-use crate::core::core::PackCompact;
 use clap::ArgMatches;
 use std::collections::HashSet;
 use std::fs::File;
@@ -6,7 +5,8 @@ use std::fs::File;
 use log::info;
 use std::io::Write;
 
-use crate::core::reader::read_input;
+use packing_lib::core::core::PackCompact;
+use packing_lib::core::reader::read_input;
 
 pub fn view_main(matches: &ArgMatches) {
     info!("View main");

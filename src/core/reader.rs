@@ -1,5 +1,3 @@
-use crate::convert::convert_helper::Method;
-use crate::convert::helper::{byte_to_string, remove_prefix_filename};
 use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
@@ -9,6 +7,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::{fs, process};
+use crate::convert::convert_helper::Method;
+use crate::convert::helper::{byte_to_string, remove_prefix_filename};
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html

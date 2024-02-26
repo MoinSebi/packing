@@ -1,12 +1,9 @@
-mod convert;
-mod core;
 mod index;
 mod info;
 mod rename;
 mod stats;
 mod view;
 
-use crate::convert::convert_main::convert_main;
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
 use crate::rename::rename_main::rename_main1;
@@ -18,6 +15,7 @@ use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
 use std::io::Write;
+use packing_lib::convert::convert_main::convert_main;
 
 fn main() {
     let matches = App::new("packing")

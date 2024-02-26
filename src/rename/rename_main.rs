@@ -1,10 +1,11 @@
-use crate::convert::convert_helper::{Method, OutputType};
-use crate::convert::helper::make_header;
-use crate::core::core::PackCompact;
-use crate::core::reader::{get_meta, unpack_zstd_to_byte};
-use crate::core::writer::writer_compress_zlib;
+
 use clap::ArgMatches;
 use log::info;
+use packing_lib::convert::convert_helper::{Method, OutputType};
+use packing_lib::convert::helper::make_header;
+use packing_lib::core::core::PackCompact;
+use packing_lib::core::reader::{get_meta, unpack_zstd_to_byte};
+use packing_lib::core::writer::writer_compress_zlib;
 
 pub fn rename_main1(matches: &ArgMatches) {
     info!("Renaming");
