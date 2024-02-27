@@ -60,7 +60,7 @@ pub fn get_meta(buffer: &[u8]) -> (bool, bool, u8, u16, u16, u32, u32, String) {
 ///
 pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, _thresh, _length, bytes, _name) = get_meta(buffer);
+    let (_kind, _bin, _method, _relative, _thresh, bytes, _length, _name) = get_meta(buffer);
 
     let chunks = buffer.chunks((bytes + 77) as usize);
     let mut result: Vec<PackCompact> = Vec::new();
@@ -78,7 +78,7 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
 /// Iterate over each sample
 pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, _thresh, _length, bytes, _name) = get_meta(buffer);
+    let (_kind, _bin, _method, _relative, _thresh, bytes, _length, _name) = get_meta(buffer);
     let chunks = buffer.chunks((bytes + 77) as usize);
 
     info!("Number of samples: {}", chunks.len());
