@@ -1,9 +1,6 @@
 use assert_cmd::assert::OutputAssertExt;
-use assert_cmd::Command;
-use std::fs;
 use packing_lib::core::reader::{unpack_zstd_to_byte, wrapper_bool};
 
-#[test]
 /// Test stats
 ///
 /// Input: gfa
