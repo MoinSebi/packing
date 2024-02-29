@@ -48,8 +48,10 @@ pub fn get_meta(buffer: &[u8]) -> (bool, bool, u8, u16, u16, u32, u32, String) {
         bytes = length.div_ceil(8);
     }
 
-    let name = byte_to_string(&buffer[13..77]);
-    let name = name.trim_matches(char::from(0)).to_string();
+    let mut name = byte_to_string(&buffer[13..77]);
+    name = name.trim_matches(char::from(0)).to_string();
+    name = name.trim_end().to_string();
+
 
     (cov == 1, bin == 1, method, r, thresh, bytes, length, name)
 }
