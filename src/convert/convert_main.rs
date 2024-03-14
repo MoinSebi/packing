@@ -16,7 +16,7 @@ pub fn convert_main(matches: &ArgMatches) {
     let normalize = matches.is_present("normalize");
     let absolute_thresh: u16 = matches
         .value_of("absolute threshold")
-        .unwrap_or("0")
+        .unwrap_or("1")
         .parse()
         .unwrap();
     let relative_thresh: u16 = matches
@@ -88,7 +88,7 @@ pub fn convert_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
     // Absolute threshold is adjusted is made with thresh
-    if absolute_thresh == 0 {
+    if matches.is_present("absolute threshold"){
         real_thresh = get_real_threshold(&mut pc, out_type, include_all, relative_thresh, method);
     } else {
         real_thresh = absolute_thresh;

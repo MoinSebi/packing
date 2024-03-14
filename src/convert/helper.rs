@@ -75,7 +75,7 @@ pub fn normalize_u16_u16(input_vec: Vec<u16>, absolute_thresh: &u16) -> Vec<u16>
 pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u8> {
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter() {
-        if x > absolute_thresh {
+        if x >= absolute_thresh {
             bv.push(true)
         } else {
             bv.push(false)
