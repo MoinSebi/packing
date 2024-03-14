@@ -138,7 +138,7 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.a3.pb")
+        .arg("data/test/9986.node.a3.pc")
         .arg("-t")
         .arg("node")
         .arg("-a")

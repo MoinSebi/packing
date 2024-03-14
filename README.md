@@ -8,12 +8,12 @@ Can either be used for reduced storage or in combination with [gfa2bin](https://
 - ```pi```pack index: Index of the graph structure.  
 
 
-I use .pb "pack binary", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
+I use .pb "pack compressed", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
 
 
 ___ 
-### Install: 
+## Install: 
 
 ```
 git clone https://github.com/MoinSebi/packing
@@ -21,177 +21,34 @@ cd packing
 cargo build --release
 ```
 ___
-### Usage
-#### Index
+## Usage
+### Index
 
-Index a graph or pack file. Index is needed if you want to convert reconvert from pc to pack.  
-``` 
-packing-index 0.1.0
+Index a graph or (plain-text) pack file. Index is needed if you want to convert reconvert from pc to pack.  
 
-Index a graph (gfa or VG pack)
-
-USAGE:
-    packing index [FLAGS] [OPTIONS] --output <output>
-
-FLAGS:
-    -h, --help       Print help information
-    -q               No messages
-    -V, --version    Print version information
-
-OPTIONS:
-    -v <verbose>        -v = DEBUG | -vv = TRACE
-
-Input options:
-    -g, --gfa <gfa>      Graphical Fragment Assembly file
-    -p, --pack <pack>    pack format after alignment
-
-Output options:
-    -o, --output <output>    Output file
-
-```
-#### Info
-Information about the index or binary file.
-``` 
-packing-info 0.1.0
-
-Information about index or binary files (not compressed pack)
-
-USAGE:
-    packing info [FLAGS] [OPTIONS]
-
-FLAGS:
-    -h, --help       Print help information
-    -q               No messages
-    -V, --version    Print version information
-
-OPTIONS:
-    -v <verbose>        -v = DEBUG | -vv = TRACE
-
-Input options:
-    -c, --compressed <pack compressed>    Information about the binary
-    -i, --index <index>                   Information about the index
-```
-
-#### Convert
-Convert a pack file (tabular) to a binary file or vice versa. This command can also perform binary operations (e.g. presence-absence).
-```
-packing-convert 0.1.0
-
-Convert VG PACK format for a compact index structure (partially reversible)
-
-USAGE:
-    packing convert [FLAGS] [OPTIONS]
-
-FLAGS:
-    -h, --help       Print help information
-    -q               No messages
-    -V, --version    Print version information
-
-OPTIONS:
-    -v <verbose>        -v = DEBUG | -vv = TRACE
-
-Input options:
-    -c, --compressed <pack compressed>    Compressed pack file.
-    -i, --index <index>                   Index file from 'packing index'
-    -p, --pack <pack>                     vg pack file
-
-Normalization parameters:
-    -a, --absolute threshold <absolute threshold>
-            Presence-absence according to absolute threshold
-
-    -b, --binary
-            Make a presence-absence file
-
-    -n, --name <name>
-            Name of the sample [default: name of the file]
-
-        --non-covered
-            Include non-covered entries (nodes or sequences) for dynamic normalizing calculations
-            (e.g mean)
-
-        --normalize
-            Normalize the data set (and return a value based pack)
-
-    -r, --threshold <relative threshold>
-            Percentile (can be combined with 'normalize' flag
-
-    -s, --stats <stats>
-            Normalization method (mean|median|percentile|nothing) [default: nothing]
-
-Output options:
-        --nc             Non-compressed output
-    -o, --out <out>      Output name [default: pack]
-    -t, --type <type>    Type of output: node|sequence|pack [default: sequence]
-
-```
-
-#### View
-Show the compressed file in plain text.
-``` 
-packing-view 0.1.0
-
-Shows the compressed binary data in plain text
-
-USAGE:
-    packing view [FLAGS] [OPTIONS] --compressed <pack compressed>
-
-FLAGS:
-    -h, --help       Print help information
-    -q               No messages
-    -V, --version    Print version information
-
-OPTIONS:
-    -c, --compressed <pack compressed>    compressed pack file
-    -i, --index <index>                   Index file
-    -o, --output <output>                 Output file name
-    -v <verbose>                          -v = DEBUG | -vv = TRACE
-```
-
-
-#### Stats
-Calculate some stats. 
-``` 
-packing-stats 0.1.0
-
-Statistics on pack files
-
-USAGE:
-    packing stats [FLAGS] [OPTIONS]
-
-FLAGS:
-    -h, --help       Print help information
-    -q               No messages
-    -V, --version    Print version information
-
-OPTIONS:
-    -v <verbose>        -v = DEBUG | -vv = TRACE
-
-Input options:
-    -c, --compressed <pack compressed>
-            Compressed pack file. Original can only be accessed if the file is not normalized.
-
-    -i, --index <index>
-            Index file from 'packing index'
-
-    -o, --output <output>
-            Output file name
-
-    -p, --pack <pack>
-            vg pack file
-
-```
-
---- 
-### Usage
-
-**Reduce storage**  
-Indexing
 ``` 
 ./packing index -g test.gfa -o test.pi 
 OR: 
 ./packing index -p test.pack -o test.pi 
 ```
-Coverage
+
+### Convert
+Convert a (plain-text) pack file to a compressed pack or vice versa. This command can also result in pack threshold (e.g. presence-absence).  
+Either for normalization or presence-absence, you need to provide a compressed file + index OR a (plain-text) pack file. Dependent on output (default: compressed, can be changed when using ```-b```), the threshold provided will be used for normalization or presence-absence. 
+
+**Thresholds**  
+If an absolute threshold is provided, other inputs will be ignored. If a method is provided, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (```--non-covered```) or only the covered ones.
+
+**Example computation**  
+Coverage is: 1, 1, 2, 8, 4, 4  
+Mean: 4  
+Relative value: 50  
+Real threshold: 2  
+New coverage (e.g. pc): 0, 0, 1, 4, 2, 2  
+Binary version (e.g. pt): 0, 0, 1, 1, 1, 1  
+
+
+**Example** 
 ```
 ./packing convert -p test.pack -o test.pc  
 ```
@@ -202,20 +59,50 @@ Coverage
 ```
 
 **Presence-Absence file (-b)**    
-Absolute threshold: 
+Absolute threshold:
 ```
 On nodes: 
 ./packing convert -i test.pi -c test.pc -t node -b -a 5 -o output.pt
 On sequence:  
 ./packing convert -i test.pi -c test.pc -b -a 5 -o output.a5.pt
 ```
-Relative threshold: 
+Relative threshold:
 ```
 Mean
 ./packing convert -i test.pi -c test.bp -t node -s mean -b -r 50 --method percentile -o output.mean.r50.pt
 Nothing (percentile)
 ./packing convert -i test.pi -c test.bp -t node -b -r 50 -o output.r50.pt
 ```
+
+
+
+
+### Info
+Information about the index or binary file.
+``` 
+./packing info -i test.pi 
+./packing info -c test.pc
+./packing info -c test.pt
+
+```
+
+
+### View
+Show the compressed file in plain text. If you don't provide an index, there will be no sequence/node information, just plain vector. 
+``` 
+./packing view -c test.pc -o test.pc.txt
+./packing view -c test.pt -o test.pt.txt
+./packing view -c test.pc -i test.pi -o test.pc.full.txt
+```
+
+### Stats
+Calculate some stats of (plain-text) pack files, compressed pack or threshold packs. Not very smart. Add index for more information (not sure). 
+``` 
+./packing stats -p test.pack -o test.packstats
+./packing stats -c test.pc -i test.pi -o test.full.stats
+./packing stats -c test.pt -o test.pt.stats
+```
+
 
 ---
 
