@@ -37,7 +37,7 @@ Convert a (plain-text) pack file to a compressed pack or vice versa. This comman
 Either for normalization or presence-absence, you need to provide a compressed file + index OR a (plain-text) pack file. Dependent on output (default: compressed, can be changed when using ```-b```), the threshold provided will be used for normalization or presence-absence. 
 
 **Thresholds**  
-If an absolute threshold is provided, other inputs will be ignored. If a method is provided, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (```--non-covered```) or only the covered ones.
+If an absolute threshold is provided, other inputs will be ignored. If a method is provided ```-m```, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (```--non-covered```) or only the covered ones.
 
 **Example computation**  
 Coverage is: 1, 1, 2, 8, 4, 4  
