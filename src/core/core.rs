@@ -1,8 +1,7 @@
-
-use bitvec::order::Msb0;
-use bitvec::vec::BitVec;
 use crate::convert::convert_helper::Method;
 use crate::convert::helper::{mean_vec_u16_u16, transform_u32_to_array_of_u8};
+use bitvec::order::Msb0;
+use bitvec::vec::BitVec;
 
 /// VG pack representation + additional information.
 ///
@@ -19,6 +18,12 @@ pub struct PackCompact {
     pub relative: u16,
     pub threshold: u16,
     pub length: u32,
+}
+
+impl Default for PackCompact {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PackCompact {

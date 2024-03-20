@@ -14,8 +14,8 @@ use clap::{App, AppSettings, Arg};
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
-use std::io::Write;
 use packing_lib::convert::convert_main::convert_main;
+use std::io::Write;
 
 fn main() {
     let matches = App::new("packing")

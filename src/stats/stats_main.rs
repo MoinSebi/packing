@@ -1,12 +1,10 @@
-
-
 use clap::ArgMatches;
 use log::info;
-use std::fs::File;
-use std::io::{self, Write};
-use packing_lib::convert::helper::{mean_vec_u16_u16, median_vec_u16_16, remove_zero_new};
+use packing_lib::convert::helper::{mean_vec_u16_f64, median_vec_u16_16, remove_zero_new};
 use packing_lib::core::core::PackCompact;
 use packing_lib::core::reader::read_input;
+use std::fs::File;
+use std::io::{self, Write};
 
 pub fn stats_main(matches: &ArgMatches) {
     info!("Stats main");
@@ -56,7 +54,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
             file2,
             &format!(
                 "Average (with zeros) {}",
-                mean_vec_u16_u16(&pc.node_coverage)
+                mean_vec_u16_f64(&pc.node_coverage)
             ),
         )
         .expect("Can not write file");
@@ -71,7 +69,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
         let wo = remove_zero_new(&pc.node_coverage);
         write_to_file_or_stdout(
             file2,
-            &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo)),
+            &format!("Average (without zeros) {}", mean_vec_u16_f64(&wo)),
         )
         .expect("Can not write file");
         write_to_file_or_stdout(
@@ -82,7 +80,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
     } else {
         write_to_file_or_stdout(
             file2,
-            &format!("Average (with zeros) {}", mean_vec_u16_u16(&pc.coverage)),
+            &format!("Average (with zeros) {}", mean_vec_u16_f64(&pc.coverage)),
         )
         .expect("Can not write file");
         write_to_file_or_stdout(
@@ -93,7 +91,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
         let wo = remove_zero_new(&pc.coverage);
         write_to_file_or_stdout(
             file2,
-            &format!("Average (without zeros) {}", mean_vec_u16_u16(&wo)),
+            &format!("Average (without zeros) {}", mean_vec_u16_f64(&wo)),
         )
         .expect("Can not write file");
         write_to_file_or_stdout(

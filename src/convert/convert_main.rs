@@ -50,7 +50,7 @@ pub fn convert_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
 
-    let real_thresh;
+    let real_thresh: f64;
 
     // If name is set as argument, replace filename
     if matches.is_present("name") {
@@ -88,10 +88,10 @@ pub fn convert_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
     // Absolute threshold is adjusted is made with thresh
-    if matches.is_present("absolute threshold"){
+    if matches.is_present("absolute threshold") {
         real_thresh = get_real_threshold(&mut pc, out_type, include_all, relative_thresh, method);
     } else {
-        real_thresh = absolute_thresh;
+        real_thresh = absolute_thresh as f64;
     }
     info!("Real threshold: {}", real_thresh);
 
@@ -118,7 +118,7 @@ pub fn convert_main(matches: &ArgMatches) {
         bin,
         method,
         relative_thresh,
-        &real_thresh,
+        &(real_thresh as u16),
         number_entries as u32,
         &pc.name,
     );

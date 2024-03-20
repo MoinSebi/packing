@@ -1,7 +1,7 @@
 use log::info;
-use std::collections::HashSet;
 use packing_lib::convert::convert_helper::Method;
 use packing_lib::core::reader::{get_meta, read_index, unpack_zstd_to_byte};
+use std::collections::HashSet;
 
 /// Information about the a index file
 pub fn info_index(filename: &str) {

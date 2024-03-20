@@ -1,11 +1,10 @@
-
 use crate::index::index_wrapper::make_index;
 use crate::info;
 use clap::ArgMatches;
 use log::warn;
-use std::path::Path;
 use packing_lib::core::core::PackCompact;
 use packing_lib::core::writer::writer_compress_zlib;
+use std::path::Path;
 
 pub fn index_main(matches: &ArgMatches) {
     if matches.is_present("gfa") {

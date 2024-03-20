@@ -1,4 +1,3 @@
-
 use clap::ArgMatches;
 use log::info;
 use packing_lib::convert::convert_helper::{Method, OutputType};

@@ -66,6 +66,10 @@ On nodes:
 On sequence:  
 ./packing convert -i test.pi -c test.pc -b -a 5 -o output.a5.pt
 ```
+￼
+￼
+￼
+
 Relative threshold:
 ```
 Mean

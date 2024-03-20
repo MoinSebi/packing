@@ -1,9 +1,9 @@
+use crate::convert::convert_helper::{Method, OutputType};
+use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
 use log::{info, warn};
-use crate::convert::convert_helper::{Method, OutputType};
-use crate::core::core::PackCompact;
 
 /// u16 vector to u8 vector
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
@@ -16,25 +16,38 @@ pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
 /// Calculate the average of a vector
 ///
 /// - u16 in
+/// - f64 out
+pub fn mean_vec_u16_f64(val: &Vec<u16>) -> f64 {
+    let sums: u64 = val.iter().fold(0, |mut sum, &val| {
+        sum += val as u64;
+        sum
+    });
+    
+    (sums as f64) / (val.len() as f64)
+}
+
+/// Calculate the average of a vector
+///
+/// - u16 in
 /// - u16 out
 pub fn mean_vec_u16_u16(val: &Vec<u16>) -> u16 {
     let sums: u64 = val.iter().fold(0, |mut sum, &val| {
         sum += val as u64;
         sum
     });
-    let average: u16 = ((sums as f64) / (val.len() as f64)).round() as u16;
-    average
+    
+    ((sums as f64) / (val.len() as f64)).round() as u16
 }
 
 /// Calculate the median of a vector
 ///
 /// - u16 in
 /// - u16 out
-pub fn median_vec_u16_16(numbers: &Vec<u16>) -> u16 {
+pub fn median_vec_u16_16(numbers: &Vec<u16>) -> f64 {
     let mut num = numbers.clone();
     num.sort();
     let mid = num.len() / 2;
-    num[mid]
+    num[mid] as f64
 }
 
 /// u32 -> 4xu8
@@ -60,22 +73,22 @@ pub fn byte_to_string(input: &[u8]) -> String {
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_u16_u16(input_vec: Vec<u16>, absolute_thresh: &u16) -> Vec<u16> {
-    if absolute_thresh == &0 {
+pub fn normalize_u16_u16(input_vec: Vec<u16>, absolute_thresh: &f64) -> Vec<u16> {
+    if absolute_thresh == &0.0 {
         return input_vec;
     }
     let mut new_vec: Vec<u16> = Vec::new();
     for item in input_vec.iter() {
-        new_vec.push(((*item as f64) / (*absolute_thresh as f64)).round() as u16)
+        new_vec.push(((*item as f64) / (*absolute_thresh)).round() as u16)
     }
     new_vec
 }
 
 /// Create binary vector
-pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &u16) -> Vec<u8> {
+pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f64) -> Vec<u8> {
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter() {
-        if x >= absolute_thresh {
+        if (*x as f64) >= *absolute_thresh {
             bv.push(true)
         } else {
             bv.push(false)
@@ -178,7 +191,7 @@ pub fn get_real_threshold(
     include_all: bool,
     relative: u16,
     tt: Method,
-) -> u16 {
+) -> f64 {
     // "work_on" is the current data we do the normalizcation on
     let mut work_on: Vec<u16>;
 
@@ -195,30 +208,31 @@ pub fn get_real_threshold(
     // relative is 0
     if relative == 0 {
         warn!("Relative threshold is 0");
-        return 0;
+        return 0.0;
     }
 
     if !include_all {
         remove_zero(&mut work_on)
     }
 
-    let mut thresh = 0;
+    let mut thresh: f64 = 0.0;
     if tt == Method::Percentile {
         work_on.sort();
         thresh = work_on
-            [((work_on.len() as f64 - 1.0) * ((relative as f64) / 100_f64)).round() as usize];
+            [((work_on.len() as f64 - 1.0) * ((relative as f64) / 100_f64)).round() as usize]
+            as f64;
         info!("{}% Percentile is {}", relative, thresh);
         info!("Working threshold is {}", thresh);
         return thresh;
     } else if tt == Method::Mean {
-        thresh = mean_vec_u16_u16(&work_on);
+        thresh = mean_vec_u16_f64(&work_on);
         info!("Mean is {}", thresh);
-        thresh = ((thresh as f64) * ((relative as f64) / 100_f64)).round() as u16;
+        thresh *= (relative as f64) / 100_f64;
         info!("Working threshold is {}", thresh);
     } else if tt == Method::Median {
         thresh = median_vec_u16_16(&work_on);
         info!("Median is {}", thresh);
-        thresh = ((thresh as f64) * ((relative as f64) / 100_f64)).round() as u16;
+        thresh *= (relative as f64) / 100_f64;
         info!("Working threshold is {}", thresh);
     }
     thresh
