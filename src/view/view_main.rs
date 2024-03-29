@@ -50,7 +50,7 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
             nodes.sort();
             if !pc.is_binary {
                 for (i, x) in nodes.iter().enumerate() {
-                    writeln!(f, "{}\t{}", x, pc.node_coverage[i]).expect("Can not write file");
+                    writeln!(f, "{}\t{}", x, pc.coverage[i]).expect("Can not write file");
                 }
             } else {
                 for (i, x) in nodes.iter().enumerate() {

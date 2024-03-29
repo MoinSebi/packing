@@ -208,7 +208,6 @@ impl PackCompact {
         PackCompact {
             name,
             node: Vec::new(),
-            node_coverage: Vec::new(),
             bin_coverage: bv,
             coverage: Vec::new(),
             is_sequence: _kind,
@@ -229,7 +228,6 @@ impl PackCompact {
         PackCompact {
             name,
             node: Vec::new(),
-            node_coverage: Vec::new(),
             bin_coverage: BitVec::new(),
             coverage: data,
             is_sequence: _kind,

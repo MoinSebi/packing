@@ -1,14 +1,14 @@
 # Packing - Compressing table-like pack format
-Tool for binary representation of coverage and presence-absence information from vb pack files.
+Tool for compressed representation of coverage information from a tabular (plain-text) pack file (e.g. VG pack).
 Can either be used for reduced storage or in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
 
 **Data fromats**  
-- ```pc``` pack compressed: Compressed representation of a pack file. Alternatively also a normalized pack file.
-- ```pb``` pack binary: Represents presence-absence information. Header contains the threshold and the name of the sample.
+- ```pc``` pack compressed: Compressed representation of a pack file. Also used for normalized coverage. 
+- ```pb``` pack binary: Represents presence-absence information. 
 - ```pi```pack index: Index of the graph structure.  
 
 
-I use .pb "pack compressed", .pi "pack index" and pt "pack threshold" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
+I use .pc "pack compressed", .pi "pack index" and pb "pack binary" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
 
 
@@ -33,11 +33,18 @@ OR:
 ```
 
 ### Convert
-Convert a (plain-text) pack file to a compressed pack or vice versa. This command can also result in pack threshold (e.g. presence-absence).  
-Either for normalization or presence-absence, you need to provide a compressed file + index OR a (plain-text) pack file. Dependent on output (default: compressed, can be changed when using ```-b```), the threshold provided will be used for normalization or presence-absence. 
+Convert a (plain-text) pack file to a compressed pack (```pc```) or binary pack (```pt```). Alternative input is pack compressed (```pc```) file. This command can also re-convert a pack compressed (```pc```, **sequence-level**) to a plain-text pack file (see below). 
+An index file is needed for all conversions from a pack-compressed file. On default, the output will be a sequence-level binary compressed pack file (```pb```). If you want to normalize the file, provide a threshold (see below) and the ```-normalize``` flag. If you only want to compress your plain-text, use the ```-c``` flag.
 
 **Thresholds**  
-If an absolute threshold is provided, other inputs will be ignored. If a method is provided ```-m```, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (```--non-covered```) or only the covered ones.
+A threshold is used to perform a normalization or presence-absence conversion. The main modifications of the threshold are  
+- Absolute threshold ````-a````: A plain number, which will be used as a threshold and is the highest priority.
+- Method ```-m```: Dynamic computation of the threshold based on a method [mean, median, percentile]. 
+- Relative threshold ```-r```: A relative threshold (fraction) which will be multiplied with the computed value (e.g. 50% -> 0.5).
+
+**Comment**  
+If an absolute threshold is provided, other inputs will be ignored. If a method is provided with ```-m```, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (default: off, activate with ```--non-covered```) or only the covered ones.
+
 
 **Example computation**  
 Coverage is: 1, 1, 2, 8, 4, 4  
@@ -46,6 +53,10 @@ Relative value: 50
 Real threshold: 2  
 New coverage (e.g. pc): 0, 0, 1, 4, 2, 2  
 Binary version (e.g. pt): 0, 0, 1, 1, 1, 1  
+
+**Nodes and sequence**
+This is not 100% intuitive and might change in the future. Your compressed or binary file can be either sequence and node based, which is also stored in the header of the file. By default we use the sequence based format, but you can change it with the ```-t``` flag.
+
 
 
 **Example** 
@@ -66,11 +77,9 @@ On nodes:
 On sequence:  
 ./packing convert -i test.pi -c test.pc -b -a 5 -o output.a5.pt
 ```
-￼
-￼
-￼
 
-Relative threshold:
+
+### Relative threshold:
 ```
 Mean
 ./packing convert -i test.pi -c test.bp -t node -s mean -b -r 50 --method percentile -o output.mean.r50.pt

@@ -1,4 +1,4 @@
-use crate::convert::convert_helper::{Method, OutputType};
+use crate::convert::convert_helper::{Method};
 use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
@@ -22,7 +22,7 @@ pub fn mean_vec_u16_f64(val: &Vec<u16>) -> f64 {
         sum += val as u64;
         sum
     });
-    
+
     (sums as f64) / (val.len() as f64)
 }
 
@@ -35,7 +35,7 @@ pub fn mean_vec_u16_u16(val: &Vec<u16>) -> u16 {
         sum += val as u64;
         sum
     });
-    
+
     ((sums as f64) / (val.len() as f64)).round() as u16
 }
 
@@ -73,9 +73,9 @@ pub fn byte_to_string(input: &[u8]) -> String {
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_u16_u16(input_vec: Vec<u16>, absolute_thresh: &f64) -> Vec<u16> {
+pub fn normalize_u16_u16(input_vec: &Vec<u16>, absolute_thresh: &f64) -> Vec<u16> {
     if absolute_thresh == &0.0 {
-        return input_vec;
+        return input_vec.clone();
     }
     let mut new_vec: Vec<u16> = Vec::new();
     for item in input_vec.iter() {
@@ -99,7 +99,7 @@ pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f64) -> Vec<u8> {
 }
 
 pub fn make_header(
-    node: OutputType,
+    sequence_out: bool,
     is_binary: bool,
     method: Method,
     r: u16,
@@ -110,7 +110,7 @@ pub fn make_header(
     let mut buff: Vec<u8> = vec![53, 56];
 
     // Is node?
-    if OutputType::Sequence == node {
+    if sequence_out {
         buff.push(1);
     } else {
         buff.push(0);
@@ -187,23 +187,12 @@ pub fn remove_prefix_filename(filename: &str) -> String {
 /// - node or sequence
 pub fn get_real_threshold(
     pc: &mut PackCompact,
-    node: OutputType,
     include_all: bool,
     relative: u16,
     tt: Method,
 ) -> f64 {
     // "work_on" is the current data we do the normalizcation on
-    let mut work_on: Vec<u16>;
-
-    // If we want to work on nodes
-    if node == OutputType::Node {
-        pc.calc_node_cov();
-        work_on = pc.node_coverage.clone();
-        pc.coverage = Vec::new();
-        // If we want to work node sequence
-    } else {
-        work_on = pc.coverage.clone();
-    }
+    let mut work_on: Vec<u16> = pc.coverage.clone();
 
     // relative is 0
     if relative == 0 {
@@ -237,3 +226,5 @@ pub fn get_real_threshold(
     }
     thresh
 }
+
+// Standard variation function of u16 vec

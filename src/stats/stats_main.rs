@@ -49,24 +49,18 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
             ),
         )
         .expect("Can not write file");
-    } else if pc.coverage.is_empty() {
+    } else if !pc.is_sequence {
         write_to_file_or_stdout(
             file2,
-            &format!(
-                "Average (with zeros) {}",
-                mean_vec_u16_f64(&pc.node_coverage)
-            ),
+            &format!("Average (with zeros) {}", mean_vec_u16_f64(&pc.coverage)),
         )
         .expect("Can not write file");
         write_to_file_or_stdout(
             file2,
-            &format!(
-                "Median (with zeros) {}",
-                median_vec_u16_16(&pc.node_coverage)
-            ),
+            &format!("Median (with zeros) {}", median_vec_u16_16(&pc.coverage)),
         )
         .expect("Can not write file");
-        let wo = remove_zero_new(&pc.node_coverage);
+        let wo = remove_zero_new(&pc.coverage);
         write_to_file_or_stdout(
             file2,
             &format!("Average (without zeros) {}", mean_vec_u16_f64(&wo)),

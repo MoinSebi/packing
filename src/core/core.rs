@@ -9,7 +9,6 @@ use bitvec::vec::BitVec;
 pub struct PackCompact {
     pub node: Vec<u32>,                 // Node ids (also duplicated)
     pub coverage: Vec<u16>,             // Coverage of the nodes
-    pub node_coverage: Vec<u16>,        // Coverage of nodes
     pub bin_coverage: BitVec<u8, Msb0>, // Binary coverage
     pub name: String,                   // Name of the pack/sample
     pub is_sequence: bool,
@@ -34,7 +33,6 @@ impl PackCompact {
         Self {
             node: Vec::new(),
             coverage: Vec::new(),
-            node_coverage: Vec::new(),
             bin_coverage: BitVec::new(),
             name: String::new(),
             is_sequence: false,
@@ -81,6 +79,6 @@ impl PackCompact {
             }
         }
         result.push(mean_vec_u16_u16(&node_mean));
-        self.node_coverage = result
+        self.coverage = result
     }
 }
