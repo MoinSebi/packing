@@ -3,6 +3,7 @@ mod info;
 mod rename;
 mod stats;
 mod view;
+mod compress;
 
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
@@ -150,6 +151,12 @@ fn main() {
                 .takes_value(true)
                 .display_order(2)
             )
+            .arg(Arg::new("std")
+                .short('s')
+                .long("std")
+                .about("Adjust your value by standard deviation")
+                .takes_value(true)
+                .display_order(2))
             // If you normalize, pls use me
             .arg(Arg::new("normalize")
                 .long("normalize")
@@ -173,7 +180,6 @@ fn main() {
             .arg(Arg::new("compress")
                 .long("compress")
                 .about("Simply compress the output (ignore everything else)")
-                .takes_value(true)
                 .display_order(6)
             )
 
@@ -258,6 +264,23 @@ fn main() {
                 .about("Output file name")
                 .takes_value(true))
 
+        )
+        .subcommand(App::new("compress")
+            .about("Compress a plain-text file")
+            .setting(AppSettings::ArgRequiredElseHelp)
+            .arg(Arg::new("input")
+                .short('i')
+                .long("input")
+                .takes_value(true))
+            .arg(Arg::new("output")
+                .short('o')
+                .long("output")
+                .takes_value(true))
+            .arg(Arg::new("name")
+                .short('n')
+                .long("name")
+                .takes_value(true)
+            )
         )
 
 

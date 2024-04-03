@@ -27,15 +27,15 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
                 let mut node = 0;
                 for x in 0..pc.coverage.len() {
                     if x == 0 {
-                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x])
+                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node_index[x], node, pc.coverage[x])
                             .expect("Can not write file");
-                    } else if pc.node[x] == pc.node[x - 1] {
+                    } else if pc.node_index[x] == pc.node_index[x - 1] {
                         node += 1;
-                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.bin_coverage[x])
+                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node_index[x], node, pc.bin_coverage[x])
                             .expect("Can not write file");
                     } else {
                         node = 0;
-                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node[x], node, pc.coverage[x])
+                        writeln!(f, "{}\t{}\t{}\t{}", x, pc.node_index[x], node, pc.coverage[x])
                             .expect("Can not write file");
                     }
                 }
@@ -45,7 +45,7 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
 
             // is node
         } else {
-            let nodes: HashSet<_> = pc.node.iter().collect();
+            let nodes: HashSet<_> = pc.node_index.iter().collect();
             let mut nodes: Vec<_> = nodes.into_iter().collect();
             nodes.sort();
             if !pc.is_binary {
@@ -74,7 +74,7 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
             writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
         }
     } else {
-        for x in pc.node.iter() {
+        for x in pc.node_index.iter() {
             writeln!(f, "{}", x).expect("Can not write file");
         }
     }

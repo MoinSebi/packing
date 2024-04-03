@@ -25,6 +25,7 @@ env_logger = "0.8.4"
 chrono = "0.4"
 bitvec = "1"
 byteorder = "1"
+half = "2.4.0"
 
 [dev-dependencies]
 assert_cmd = "2.0"

@@ -7,15 +7,17 @@ use bitvec::vec::BitVec;
 ///
 /// Is working with VG version 1.3 (maybe also earlier)
 pub struct PackCompact {
-    pub node: Vec<u32>,                 // Node ids (also duplicated)
-    pub coverage: Vec<u16>,             // Coverage of the nodes
+    pub node_index: Vec<u32>,                 // 4 bytesNode ids (also duplicated)
+    pub coverage: Vec<u16>,             // 4 bytes - Coverage
+    pub normalized_coverage: Vec<f32>,  // 2 bytes - coverage
     pub bin_coverage: BitVec<u8, Msb0>, // Binary coverage
     pub name: String,                   // Name of the pack/sample
     pub is_sequence: bool,
     pub is_binary: bool,
     pub method: Method,
-    pub relative: u16,
-    pub threshold: u16,
+    pub fraction: f32,
+    pub std: f32,
+    pub threshold: f32,
     pub length: u32,
 }
 
@@ -31,15 +33,17 @@ impl PackCompact {
     /// No arguments.
     pub fn new() -> Self {
         Self {
-            node: Vec::new(),
+            node_index: Vec::new(),
             coverage: Vec::new(),
+            normalized_coverage: Vec::new(),
             bin_coverage: BitVec::new(),
             name: String::new(),
             is_sequence: false,
             is_binary: false,
             method: Method::Nothing,
-            relative: 0,
-            threshold: 0,
+            fraction: 0.0,
+            std: 0.0,
+            threshold: 0.0,
             length: 0,
         }
     }
@@ -51,10 +55,10 @@ impl PackCompact {
     ///
     /// - Convert node (u32) to [u8;4]
     /// - Then extend it to the buffer
-    pub fn node2buffer(&self) -> Vec<u8> {
+    pub fn node_index2buffer(&self) -> Vec<u8> {
         let mut buffer: Vec<u8> = Vec::new();
         for x in 0..self.coverage.len() {
-            buffer.extend(transform_u32_to_array_of_u8(self.node[x]));
+            buffer.extend(transform_u32_to_array_of_u8(self.node_index[x]));
         }
         buffer
     }
@@ -65,14 +69,14 @@ impl PackCompact {
     /// - Add to struct
     /// - Always average method
     pub fn calc_node_cov(&mut self) {
-        let mut node_id = self.node[0];
+        let mut node_id = self.node_index[0];
         let mut node_mean: Vec<u16> = Vec::new();
         let mut result: Vec<u16> = Vec::new();
         for x in 0..self.coverage.len() {
-            if self.node[x] != node_id {
+            if self.node_index[x] != node_id {
                 result.push(mean_vec_u16_u16(&node_mean));
 
-                node_id = self.node[x];
+                node_id = self.node_index[x];
                 node_mean = vec![self.coverage[x]];
             } else {
                 node_mean.push(self.coverage[x])

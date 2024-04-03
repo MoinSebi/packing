@@ -14,9 +14,6 @@ fn view_1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a1.pt")
-        .arg("-t")
-        .arg("sequence")
-        .arg("--binary")
         .arg("-v");
     cmd.assert().success();
 
@@ -44,9 +41,8 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.pc")
-        .arg("-t")
-        .arg("sequence");
+        .arg("data/test/9986.sequence.pc");
+
     cmd.assert().success();
 
     let mut cmd1 = Command::cargo_bin("packing")?;

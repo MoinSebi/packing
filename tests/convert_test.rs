@@ -15,9 +15,6 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a1.pt")
-        .arg("-t")
-        .arg("sequence")
-        .arg("--binary")
         .arg("-v");
     cmd.assert().success();
 
@@ -38,8 +35,6 @@ fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a1.pt")
-        .arg("-t")
-        .arg("sequence")
         .arg("-a")
         .arg("3")
         .arg("-v");
@@ -53,7 +48,7 @@ fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// -s (stats) median
-/// -b (binary) (bit)
+/// -b (binary) (compress)
 fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -61,11 +56,8 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a3.pt")
-        .arg("-t")
-        .arg("sequence")
-        .arg("-r")
-        .arg("50")
-        .arg("-b")
+        .arg("-f")
+        .arg("0.50")
         .arg("-m")
         .arg("median")
         .arg("-v");
@@ -90,11 +82,8 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.r50.pt")
-        .arg("-t")
-        .arg("sequence")
         .arg("-a")
         .arg("2")
-        .arg("-b")
         .arg("-v");
     cmd.assert().success();
 
@@ -117,8 +106,7 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.node.a1.pt")
-        .arg("-t")
-        .arg("node")
+        .arg("--node")
         .arg("-v");
     cmd.assert().success();
 
@@ -139,8 +127,7 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.node.a3.pc")
-        .arg("-t")
-        .arg("node")
+        .arg("--node")
         .arg("-a")
         .arg("3")
         .arg("-v");
@@ -154,7 +141,7 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// -s (stats) median
-/// -b (binary) (bit)
+/// -b (binary) (compress)
 fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
@@ -162,11 +149,9 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.node.median.pt")
-        .arg("-t")
-        .arg("node")
-        .arg("-r")
-        .arg("50")
-        .arg("-b")
+        .arg("--node")
+        .arg("-f")
+        .arg("0.5")
         .arg("-m")
         .arg("median")
         .arg("-v");
@@ -191,11 +176,9 @@ fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.node.r50.pt")
-        .arg("-t")
-        .arg("node")
+        .arg("--node")
         .arg("-a")
         .arg("2")
-        .arg("-b")
         .arg("-v");
     cmd.assert().success();
 
@@ -215,10 +198,8 @@ fn convert_pt_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/example/9986.100k.txt")
         .arg("-o")
         .arg("data/test/9986.node.norm.r50.pt")
-        .arg("-t")
-        .arg("sequence")
-        .arg("-r")
-        .arg("50")
+        .arg("-f")
+        .arg("0.50")
         .arg("--normalize")
         .arg("-v");
     cmd.assert().success();

@@ -8,6 +8,7 @@ use clap::ArgMatches;
 use log::{debug, info, warn};
 
 use std::process;
+use half::f16;
 
 
 pub fn convert_main(matches: &ArgMatches) {
@@ -39,24 +40,25 @@ pub fn convert_main(matches: &ArgMatches) {
         info!("Name is {}", pc.name)
     }
 
-    let normalize = matches.is_present("normalize");
-    let absolute_thresh: u16 = matches
+    let mut normalize = matches.is_present("normalize");
+    let mut absolute_thresh: u16 = matches
         .value_of("absolute threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let relative_thresh: u16 = matches
+    let mut relative_thresh: u16 = matches
         .value_of("relative threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
+
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
     let compress = matches.is_present("compress");
     let node = matches.is_present("node");
-
+    let std = matches.value_of("std").unwrap_or("0");
     if node && !pc.is_sequence {
         info!("Input is node-based, output should be sequence. This does not work");
         process::exit(0x0100)
@@ -64,9 +66,7 @@ pub fn convert_main(matches: &ArgMatches) {
 
     let bin = !matches.is_present("normalization") || !matches.is_present("compress");
 
-    if compress {
-        method = Method::Nothing;
-    }
+
 
     if !matches.is_present("absolute threshold")
         && method == Method::Nothing
@@ -75,17 +75,25 @@ pub fn convert_main(matches: &ArgMatches) {
         method = Method::Percentile;
     }
 
-    info!("Method: {}", method.to_string());
-    info!("Absolute threshold: {}", absolute_thresh);
-    info!("Relative threshold: {}", relative_thresh);
-    info!("Include all: {}", include_all);
-    info!("Normalize: {}", normalize);
+    if !normalize && !matches.is_present("method") && !matches.is_present("absolute threshold"){
+        absolute_thresh = 1;
+    }
+
 
     let real_thresh: f64;
+    let mut sequence_out = matches.is_present("node");
+
+    if compress{
+        sequence_out = true;
+        normalize = false;
+        absolute_thresh = 0;
+
+    }
+
+
+
 
     // Checking the output base (sequence, nodes) or pack file
-    let sequence_out = matches.is_present("node");
-
     info!(
         "Feature: {}",
         if sequence_out { "node" } else { "sequence" }
@@ -93,17 +101,18 @@ pub fn convert_main(matches: &ArgMatches) {
 
     // Write the pack
     if matches.is_present("output-pack") {
-        debug!("Writing pack file");
-        pc.write_pack(matches.value_of("out").unwrap());
-        process::exit(0x0100);
+            debug!("Writing pack file");
+            pc.write_pack(matches.value_of("out").unwrap());
+            process::exit(0x0100);
+
     }
 
     if matches.is_present("relative threshold") && relative_thresh == 0 {
         warn!("Relative threshold is 0");
         process::exit(0x0100);
     }
-    if absolute_thresh == 0 && method == Method::Nothing && relative_thresh == 0 {
-        warn!("Relative threshold is 0");
+    if !matches.is_present("absolute threshold") && method == Method::Nothing && relative_thresh == 0 {
+        warn!("Nothing here");
         process::exit(0x0100);
     }
 
@@ -117,6 +126,12 @@ pub fn convert_main(matches: &ArgMatches) {
     } else {
         real_thresh = absolute_thresh as f64;
     }
+    info!("Method: {}", method.to_string());
+    info!("Absolute threshold: {}", absolute_thresh);
+    info!("Relative threshold: {}", relative_thresh);
+    info!("Include all: {}", include_all);
+    info!("Normalize: {}", normalize);
+    info!("Standard deviation {}", std);
     info!("Real threshold: {}", real_thresh);
 
     // The vector we work with
@@ -142,6 +157,8 @@ pub fn convert_main(matches: &ArgMatches) {
         &pc.name,
     );
     bb.extend(buffer);
+    println!("{}", bb.len());
+
     if matches.is_present("non-compressed") {
         writer_compress(&bb, matches.value_of("out").unwrap());
     } else {

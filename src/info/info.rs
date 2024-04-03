@@ -1,7 +1,8 @@
 use log::info;
 use packing_lib::convert::convert_helper::Method;
-use packing_lib::core::reader::{get_meta, read_index, unpack_zstd_to_byte};
+use packing_lib::core::reader::{read_index, unpack_zstd_to_byte};
 use std::collections::HashSet;
+use packing_lib::core::core::PackCompact;
 
 /// Information about the a index file
 pub fn info_index(filename: &str) {
@@ -18,7 +19,7 @@ pub fn info_index(filename: &str) {
 /// Split files after cat
 pub fn info_compressed(filename: &str) {
     let g: Vec<u8> = unpack_zstd_to_byte(filename);
-    let meta = get_meta(&g);
+    let meta = PackCompact::get_meta(&g);
 
     info!("Entry type: {}", if meta.0 { "Sequence" } else { "Node" });
     info!(

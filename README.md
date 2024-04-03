@@ -40,7 +40,7 @@ An index file is needed for all conversions from a pack-compressed file. On defa
 A threshold is used to perform a normalization or presence-absence conversion. The main modifications of the threshold are  
 - Absolute threshold ````-a````: A plain number, which will be used as a threshold and is the highest priority.
 - Method ```-m```: Dynamic computation of the threshold based on a method [mean, median, percentile]. 
-- Relative threshold ```-r```: A relative threshold (fraction) which will be multiplied with the computed value (e.g. 50% -> 0.5).
+- Fraction ```-f```: A relative threshold (fraction) which will be multiplied with the computed value.
 
 **Comment**  
 If an absolute threshold is provided, other inputs will be ignored. If a method is provided with ```-m```, we will firstly calculate a value (mean or median) which will later scaled by the relative threshold ```-r```. If no relative threshold is provided, it will always be set to 100. Percentile method will be used directly on sorted data vector. Any of these "dynamic" methods can include all entries (default: off, activate with ```--non-covered```) or only the covered ones.
@@ -55,7 +55,7 @@ New coverage (e.g. pc): 0, 0, 1, 4, 2, 2
 Binary version (e.g. pt): 0, 0, 1, 1, 1, 1  
 
 **Nodes and sequence**
-This is not 100% intuitive and might change in the future. Your compressed or binary file can be either sequence and node based, which is also stored in the header of the file. By default we use the sequence based format, but you can change it with the ```-t``` flag.
+This is not 100% intuitive and might change in the future. Your compressed or binary file can be either sequence and node based, which is also stored in the header of the file. By default we use the sequence based format, but you can change it with the ```--node``` flag.
 
 
 
@@ -66,7 +66,7 @@ This is not 100% intuitive and might change in the future. Your compressed or bi
 
 **Get pack file from index + coverage**
 ``` 
-./packing convert -i test.pi -c test.pc -t pack -o test.pack   
+./packing convert -i test.pi -c test.pc --output-pack -o test.pack   
 ```
 
 **Presence-Absence file (-b)**    

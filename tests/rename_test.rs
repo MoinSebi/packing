@@ -8,15 +8,13 @@ use std::fs;
 ///
 /// Input: gfa
 /// Output: pi (index)
-fn view_2() -> Result<(), Box<dyn std::error::Error>> {
+fn rename1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("convert")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.pc")
-        .arg("-t")
-        .arg("sequence");
+        .arg("data/test/9986.sequence.pc");
     cmd.assert().success();
 
     let mut cmd2 = Command::cargo_bin("packing")?;
@@ -37,8 +35,8 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
     cmd3.unwrap().assert().success();
     cmd3.assert().stderr(predicate::str::contains("test321313"));
 
-    fs::remove_file("data/test/9986.1k.sequence.rename.pc")?;
-    fs::remove_file("data/test/9986.sequence.pc")?;
+    //fs::remove_file("data/test/9986.1k.sequence.rename.pc")?;
+    //fs::remove_file("data/test/9986.sequence.pc")?;
 
     Ok(())
 }

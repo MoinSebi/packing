@@ -20,7 +20,7 @@ pub fn index_main(matches: &ArgMatches) {
     } else if matches.is_present("pack") {
         let o = matches.value_of("output").unwrap();
         let p = PackCompact::parse_pack(matches.value_of("pack").unwrap());
-        let buf = p.node2buffer();
+        let buf = p.node_index2buffer();
         writer_compress_zlib(&buf, o);
     } else {
         info!("No input")
