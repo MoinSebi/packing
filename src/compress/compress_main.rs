@@ -26,8 +26,6 @@ pub fn compress_main(matches: &ArgMatches) {
         info!("There is a problem with the input files. Run 'packing info' on your file.");
         info!("[-h, --help] for help information");
         process::exit(0x0100);
-    } else {
-        info!("Name is {}", pc.name)
     }
 
     let num_entries = pc.coverage.len();
@@ -44,6 +42,5 @@ pub fn compress_main(matches: &ArgMatches) {
 
     buffer.extend(vec_u16_to_u8(&pc.coverage));
 
-    println!("{}", buffer.len());
-    writer_compress_zlib(&buffer, matches.value_of("out").unwrap());
+    writer_compress_zlib(&buffer, matches.value_of("output").unwrap());
 }

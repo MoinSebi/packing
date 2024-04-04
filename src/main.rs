@@ -19,6 +19,7 @@ use log::{info, LevelFilter};
 use crate::bit::bit_main::bit_main;
 use packing_lib::normalize::normalize_main::normalize_main;
 use std::io::Write;
+use crate::compress::compress_main::compress_main;
 
 fn main() {
     let matches = App::new("packing")
@@ -250,14 +251,16 @@ fn main() {
         .subcommand(App::new("compress")
             .about("Compress a plain-text file")
             .setting(AppSettings::ArgRequiredElseHelp)
-            .arg(Arg::new("input")
-                .short('i')
-                .long("input")
-                .takes_value(true))
+            .arg(Arg::new("pack")
+                .short('p')
+                .long("pack")
+                .takes_value(true)
+                .required(true))
             .arg(Arg::new("output")
                 .short('o')
                 .long("output")
-                .takes_value(true))
+                .takes_value(true)
+                .required(true))
             .arg(Arg::new("name")
                 .short('n')
                 .long("name")
@@ -422,5 +425,8 @@ fn main() {
     }
     if let Some(matches) = matches.subcommand_matches("normalize") {
         normalize_main(matches);
+    }
+    if let Some(matches) = matches.subcommand_matches("compress") {
+        compress_main(matches);
     }
 }

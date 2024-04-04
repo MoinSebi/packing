@@ -38,6 +38,6 @@ pub fn info_compressed(filename: &str) {
     info!("Real threshold: {}", meta.5);
     info!("Bytes: {}", meta.6);
     info!("Entries: {}", meta.7);
-    info!("Header bytes: {}", 95);
+    info!("Header bytes: {}", 85);
     info!("Name: {}", meta.8);
 }
