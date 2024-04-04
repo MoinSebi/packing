@@ -1,11 +1,9 @@
 use crate::core::reader::read_input;
-use crate::core::writer::{writer_compress, writer_compress_zlib};
+use crate::core::writer::writer_compress_zlib;
 use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{
-    normalize_f32_f32, normalize_u16_f32, vec2binary, vec2binary_f32, vec_f32_to_u8, vec_u16_to_u8,
-};
+use crate::normalize::helper::{normalize_f32_f32, normalize_u16_f32};
 use clap::ArgMatches;
-use log::{debug, info, warn};
+use log::{info, warn};
 
 use crate::core::core::{DataType, PackCompact};
 
@@ -47,10 +45,14 @@ pub fn normalize_main(matches: &ArgMatches) {
         .unwrap_or("1.0")
         .parse()
         .unwrap();
-    let std: f32 = matches.value_of("standard-deviation").unwrap_or("0").parse().unwrap();
+    let std: f32 = matches
+        .value_of("standard-deviation")
+        .unwrap_or("0")
+        .parse()
+        .unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
-    let mut method = Method::from_str(method_string);
+    let method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
@@ -66,7 +68,7 @@ pub fn normalize_main(matches: &ArgMatches) {
 
     // Checking the output base (sequence, nodes) or pack file
 
-    if matches.is_present("fraction") && relative_thresh == 0.0 && std == 0.0{
+    if matches.is_present("fraction") && relative_thresh == 0.0 && std == 0.0 {
         warn!("Relative threshold is 0");
         process::exit(0x0100);
     }
@@ -83,7 +85,10 @@ pub fn normalize_main(matches: &ArgMatches) {
         real_thresh = absolute_thresh as f32;
     }
     info!("New parameters");
-    info!("Feature: {}", if want_sequence { "sequence" } else { "node" });
+    info!(
+        "Feature: {}",
+        if want_sequence { "sequence" } else { "node" }
+    );
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
     info!("Relative threshold: {}", relative_thresh);

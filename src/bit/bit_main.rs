@@ -46,7 +46,7 @@ pub fn bit_main(matches: &ArgMatches) {
         .unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
-    let mut method = Method::from_str(method_string);
+    let method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
@@ -83,7 +83,10 @@ pub fn bit_main(matches: &ArgMatches) {
     }
 
     info!("New parameters");
-    info!("Feature: {}", if want_sequence { "node" } else { "sequence" });
+    info!(
+        "Feature: {}",
+        if want_sequence { "node" } else { "sequence" }
+    );
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
     info!("Relative threshold: {}", relative_thresh);

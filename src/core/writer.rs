@@ -121,7 +121,7 @@ impl PackCompact {
 
         buffer.push(if want_sequence { 1 } else { 0 });
         // Is binary?
-        buffer.push(is_binary.toU8());
+        buffer.push(is_binary.to_u8());
 
         match method {
             Method::Nothing => buffer.push(0),

@@ -75,20 +75,18 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
                 }
             }
         }
+    } else if pc.data_type == DataType::TypeBit {
+        println!("Binary sequence");
+        for x in pc.bin_coverage.iter() {
+            writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
+        }
+    } else if pc.data_type == DataType::TypeU16 {
+        for x in pc.coverage.iter() {
+            writeln!(f, "{}", x).expect("Can not write file");
+        }
     } else {
-        if pc.data_type == DataType::TypeBit {
-            println!("Binary sequence");
-            for x in pc.bin_coverage.iter() {
-                writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
-            }
-        } else if pc.data_type == DataType::TypeU16 {
-            for x in pc.coverage.iter() {
-                writeln!(f, "{}", x).expect("Can not write file");
-            }
-        } else {
-            for x in pc.normalized_coverage.iter() {
-                writeln!(f, "{}", x).expect("Can not write file");
-            }
+        for x in pc.normalized_coverage.iter() {
+            writeln!(f, "{}", x).expect("Can not write file");
         }
     }
 }

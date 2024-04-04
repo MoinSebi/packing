@@ -2,7 +2,10 @@ use clap::ArgMatches;
 use log::info;
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
-use packing_lib::normalize::helper::{mean, mean_vec_u16_f64, median, median_vec_u16_16, remove_zero, remove_zero_f32, remove_zero_new};
+use packing_lib::normalize::helper::{
+    mean, mean_vec_u16_f64, median, median_vec_u16_16, remove_zero, remove_zero_f32,
+    remove_zero_new,
+};
 use std::fs::File;
 use std::io::{self, Write};
 
@@ -50,104 +53,80 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
             ),
         )
         .expect("Can not write file");
-    } else if pc.data_type == DataType::TypeU16{
+    } else if pc.data_type == DataType::TypeU16 {
         info!("Is U16");
         if !pc.is_sequence {
             let mut workon = pc.coverage.clone();
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (with zeros) {}", mean(&workon)),
-            )
+            write_to_file_or_stdout(file2, &format!("Average (with zeros) {}", mean(&workon)))
                 .expect("Can not write file");
             write_to_file_or_stdout(
                 file2,
                 &format!("Median (with zeros) {}", median(&mut workon)),
             )
-                .expect("Can not write file");
+            .expect("Can not write file");
             remove_zero_new(&workon);
             write_to_file_or_stdout(
                 file2,
                 &format!("Average (without zeros) {}", mean_vec_u16_f64(&workon)),
             )
-                .expect("Can not write file");
+            .expect("Can not write file");
             write_to_file_or_stdout(
                 file2,
                 &format!("Median (without zeros) {}", median_vec_u16_16(&mut workon)),
             )
-                .expect("Can not write file");
+            .expect("Can not write file");
         } else {
             println!("dasjkdsa");
             let mut workon = pc.coverage.clone();
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (with zeros) {}", mean(&workon)),
-            )
+            write_to_file_or_stdout(file2, &format!("Average (with zeros) {}", mean(&workon)))
                 .expect("Can not write file");
             write_to_file_or_stdout(
                 file2,
                 &format!("Median (with zeros) {}", median(&mut workon)),
             )
-                .expect("Can not write file");
+            .expect("Can not write file");
             remove_zero(&mut workon);
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (without zeros) {}", mean(&workon)),
-            )
+            write_to_file_or_stdout(file2, &format!("Average (without zeros) {}", mean(&workon)))
                 .expect("Can not write file");
             write_to_file_or_stdout(
                 file2,
                 &format!("Median (without zeros) {}", median(&mut workon)),
             )
-                .expect("Can not write file");
+            .expect("Can not write file");
         }
+    } else if !pc.is_sequence {
+        let mut workon = pc.normalized_coverage.clone();
+        write_to_file_or_stdout(file2, &format!("Average (with zeros) {}", mean(&workon)))
+            .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (with zeros) {}", median(&mut workon)),
+        )
+        .expect("Can not write file");
+        remove_zero_f32(&mut workon);
+        write_to_file_or_stdout(file2, &format!("Average (without zeros) {}", mean(&workon)))
+            .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (without zeros) {}", median(&mut workon)),
+        )
+        .expect("Can not write file");
     } else {
-
-        if !pc.is_sequence {
-            let mut workon = pc.normalized_coverage.clone();
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (with zeros) {}", mean(&workon)),
-            )
-                .expect("Can not write file");
-            write_to_file_or_stdout(
-                file2,
-                &format!("Median (with zeros) {}", median(&mut workon)),
-            )
-                .expect("Can not write file");
-            remove_zero_f32(&mut workon);
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (without zeros) {}", mean(& workon)),
-            )
-                .expect("Can not write file");
-            write_to_file_or_stdout(
-                file2,
-                &format!("Median (without zeros) {}", median(&mut workon)),
-            )
-                .expect("Can not write file");
-        } else {
-            let mut workon = pc.normalized_coverage.clone();
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (with zeros) {}", mean(&workon)),
-            )
-                .expect("Can not write file");
-            write_to_file_or_stdout(
-                file2,
-                &format!("Median (with zeros) {}", median(&mut workon)),
-            )
-                .expect("Can not write file");
-            remove_zero_f32(&mut workon);
-            write_to_file_or_stdout(
-                file2,
-                &format!("Average (without zeros) {}", mean(&workon)),
-            )
-                .expect("Can not write file");
-            write_to_file_or_stdout(
-                file2,
-                &format!("Median (without zeros) {}", median(&mut workon)),
-            )
-                .expect("Can not write file");
-        }
+        let mut workon = pc.normalized_coverage.clone();
+        write_to_file_or_stdout(file2, &format!("Average (with zeros) {}", mean(&workon)))
+            .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (with zeros) {}", median(&mut workon)),
+        )
+        .expect("Can not write file");
+        remove_zero_f32(&mut workon);
+        write_to_file_or_stdout(file2, &format!("Average (without zeros) {}", mean(&workon)))
+            .expect("Can not write file");
+        write_to_file_or_stdout(
+            file2,
+            &format!("Median (without zeros) {}", median(&mut workon)),
+        )
+        .expect("Can not write file");
     }
 }

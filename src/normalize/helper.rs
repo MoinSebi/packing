@@ -58,13 +58,11 @@ where
     }
 }
 
-
 pub fn percentile<T>(data: &[T], percentile: f64) -> f64
-    where
-        T: PartialOrd + Copy,
-        f64: From<T>,
+where
+    T: PartialOrd + Copy,
+    f64: From<T>,
 {
-
     let mut sorted_data = data.to_vec();
     sorted_data.sort_by(|a, b| a.partial_cmp(b).unwrap());
 

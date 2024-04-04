@@ -142,7 +142,7 @@ impl PackCompact {
     /// Outputs sequence/Node, length, thresh, name
     pub fn get_meta(buffer: &[u8]) -> (bool, DataType, Method, f32, f32, f32, u32, u32, String) {
         let is_sequence = buffer[2];
-        let bin = DataType::fromU8(buffer[3]);
+        let bin = DataType::from_u8(buffer[3]);
         let method = buffer[4];
         let r = BigEndian::read_f32(&buffer[5..9]);
         let aaa = BigEndian::read_f32(&buffer[9..13]);
@@ -152,8 +152,8 @@ impl PackCompact {
         let mut bytes = length * 2;
         if bin == DataType::TypeBit {
             bytes = length.div_ceil(8);
-        } else if bin == DataType::TypeF32{
-            bytes = bytes * 2;
+        } else if bin == DataType::TypeF32 {
+            bytes *= 2;
         }
 
         let mut name = byte_to_string(&buffer[21..85]);

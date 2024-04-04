@@ -1,6 +1,9 @@
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
 use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median, median_vec_u16_16, percentile, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8};
+use crate::normalize::helper::{
+    calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median,
+    median_vec_u16_16, percentile, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8,
+};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use log::{debug, info, warn};
@@ -13,7 +16,7 @@ pub enum DataType {
 }
 
 impl DataType {
-    pub fn fromU8(input: u8) -> Self {
+    pub fn from_u8(input: u8) -> Self {
         if input == 1 {
             TypeU16
         } else if input == 0 {
@@ -23,7 +26,7 @@ impl DataType {
         }
     }
 
-    pub fn toU8(&self) -> u8 {
+    pub fn to_u8(&self) -> u8 {
         if self == &TypeBit {
             0
         } else if self == &TypeU16 {
@@ -166,7 +169,7 @@ impl PackCompact {
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
                 thresh = percentile(&work_on, relative as f64) as f32;
-                debug!("{} % Percentile is {}", relative*100.0, thresh);
+                debug!("{} % Percentile is {}", relative * 100.0, thresh);
                 debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
@@ -203,7 +206,7 @@ impl PackCompact {
             if tt == Method::Percentile {
                 thresh = percentile(&work_on, relative as f64) as f32;
 
-                debug!("{} % Percentile is {}", relative*100.0, thresh);
+                debug!("{} % Percentile is {}", relative * 100.0, thresh);
                 debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
