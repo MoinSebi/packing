@@ -9,12 +9,15 @@ use std::fs;
 /// Output: pi (index)
 fn view_1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("normalize")
+    cmd.arg("bit")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a1.pt")
-        .arg("-v");
+        .arg("-v")
+        .arg("-a")
+        .arg("1");
+
     cmd.assert().success();
 
     let mut cmd1 = Command::cargo_bin("packing")?;
@@ -41,7 +44,9 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.pc");
+        .arg("data/test/9986.sequence.pc")
+        .arg("-a")
+        .arg("1");
 
     cmd.assert().success();
 

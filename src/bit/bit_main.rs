@@ -93,14 +93,17 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // The vector we work with
 
-    let number_entries = pc.normalized_coverage.len();
+    let mut number_entries = 0;
     let mut buffer = Vec::new();
 
     if pc.normalized_coverage.is_empty() {
         info!("Number of samples: {}", pc.coverage.len());
+        number_entries = pc.coverage.len();
         buffer = vec2binary(pc.coverage, &real_thresh);
     } else {
         info!("Number of samples: {}", pc.normalized_coverage.len());
+        number_entries = pc.normalized_coverage.len();
+
         buffer = vec2binary_f32(pc.normalized_coverage, &real_thresh);
     }
 

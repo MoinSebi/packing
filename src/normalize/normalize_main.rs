@@ -38,7 +38,7 @@ pub fn normalize_main(matches: &ArgMatches) {
     }
 
     let absolute_thresh: u16 = matches
-        .value_of("absolute threshold")
+        .value_of("absolute-threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
@@ -54,7 +54,7 @@ pub fn normalize_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
-    if !matches.is_present("absolute threshold")
+    if !matches.is_present("absolute-threshold")
         && method == Method::Nothing
         && matches.is_present("fraction")
     {
