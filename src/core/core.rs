@@ -1,6 +1,6 @@
-use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median, median_vec_u16_16, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8};
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
+use crate::normalize::convert_helper::Method;
+use crate::normalize::helper::{calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median, median_vec_u16_16, percentile, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use log::{debug, info, warn};
@@ -14,9 +14,9 @@ pub enum DataType {
 
 impl DataType {
     pub fn fromU8(input: u8) -> Self {
-        if input == 0 {
+        if input == 1 {
             TypeU16
-        } else if input == 1 {
+        } else if input == 0 {
             TypeBit
         } else {
             TypeF32
@@ -24,9 +24,9 @@ impl DataType {
     }
 
     pub fn toU8(&self) -> u8 {
-        if self == &TypeU16 {
+        if self == &TypeBit {
             0
-        } else if self == &TypeBit {
+        } else if self == &TypeU16 {
             1
         } else {
             2
@@ -54,7 +54,7 @@ pub struct PackCompact {
     pub bin_coverage: BitVec<u8, Msb0>, // Binary coverage
     pub name: String,                   // Name of the pack/sample
     pub is_sequence: bool,
-    pub is_binary: DataType,
+    pub data_type: DataType,
     pub method: Method,
     pub fraction: f32,
     pub std: f32,
@@ -80,7 +80,7 @@ impl PackCompact {
             bin_coverage: BitVec::new(),
             name: String::new(),
             is_sequence: false,
-            is_binary: DataType::TypeU16,
+            data_type: DataType::TypeU16,
             method: Method::Nothing,
             fraction: 0.0,
             std: 0.0,
@@ -110,7 +110,7 @@ impl PackCompact {
     /// - Add to struct
     /// - Always average method
     pub fn calc_node_cov(&mut self) {
-        if self.normalized_coverage.is_empty(){
+        if self.normalized_coverage.is_empty() {
             let mut node_id = self.node_index[0];
             let mut node_mean: Vec<u16> = Vec::new();
             let mut result: Vec<f32> = Vec::new();
@@ -163,12 +163,10 @@ impl PackCompact {
                 a_std = calculate_std_deviation(&work_on) as f32 * std
             }
 
-
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
-                work_on.sort();
-                thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize] as f32;
-                debug!("{}% Percentile is {}", relative, thresh);
+                thresh = percentile(&work_on, relative as f64) as f32;
+                debug!("{} % Percentile is {}", relative*100.0, thresh);
                 debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
@@ -178,6 +176,7 @@ impl PackCompact {
                 thresh = median_vec_u16_16(&work_on) as f32;
                 debug!("Median is {}", thresh);
             }
+            println!("dasdasjdkja");
             debug!("Std is {}", a_std);
             thresh -= a_std;
             thresh *= relative;
@@ -202,9 +201,9 @@ impl PackCompact {
 
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
-                work_on.sort_by(|a, b| a.partial_cmp(b).unwrap());
-                thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize];
-                debug!("{}% Percentile is {}", relative, thresh);
+                thresh = percentile(&work_on, relative as f64) as f32;
+
+                debug!("{} % Percentile is {}", relative*100.0, thresh);
                 debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
@@ -226,19 +225,21 @@ impl PackCompact {
         }
     }
 
-
-    pub fn print_meta(&self){
-        info!("Entry type: {}", if self.is_sequence { "Sequence" } else { "Node" });
+    pub fn print_meta(&self) {
         info!(
-        "Data type: {}",
-        if self.is_binary == DataType::TypeBit {
-            "Binary"
-        } else if self.is_binary == DataType::TypeU16 {
-            "Value (u16)"
-        } else {
-            "Value (f32)"
-        }
-    );
+            "Entry type: {}",
+            if self.is_sequence { "Sequence" } else { "Node" }
+        );
+        info!(
+            "Data type: {}",
+            if self.data_type == DataType::TypeBit {
+                "Binary"
+            } else if self.data_type == DataType::TypeU16 {
+                "Value (u16)"
+            } else {
+                "Value (f32)"
+            }
+        );
         info!("Method: {}", self.method.to_string());
         info!("Fraction: {}", self.fraction);
         info!("Real threshold: {}", self.threshold);

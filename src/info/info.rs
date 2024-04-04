@@ -41,4 +41,3 @@ pub fn info_compressed(filename: &str) {
     info!("Header bytes: {}", 95);
     info!("Name: {}", meta.8);
 }
-

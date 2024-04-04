@@ -1,5 +1,5 @@
-use crate::normalize::convert_helper::Method;
 use crate::core::core::{DataType, PackCompact};
+use crate::normalize::convert_helper::Method;
 use byteorder::{BigEndian, ByteOrder};
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -34,15 +34,14 @@ impl PackCompact {
         writeln!(f, "seq.pos\tnode.id\tnode.offset\tcoverage").expect("Can not write file");
 
         let mut node = 0;
-        for x in 0..self.coverage.len() {
-            if x == 0 {
-                writeln!(
-                    f,
-                    "{}\t{}\t{}\t{}",
-                    x, self.node_index[x], node, self.coverage[x]
-                )
-                .expect("Can not write file");
-            } else if self.node_index[x] == self.node_index[x - 1] {
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}",
+            0, self.node_index[0], node, self.coverage[0]
+        )
+        .expect("Can not write file");
+        for x in 1..self.coverage.len() {
+            if self.node_index[x] == self.node_index[x - 1] {
                 node += 1;
                 writeln!(
                     f,
@@ -62,6 +61,39 @@ impl PackCompact {
         }
     }
 
+    pub fn write_pack_f32(&self, filename: &str) {
+        let f = File::create(filename).expect("Unable to create file");
+        let mut f = BufWriter::new(f);
+        writeln!(f, "seq.pos\tnode.id\tnode.offset\tcoverage").expect("Can not write file");
+
+        let mut node = 0;
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}",
+            0, self.node_index[0], node, self.normalized_coverage[0]
+        )
+        .expect("Can not write file");
+        for x in 1..self.coverage.len() {
+            if self.node_index[x] == self.node_index[x - 1] {
+                node += 1;
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    x, self.node_index[x], node, self.normalized_coverage[x]
+                )
+                .expect("Can not write file");
+            } else {
+                node = 0;
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    x, self.node_index[x], node, self.normalized_coverage[x]
+                )
+                .expect("Can not write file");
+            }
+        }
+    }
+
     /// Construct a header (data) from a PackCompact
     ///
     /// This is the order:
@@ -74,7 +106,7 @@ impl PackCompact {
     /// - length
     /// - name
     pub fn file_header(
-        sequence_out: bool,
+        want_sequence: bool,
         is_binary: DataType,
         method: Method,
         relative: f32,
@@ -87,7 +119,7 @@ impl PackCompact {
 
         // Is node?
 
-        buffer.push(if sequence_out {1} else {0});
+        buffer.push(if want_sequence { 1 } else { 0 });
         // Is binary?
         buffer.push(is_binary.toU8());
 

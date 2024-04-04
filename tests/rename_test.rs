@@ -2,7 +2,6 @@ use assert_cmd::assert::OutputAssertExt;
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 
-
 #[test]
 /// Test stats
 ///

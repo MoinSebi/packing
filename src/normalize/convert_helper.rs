@@ -1,7 +1,6 @@
 use crate::core::core::PackCompact;
 use log::warn;
 
-
 #[derive(PartialEq, Copy, Clone)]
 pub enum Method {
     Mean,

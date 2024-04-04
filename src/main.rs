@@ -16,8 +16,9 @@ use clap::{App, AppSettings, Arg};
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
-use std::io::Write;
 use crate::bit::bit_main::bit_main;
+use packing_lib::normalize::normalize_main::normalize_main;
+use std::io::Write;
 
 fn main() {
     let matches = App::new("packing")
@@ -130,7 +131,7 @@ fn main() {
 
 
             .help_heading("Normalization parameters")
-            .arg(Arg::new("absolute threshold")
+            .arg(Arg::new("absolute-threshold")
                 .short('a')
                 .long("absolute-threshold")
                 .about("Presence-absence according to absolute threshold")
@@ -152,7 +153,7 @@ fn main() {
                 .takes_value(true)
                 .display_order(2)
             )
-            .arg(Arg::new("std")
+            .arg(Arg::new("standard-deviation")
                 .short('s')
                 .long("std")
                 .about("Adjust your value by standard deviation")
@@ -169,7 +170,6 @@ fn main() {
                 .long("node")
                 .about("Merge coverage on node level [default: off -> sequence-level]")
                 .display_order(5)
-
             )
 
             .help_heading("Modification options")
@@ -340,10 +340,6 @@ fn main() {
 
 
             //Output
-            // As you might get mutiple file, takes value for everythin
-            // Alternative only one run per process
-            // ReaderBit and u16 with stats function
-            // You iterate and lose information directly
             .help_heading("Output options")
             .arg(Arg::new("out")
                 .short('o')
@@ -423,5 +419,8 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("bit") {
         bit_main(matches);
+    }
+    if let Some(matches) = matches.subcommand_matches("normalize") {
+        normalize_main(matches);
     }
 }

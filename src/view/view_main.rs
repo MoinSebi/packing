@@ -18,22 +18,22 @@ pub fn view_main(matches: &ArgMatches) {
 
 pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
     let mut f = File::create(outfile).expect("Unable to create file");
-
-    // If index is present
+    pc.print_meta();
+    info!("View wrapper");
+    // If the index is present, we can write real outputs
     if index_present {
         // complex
         if pc.is_sequence {
-            if pc.is_binary == DataType::TypeBit {
+            if pc.data_type == DataType::TypeBit {
                 let mut node = 0;
-                for x in 0..pc.coverage.len() {
-                    if x == 0 {
-                        writeln!(
-                            f,
-                            "{}\t{}\t{}\t{}",
-                            x, pc.node_index[x], node, pc.coverage[x]
-                        )
-                        .expect("Can not write file");
-                    } else if pc.node_index[x] == pc.node_index[x - 1] {
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    0, pc.node_index[0], node, pc.coverage[0]
+                )
+                .expect("Can not write file");
+                for x in 1..pc.coverage.len() {
+                    if pc.node_index[x] == pc.node_index[x - 1] {
                         node += 1;
                         writeln!(
                             f,
@@ -51,7 +51,7 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
                         .expect("Can not write file");
                     }
                 }
-            } else if pc.is_binary == DataType::TypeU16 {
+            } else if pc.data_type == DataType::TypeU16 {
                 pc.write_pack(outfile);
             }
 
@@ -60,11 +60,11 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
             let nodes: HashSet<_> = pc.node_index.iter().collect();
             let mut nodes: Vec<_> = nodes.into_iter().collect();
             nodes.sort();
-            if pc.is_binary == DataType::TypeBit {
+            if pc.data_type == DataType::TypeBit {
                 for (i, x) in nodes.iter().enumerate() {
                     writeln!(f, "{}\t{}", x, pc.coverage[i]).expect("Can not write file");
                 }
-            } else if pc.is_binary == DataType::TypeU16 {
+            } else if pc.data_type == DataType::TypeU16 {
                 for (i, x) in nodes.iter().enumerate() {
                     writeln!(f, "{}\t{}", x, pc.bin_coverage[i]).expect("Can not write file");
                 }
@@ -75,13 +75,13 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
                 }
             }
         }
-    } else if pc.is_sequence {
-        if pc.is_binary == DataType::TypeBit {
+    } else {
+        if pc.data_type == DataType::TypeBit {
             println!("Binary sequence");
             for x in pc.bin_coverage.iter() {
                 writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
             }
-        } else if pc.is_binary == DataType::TypeU16 {
+        } else if pc.data_type == DataType::TypeU16 {
             for x in pc.coverage.iter() {
                 writeln!(f, "{}", x).expect("Can not write file");
             }
@@ -89,18 +89,6 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
             for x in pc.normalized_coverage.iter() {
                 writeln!(f, "{}", x).expect("Can not write file");
             }
-        }
-    } else if pc.is_binary == DataType::TypeBit {
-        for x in pc.bin_coverage.iter() {
-            writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
-        }
-    } else if pc.is_binary == DataType::TypeU16 {
-        for x in pc.coverage.iter() {
-            writeln!(f, "{}", x).expect("Can not write file");
-        }
-    } else {
-        for x in pc.normalized_coverage.iter() {
-            writeln!(f, "{}", x).expect("Can not write file");
         }
     }
 }

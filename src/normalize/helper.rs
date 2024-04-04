@@ -1,9 +1,6 @@
-
-
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
-
 
 /// u16 vector to u8 vector
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
@@ -53,11 +50,37 @@ where
     let len = data.len();
     if len % 2 == 0 {
         let mid = len / 2;
-        
+
         (f64::from(data[mid - 1]) + f64::from(data[mid])) / 2.0
     } else {
         let mid = len / 2;
         f64::from(data[mid])
+    }
+}
+
+
+pub fn percentile<T>(data: &[T], percentile: f64) -> f64
+    where
+        T: PartialOrd + Copy,
+        f64: From<T>,
+{
+
+    let mut sorted_data = data.to_vec();
+    sorted_data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let len = sorted_data.len() as f64;
+    let index = percentile * (len - 1.0);
+
+    let lower_index = index.floor() as usize;
+    let upper_index = index.ceil() as usize;
+
+    if lower_index == upper_index {
+        f64::from(sorted_data[lower_index])
+    } else {
+        let lower_value = f64::from(sorted_data[lower_index]);
+        let upper_value = f64::from(sorted_data[upper_index]);
+        let fraction = index - lower_index as f64;
+        lower_value + fraction * (upper_value - lower_value)
     }
 }
 
@@ -109,7 +132,6 @@ pub fn byte_to_string(input: &[u8]) -> String {
 
 /// Normalize/scale the vector by a value
 pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<u8> {
-
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push((*item as f32) / *absolute_thresh)
@@ -119,7 +141,6 @@ pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<u8>
 
 /// Normalize/scale the vector by a value
 pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<u8> {
-
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push(*item / *absolute_thresh)

@@ -1,7 +1,7 @@
 use crate::normalize::convert_helper::Method;
 
-use crate::normalize::helper::{byte_to_string, remove_prefix_filename};
 use crate::core::core::{DataType, PackCompact};
+use crate::normalize::helper::{byte_to_string, remove_prefix_filename};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
@@ -86,7 +86,7 @@ pub fn read_index(filename: &str) -> Vec<u32> {
 /// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
     let mut p = PackCompact::read_wrapper(file_pc);
-    p.node_index =  read_index(file_index);
+    p.node_index = read_index(file_index);
     p.print_meta();
     p
 }
@@ -141,8 +141,8 @@ impl PackCompact {
     /// Get the meta data from the binary pack file (73 bytes)
     /// Outputs sequence/Node, length, thresh, name
     pub fn get_meta(buffer: &[u8]) -> (bool, DataType, Method, f32, f32, f32, u32, u32, String) {
-        let cov = buffer[2];
-        let bin = buffer[3];
+        let is_sequence = buffer[2];
+        let bin = DataType::fromU8(buffer[3]);
         let method = buffer[4];
         let r = BigEndian::read_f32(&buffer[5..9]);
         let aaa = BigEndian::read_f32(&buffer[9..13]);
@@ -150,17 +150,19 @@ impl PackCompact {
         let length = BigEndian::read_u32(&buffer[17..21]);
 
         let mut bytes = length * 2;
-        if bin == 1 {
+        if bin == DataType::TypeBit {
             bytes = length.div_ceil(8);
+        } else if bin == DataType::TypeF32{
+            bytes = bytes * 2;
         }
 
-        let mut name = byte_to_string(&buffer[21..95]);
+        let mut name = byte_to_string(&buffer[21..85]);
         name = name.trim_matches(char::from(0)).to_string();
         name = name.trim_end().to_string();
 
         (
-            cov == 1,
-            DataType::fromU8(bin),
+            is_sequence == 1,
+            bin,
             Method::from_u8(method),
             r,
             aaa,
@@ -220,7 +222,7 @@ impl PackCompact {
         let (_kind, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
         debug!("Name1 {}", name);
-        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[95..]);
+        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[85..]);
         for _i in length as usize..bv.len() {
             bv.pop();
         }
@@ -231,7 +233,7 @@ impl PackCompact {
             bin_coverage: bv,
             coverage: Vec::new(),
             is_sequence: _kind,
-            is_binary: _bin,
+            data_type: _bin,
             method: _method,
             fraction: _relative,
             std,
@@ -245,8 +247,8 @@ impl PackCompact {
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0; buffer[95..].len() / 2];
-        BigEndian::read_u16_into(&buffer[95..], &mut data);
+        let mut data = vec![0; buffer[85..].len() / 2];
+        BigEndian::read_u16_into(&buffer[85..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),
@@ -254,7 +256,7 @@ impl PackCompact {
             normalized_coverage: Vec::new(),
             coverage: data,
             is_sequence: _kind,
-            is_binary: _bin,
+            data_type: _bin,
             method,
             fraction: _relative,
             std,
@@ -268,8 +270,8 @@ impl PackCompact {
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0.0; buffer[95..].len() / 4];
-        BigEndian::read_f32_into(&buffer[95..], &mut data);
+        let mut data = vec![0.0; buffer[85..].len() / 4];
+        BigEndian::read_f32_into(&buffer[85..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),
@@ -277,7 +279,7 @@ impl PackCompact {
             normalized_coverage: data,
             coverage: Vec::new(),
             is_sequence: _kind,
-            is_binary: _bin,
+            data_type: _bin,
             method,
             fraction: _relative,
             std,

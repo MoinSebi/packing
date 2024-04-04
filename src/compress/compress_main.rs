@@ -1,17 +1,17 @@
 use clap::ArgMatches;
 use log::info;
-use packing_lib::normalize::convert_helper::Method;
-use packing_lib::normalize::helper::{vec_u16_to_u8};
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use packing_lib::core::writer::writer_compress_zlib;
+use packing_lib::normalize::convert_helper::Method;
+use packing_lib::normalize::helper::vec_u16_to_u8;
 use std::process;
 
 /// How to compress a pack file
 pub fn compress_main(matches: &ArgMatches) {
     let (mut pc, _index_present) = read_input(matches);
 
-    if pc.is_binary != DataType::TypeU16{
+    if pc.data_type != DataType::TypeU16 {
         info!("Your input is not a plain-text coverage file");
         process::exit(0x0100);
     }

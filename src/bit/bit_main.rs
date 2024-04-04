@@ -1,18 +1,17 @@
 use clap::ArgMatches;
 use log::{info, warn};
-use packing_lib::normalize::convert_helper::Method;
-use packing_lib::normalize::helper::{vec2binary, vec2binary_f32};
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
-use packing_lib::core::writer::{writer_compress_zlib};
+use packing_lib::core::writer::writer_compress_zlib;
+use packing_lib::normalize::convert_helper::Method;
+use packing_lib::normalize::helper::{vec2binary, vec2binary_f32};
 use std::process;
 
 pub fn bit_main(matches: &ArgMatches) {
     let (mut pc, index_present) = read_input(matches);
 
-
     // Check if the right data
-    if pc.is_binary == DataType::TypeBit {
+    if pc.data_type == DataType::TypeBit {
         warn!("You loaded a presence/absence file. You are not able to further normalize it.");
         process::exit(0x0100);
     }
@@ -39,18 +38,17 @@ pub fn bit_main(matches: &ArgMatches) {
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let relative_thresh: f32 = matches
-        .value_of("fraction")
+    let relative_thresh: f32 = matches.value_of("fraction").unwrap_or("0").parse().unwrap();
+    let std: f32 = matches
+        .value_of("standard-deviation")
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let std: f32 = matches.value_of("standard-deviation").unwrap_or("0").parse().unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
-    let node = matches.is_present("node");
-
+    let want_sequence = !matches.is_present("node");
 
     if !matches.is_present("absolute-threshold")
         && method == Method::Nothing
@@ -60,12 +58,9 @@ pub fn bit_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
 
-
     let real_thresh: f32;
 
     // Checking the output base (sequence, nodes) or pack file
-
-
 
     if !matches.is_present("absolute-threshold")
         && method == Method::Nothing
@@ -75,7 +70,7 @@ pub fn bit_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
 
-    if node && !pc.is_sequence {
+    if want_sequence && !pc.is_sequence {
         pc.calc_node_cov();
     }
 
@@ -88,10 +83,7 @@ pub fn bit_main(matches: &ArgMatches) {
     }
 
     info!("New parameters");
-    info!(
-        "Feature: {}",
-        if node { "node" } else { "sequence" }
-    );
+    info!("Feature: {}", if want_sequence { "node" } else { "sequence" });
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
     info!("Relative threshold: {}", relative_thresh);
@@ -101,23 +93,19 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // The vector we work with
 
-
-
     let number_entries = pc.normalized_coverage.len();
     let mut buffer = Vec::new();
 
-    if pc.normalized_coverage.is_empty(){
+    if pc.normalized_coverage.is_empty() {
         info!("Number of samples: {}", pc.coverage.len());
         buffer = vec2binary(pc.coverage, &real_thresh);
     } else {
         info!("Number of samples: {}", pc.normalized_coverage.len());
         buffer = vec2binary_f32(pc.normalized_coverage, &real_thresh);
-
     }
 
-
     let mut bb = PackCompact::file_header(
-        node,
+        want_sequence,
         DataType::TypeBit,
         method,
         relative_thresh,
@@ -129,7 +117,5 @@ pub fn bit_main(matches: &ArgMatches) {
     bb.extend(buffer);
     println!("{}", bb.len());
 
-
     writer_compress_zlib(&bb, matches.value_of("out").unwrap());
-
 }
