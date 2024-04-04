@@ -1,8 +1,8 @@
 use log::info;
 use packing_lib::convert::convert_helper::Method;
+use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::{read_index, unpack_zstd_to_byte};
 use std::collections::HashSet;
-use packing_lib::core::core::PackCompact;
 
 /// Information about the a index file
 pub fn info_index(filename: &str) {
@@ -24,9 +24,15 @@ pub fn info_compressed(filename: &str) {
     info!("Entry type: {}", if meta.0 { "Sequence" } else { "Node" });
     info!(
         "Data type: {}",
-        if meta.1 { "Binary" } else { "Value (u16)" }
+        if meta.1 == DataType::TypeBit {
+            "Binary"
+        } else if meta.1 == DataType::TypeU16 {
+            "Value (u16)"
+        } else {
+            "Value (f32)"
+        }
     );
-    info!("Method: {}", Method::from_u8(meta.2).to_string());
+    info!("Method: {}", meta.2.to_string());
     info!("Relative threshold: {}", meta.3);
     info!("Real threshold: {}", meta.4);
     info!("Bytes: {}", meta.5);

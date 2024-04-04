@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use log::info;
 use packing_lib::convert::helper::{mean_vec_u16_f64, median_vec_u16_16, remove_zero_new};
-use packing_lib::core::core::PackCompact;
+use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use std::fs::File;
 use std::io::{self, Write};
@@ -32,7 +32,7 @@ fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::R
 
 pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Option<&mut File>) {
     write_to_file_or_stdout(file2, &format!("Name: {}", pc.name)).expect("Can not write file");
-    if pc.is_binary {
+    if pc.is_binary == DataType::TypeBit {
         write_to_file_or_stdout(
             file2,
             &format!(

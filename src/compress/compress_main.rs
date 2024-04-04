@@ -1,16 +1,20 @@
-use std::process;
 use clap::ArgMatches;
 use log::info;
 use packing_lib::convert::convert_helper::Method;
-use packing_lib::convert::helper::{make_header, vec_u16_to_u8};
-use packing_lib::core::core::PackCompact;
+use packing_lib::convert::helper::{vec_u16_to_u8};
+use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use packing_lib::core::writer::writer_compress_zlib;
-
+use std::process;
 
 /// How to compress a pack file
 pub fn compress_main(matches: &ArgMatches) {
     let (mut pc, index_present) = read_input(matches);
+
+    if pc.is_binary != DataType::TypeU16{
+        info!("Your input is not a plain-text coverage file");
+        process::exit(0x0100);
+    }
 
     // If name is set as argument, replace filename
     if matches.is_present("name") {
@@ -26,11 +30,10 @@ pub fn compress_main(matches: &ArgMatches) {
         info!("Name is {}", pc.name)
     }
 
-
     let num_entries = pc.coverage.len();
-    let mut buffer = PackCompact::make_header(
+    let mut buffer = PackCompact::file_header(
         true,
-        false,
+        DataType::TypeU16,
         Method::Nothing,
         0.0,
         0.0,
@@ -39,10 +42,8 @@ pub fn compress_main(matches: &ArgMatches) {
         &pc.name,
     );
 
-
     buffer.extend(vec_u16_to_u8(&pc.coverage));
 
     println!("{}", buffer.len());
     writer_compress_zlib(&buffer, matches.value_of("out").unwrap());
-
 }

@@ -1,8 +1,8 @@
-use crate::core::core::PackCompact;
+use crate::convert::convert_helper::Method;
+use crate::core::core::{DataType, PackCompact};
+use byteorder::{BigEndian, ByteOrder};
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use byteorder::{BigEndian, ByteOrder};
-use crate::convert::convert_helper::Method;
 
 #[allow(dead_code)]
 /// Just writing bytes to a file
@@ -36,35 +36,46 @@ impl PackCompact {
         let mut node = 0;
         for x in 0..self.coverage.len() {
             if x == 0 {
-                writeln!(f, "{}\t{}\t{}\t{}", x, self.node_index[x], node, self.coverage[x])
-                    .expect("Can not write file");
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    x, self.node_index[x], node, self.coverage[x]
+                )
+                .expect("Can not write file");
             } else if self.node_index[x] == self.node_index[x - 1] {
                 node += 1;
-                writeln!(f, "{}\t{}\t{}\t{}", x, self.node_index[x], node, self.coverage[x])
-                    .expect("Can not write file");
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    x, self.node_index[x], node, self.coverage[x]
+                )
+                .expect("Can not write file");
             } else {
                 node = 0;
-                writeln!(f, "{}\t{}\t{}\t{}", x, self.node_index[x], node, self.coverage[x])
-                    .expect("Can not write file");
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}",
+                    x, self.node_index[x], node, self.coverage[x]
+                )
+                .expect("Can not write file");
             }
         }
     }
-
 
     /// Construct a header (data) from a PackCompact
     ///
     /// This is the order:
     /// - sequence/node
-    /// - is_binary
+    /// - DataType (bit, u16, f32)
     /// - method
     /// - relative
     /// - std
     /// - real thresh
     /// - length
     /// - name
-    pub fn make_header(
+    pub fn file_header(
         sequence_out: bool,
-        is_binary: bool,
+        is_binary: DataType,
         method: Method,
         relative: f32,
         std: f32,
@@ -82,11 +93,7 @@ impl PackCompact {
         }
 
         // Is binary?
-        if is_binary {
-            buffer.push(1);
-        } else {
-            buffer.push(0);
-        }
+        buffer.push(is_binary.toU8());
 
         match method {
             Method::Nothing => buffer.push(0),
@@ -100,7 +107,6 @@ impl PackCompact {
         BigEndian::write_f32(&mut buff2, relative);
         buffer.extend(buff2);
 
-
         let mut buff2 = vec![0; 4];
         BigEndian::write_f32(&mut buff2, std);
         buffer.extend(buff2);
@@ -109,7 +115,6 @@ impl PackCompact {
         let mut buff2 = vec![0; 4];
         BigEndian::write_f32(&mut buff2, thresh);
         buffer.extend(buff2);
-
 
         // Length of the vector
         let mut buff2 = vec![0; 4];

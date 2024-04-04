@@ -1,6 +1,7 @@
 use crate::convert::convert_helper::Method;
+use crate::convert::convert_helper::OutputType::Pack;
 use crate::convert::helper::{byte_to_string, remove_prefix_filename};
-use crate::core::core::PackCompact;
+use crate::core::core::{DataType, PackCompact};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
@@ -9,7 +10,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::{fs, process};
-use crate::convert::convert_helper::OutputType::Pack;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -33,15 +33,14 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
     zstd_decode(buffer)
 }
 
-
-
 #[allow(dead_code)]
 /// Reading multiple files at the same time
 ///
 ///
 pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) = PackCompact::get_meta(buffer);
+    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) =
+        PackCompact::get_meta(buffer);
 
     let chunks = buffer.chunks((bytes + 77) as usize);
     let mut result: Vec<PackCompact> = Vec::new();
@@ -59,7 +58,8 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
 /// Iterate over each sample
 pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) = PackCompact::get_meta(buffer);
+    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) =
+        PackCompact::get_meta(buffer);
     let chunks = buffer.chunks((bytes + 77) as usize);
 
     info!("Number of samples: {}", chunks.len());
@@ -138,11 +138,9 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
 }
 
 impl PackCompact {
-
-
     /// Get the meta data from the binary pack file (73 bytes)
     /// Outputs sequence/Node, length, thresh, name
-    pub fn get_meta(buffer: &[u8]) -> (bool, bool, u8, f32, f32, f32, u32, u32, String) {
+    pub fn get_meta(buffer: &[u8]) -> (bool, DataType, Method, f32, f32, f32, u32, u32, String) {
         let cov = buffer[2];
         let bin = buffer[3];
         let method = buffer[4];
@@ -160,9 +158,18 @@ impl PackCompact {
         name = name.trim_matches(char::from(0)).to_string();
         name = name.trim_end().to_string();
 
-        (cov == 1, bin == 1, method, r, aaa, thresh, bytes, length, name)
+        (
+            cov == 1,
+            DataType::fromU8(bin),
+            Method::from_u8(method),
+            r,
+            aaa,
+            thresh,
+            bytes,
+            length,
+            name,
+        )
     }
-
 
     pub fn parse_pack(filename: &str) -> Self {
         let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
@@ -197,15 +204,18 @@ impl PackCompact {
     pub fn read_wrapper(file_pc: &str) -> Self {
         let buff = unpack_zstd_to_byte(file_pc);
         let meta = PackCompact::get_meta(&buff);
-        if meta.1 {
+        if meta.1 == DataType::TypeBit {
             Self::read_bin_coverage(&buff)
-        } else {
+        } else if DataType::TypeU16 == meta.1 {
             Self::read_u16(&buff)
+        } else {
+            Self::read_f32(&buff)
         }
     }
 
     pub fn read_bin_coverage(buffer: &[u8]) -> Self {
-        let (_kind, _bin, _method, _relative, std,  _thresh, _bytes, length, name) = PackCompact::get_meta(buffer);
+        let (_kind, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
+            PackCompact::get_meta(buffer);
         debug!("Name1 {}", name);
         let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[77..]);
         for _i in length as usize..bv.len() {
@@ -219,7 +229,7 @@ impl PackCompact {
             coverage: Vec::new(),
             is_sequence: _kind,
             is_binary: _bin,
-            method: Method::from_u8(_method),
+            method: _method,
             fraction: _relative,
             std: std,
             threshold: _thresh,
@@ -228,7 +238,8 @@ impl PackCompact {
     }
 
     pub fn read_u16(buffer: &[u8]) -> Self {
-        let (_kind, _bin, _method, _relative, std, _thresh, _bytes, length, name) = PackCompact::get_meta(buffer);
+        let (_kind, _bin, method, _relative, std, _thresh, _bytes, length, name) =
+            PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
         let mut data = vec![0; buffer[77..].len() / 2];
@@ -241,7 +252,30 @@ impl PackCompact {
             coverage: data,
             is_sequence: _kind,
             is_binary: _bin,
-            method: Method::from_u8(_method),
+            method: method,
+            fraction: _relative,
+            std: std,
+            threshold: _thresh,
+            length,
+        }
+    }
+
+    pub fn read_f32(buffer: &[u8]) -> Self {
+        let (_kind, _bin, method, _relative, std, _thresh, _bytes, length, name) =
+            PackCompact::get_meta(buffer);
+
+        debug!("Name {}", name);
+        let mut data = vec![0.0; buffer[77..].len() / 4];
+        BigEndian::read_f32_into(&buffer[77..], &mut data);
+        PackCompact {
+            name,
+            node_index: Vec::new(),
+            bin_coverage: BitVec::new(),
+            normalized_coverage: data,
+            coverage: Vec::new(),
+            is_sequence: _kind,
+            is_binary: _bin,
+            method: method,
             fraction: _relative,
             std: std,
             threshold: _thresh,

@@ -1,4 +1,4 @@
-use crate::convert::convert_helper::{Method};
+use crate::convert::convert_helper::Method;
 use crate::core::core::PackCompact;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
@@ -9,6 +9,14 @@ use log::{info, warn};
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
     let mut buffer: Vec<u8> = vec![0; input_vec.len() * 2];
     BigEndian::write_u16_into(input_vec, &mut buffer);
+
+    buffer
+}
+
+/// u16 vector to u8 vector
+pub fn vec_f32_to_u8(input_vec: &Vec<f32>) -> Vec<u8> {
+    let mut buffer: Vec<u8> = vec![0; input_vec.len() * 4];
+    BigEndian::write_f32_into(input_vec, &mut buffer);
 
     buffer
 }
@@ -24,6 +32,33 @@ pub fn mean_vec_u16_f64(val: &Vec<u16>) -> f64 {
     });
 
     (sums as f64) / (val.len() as f64)
+}
+
+pub fn mean<T>(data: &[T]) -> f64
+where
+    T: std::ops::Add<Output = T> + std::convert::From<u8> + Copy,
+    f64: std::convert::From<T>,
+{
+    let sum: f64 = data.iter().map(|&x| f64::from(x)).sum();
+    sum / (data.len() as f64)
+}
+
+pub fn median<T>(data: &mut [T]) -> f64
+where
+    T: PartialOrd + Copy,
+    f64: From<T>,
+{
+    data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let len = data.len();
+    if len % 2 == 0 {
+        let mid = len / 2;
+        let median = (f64::from(data[mid - 1]) + f64::from(data[mid])) / 2.0;
+        median
+    } else {
+        let mid = len / 2;
+        f64::from(data[mid])
+    }
 }
 
 /// Calculate the average of a vector
@@ -73,22 +108,34 @@ pub fn byte_to_string(input: &[u8]) -> String {
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_u16_u16(input_vec: &Vec<u16>, absolute_thresh: &f64) -> Vec<u16> {
+pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<f32> {
     if absolute_thresh == &0.0 {
-        return input_vec.clone();
+        return input_vec.iter().map(|a| (*a).into()).collect();
     }
-    let mut new_vec: Vec<u16> = Vec::new();
+    let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
-        new_vec.push(((*item as f64) / (*absolute_thresh)).round() as u16)
+        new_vec.push((*item as f32) / *absolute_thresh)
+    }
+    new_vec
+}
+
+/// Normalize/scale the vector by a value
+pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<f32> {
+    if absolute_thresh == &0.0 {
+        return input_vec.iter().map(|a| (*a).into()).collect();
+    }
+    let mut new_vec: Vec<f32> = Vec::new();
+    for item in input_vec.iter() {
+        new_vec.push((*item as f32) / *absolute_thresh)
     }
     new_vec
 }
 
 /// Create binary vector
-pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f64) -> Vec<u8> {
+pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f32) -> Vec<u8> {
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter() {
-        if (*x as f64) >= *absolute_thresh {
+        if (*x as f32) >= *absolute_thresh {
             bv.push(true)
         } else {
             bv.push(false)
@@ -98,70 +145,16 @@ pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f64) -> Vec<u8> {
     bv.into_vec()
 }
 
-pub fn make_header(
-    sequence_out: bool,
-    is_binary: bool,
-    method: Method,
-    r: u16,
-    thresh: &u16,
-    length: u32,
-    name: &str,
-) -> Vec<u8> {
-    let mut buff: Vec<u8> = vec![53, 56];
-
-    // Is node?
-    if sequence_out {
-        buff.push(1);
-    } else {
-        buff.push(0);
-    }
-
-    // Is binary?
-    if is_binary {
-        buff.push(1);
-    } else {
-        buff.push(0);
-    }
-
-    match method {
-        Method::Nothing => buff.push(0),
-        Method::Mean => buff.push(1),
-        Method::Median => buff.push(2),
-        Method::Percentile => buff.push(3),
-    }
-
-    // Relative threshold
-    let mut buff2 = vec![0; 2];
-    BigEndian::write_u16(&mut buff2, r);
-    buff.extend(buff2);
-    // Real Threshold
-    let mut buff2 = vec![0; 2];
-    BigEndian::write_u16(&mut buff2, *thresh);
-    buff.extend(buff2);
-
-    // Length of the vector
-    let mut buff2 = vec![0; 4];
-    BigEndian::write_u32(&mut buff2, length);
-    buff.extend(buff2);
-
-    // Name
-    let char_vec: Vec<char> = name.chars().collect();
-    for c in char_vec.iter() {
-        buff.push(*c as u8);
-    }
-    // Add space
-    for _x in 0..(64 - char_vec.len()) {
-        buff.push(32);
-    }
-    buff
-}
-
 //-------------------------------------------------------------------------------------------------------
 // Compression
 
 /// Remove all zeros from a vector
 pub fn remove_zero(vecc: &mut Vec<u16>) {
     vecc.retain(|&x| x != 0);
+}
+
+pub fn remove_zero_f32(vecc: &mut Vec<f32>) {
+    vecc.retain(|&x| x != 0.0);
 }
 
 pub fn remove_zero_new(vecc: &Vec<u16>) -> Vec<u16> {
@@ -178,53 +171,12 @@ pub fn remove_prefix_filename(filename: &str) -> String {
     return s2.last().unwrap().parse().unwrap();
 }
 
-/// Calculate the real threshold
-///
-/// Based on
-/// - method
-/// - relative threshold
-/// - include_all
-/// - node or sequence
-pub fn get_real_threshold(
-    pc: &mut PackCompact,
-    include_all: bool,
-    relative: u16,
-    tt: Method,
-) -> f64 {
-    // "work_on" is the current data we do the normalizcation on
-    let mut work_on: Vec<u16> = pc.coverage.clone();
+pub fn calculate_std_deviation(data: &[u16]) -> f64 {
+    let mean = data.iter().map(|&x| x as f64).sum::<f64>() / data.len() as f64;
 
-    // relative is 0
-    if relative == 0 {
-        warn!("Relative threshold is 0");
-        return 0.0;
-    }
+    let variance = data.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>() / data.len() as f64;
 
-    if !include_all {
-        remove_zero(&mut work_on)
-    }
-
-    let mut thresh: f64 = 0.0;
-    if tt == Method::Percentile {
-        work_on.sort();
-        thresh = work_on
-            [((work_on.len() as f64 - 1.0) * ((relative as f64) / 100_f64)).round() as usize]
-            as f64;
-        info!("{}% Percentile is {}", relative, thresh);
-        info!("Working threshold is {}", thresh);
-        return thresh;
-    } else if tt == Method::Mean {
-        thresh = mean_vec_u16_f64(&work_on);
-        info!("Mean is {}", thresh);
-        thresh *= (relative as f64) / 100_f64;
-        info!("Working threshold is {}", thresh);
-    } else if tt == Method::Median {
-        thresh = median_vec_u16_16(&work_on);
-        info!("Median is {}", thresh);
-        thresh *= (relative as f64) / 100_f64;
-        info!("Working threshold is {}", thresh);
-    }
-    thresh
+    variance.sqrt()
 }
 
 // Standard variation function of u16 vec

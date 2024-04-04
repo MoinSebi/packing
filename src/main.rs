@@ -1,9 +1,10 @@
+mod bit;
+mod compress;
 mod index;
 mod info;
 mod rename;
 mod stats;
 mod view;
-mod compress;
 
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
@@ -15,7 +16,6 @@ use clap::{App, AppSettings, Arg};
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
-use packing_lib::convert::convert_main::convert_main;
 use std::io::Write;
 
 fn main() {
@@ -343,9 +343,6 @@ fn main() {
     }
 
     // CONVERT
-    if let Some(matches) = matches.subcommand_matches("convert") {
-        convert_main(matches);
-    }
     if let Some(matches) = matches.subcommand_matches("view") {
         view_main(matches);
     }
