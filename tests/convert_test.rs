@@ -2,7 +2,7 @@ use assert_cmd::Command;
 
 //--------------------------------------------------------------------------------------
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pt
@@ -10,7 +10,7 @@ use assert_cmd::Command;
 /// Threshold: 1
 fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
@@ -22,7 +22,7 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pt
@@ -30,7 +30,7 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Threshold: 1
 fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
@@ -44,14 +44,14 @@ fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// -s (stats) median
 /// -b (binary) (compress)
 fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
@@ -68,7 +68,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pb
@@ -77,7 +77,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
 ///     - absolute threshold: 2
 fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
@@ -93,7 +93,7 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
 
 //--------------------------------------------------------------------------------------
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pt
@@ -101,7 +101,7 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// Threshold: 1
 fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
@@ -114,7 +114,7 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pt
@@ -122,7 +122,7 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Threshold: 1
 fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
@@ -137,14 +137,14 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// -s (stats) median
 /// -b (binary) (compress)
 fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
@@ -162,7 +162,7 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 ///
 /// Input: pack
 /// Output: pb
@@ -171,7 +171,7 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
 ///     - absolute threshold: 2
 fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")
@@ -187,13 +187,13 @@ fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-/// Test convert subcommand with
+/// Test normalize subcommand with
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// --normalize (u16)
 fn convert_pt_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.100k.txt")
         .arg("-o")

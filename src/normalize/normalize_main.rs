@@ -1,15 +1,16 @@
+use crate::normalize::convert_helper::Method;
+use crate::normalize::helper::{normalize_f32_f32, normalize_u16_f32, vec2binary, vec2binary_f32, vec_f32_to_u8, vec_u16_to_u8};
+use crate::core::reader::read_input;
+use crate::core::writer::{writer_compress, writer_compress_zlib};
 use clap::ArgMatches;
-use log::{info, warn};
-use packing_lib::normalize::convert_helper::Method;
-use packing_lib::normalize::helper::{vec2binary, vec2binary_f32};
-use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::read_input;
-use packing_lib::core::writer::{writer_compress_zlib};
+use log::{debug, info, warn};
+
+use crate::core::core::{DataType, PackCompact};
+
 use std::process;
 
-pub fn bit_main(matches: &ArgMatches) {
+pub fn normalize_main(matches: &ArgMatches) {
     let (mut pc, index_present) = read_input(matches);
-
 
     // Check if the right data
     if pc.is_binary == DataType::TypeBit {
@@ -35,16 +36,16 @@ pub fn bit_main(matches: &ArgMatches) {
     }
 
     let absolute_thresh: u16 = matches
-        .value_of("absolute-threshold")
+        .value_of("absolute threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
     let relative_thresh: f32 = matches
-        .value_of("fraction")
+        .value_of("relative threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let std: f32 = matches.value_of("standard-deviation").unwrap_or("0").parse().unwrap();
+    let std: f32 = matches.value_of("std").unwrap_or("0").parse().unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
@@ -52,9 +53,9 @@ pub fn bit_main(matches: &ArgMatches) {
     let node = matches.is_present("node");
 
 
-    if !matches.is_present("absolute-threshold")
+    if !matches.is_present("absolute threshold")
         && method == Method::Nothing
-        && matches.is_present("fraction")
+        && matches.is_present("relative threshold")
     {
         warn!("The data is empty");
         process::exit(0x0100);
@@ -63,30 +64,26 @@ pub fn bit_main(matches: &ArgMatches) {
 
     let real_thresh: f32;
 
+
     // Checking the output base (sequence, nodes) or pack file
 
-
-
-    if !matches.is_present("absolute-threshold")
-        && method == Method::Nothing
-        && relative_thresh == 0.0
-    {
-        warn!("Nothing here");
+    if matches.is_present("relative threshold") && relative_thresh == 0.0 {
+        warn!("Relative threshold is 0");
         process::exit(0x0100);
     }
 
-    if node && !pc.is_sequence {
+
+    if matches.is_present("node") && pc.is_sequence {
         pc.calc_node_cov();
     }
 
     // Absolute threshold is adjusted is made with thresh
-    if !matches.is_present("absolute-threshold") {
+    if matches.is_present("absolute threshold") {
         real_thresh =
             PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
     } else {
         real_thresh = absolute_thresh as f32;
     }
-
     info!("New parameters");
     info!(
         "Feature: {}",
@@ -103,17 +100,17 @@ pub fn bit_main(matches: &ArgMatches) {
 
 
 
-    let number_entries = pc.normalized_coverage.len();
+    let mut number_entries = 0;
     let mut buffer = Vec::new();
-
     if pc.normalized_coverage.is_empty(){
-        info!("Number of samples: {}", pc.coverage.len());
-        buffer = vec2binary(pc.coverage, &real_thresh);
+        buffer.extend(normalize_u16_f32(&pc.coverage, &real_thresh));
+        number_entries = pc.coverage.len();
     } else {
-        info!("Number of samples: {}", pc.normalized_coverage.len());
-        buffer = vec2binary_f32(pc.normalized_coverage, &real_thresh);
-
+        buffer.extend(normalize_f32_f32(&pc.normalized_coverage, &real_thresh));
+        number_entries = pc.normalized_coverage.len();
     }
+    info!("Number of entries: {}", number_entries);
+
 
 
     let mut bb = PackCompact::file_header(
@@ -131,5 +128,4 @@ pub fn bit_main(matches: &ArgMatches) {
 
 
     writer_compress_zlib(&bb, matches.value_of("out").unwrap());
-
 }

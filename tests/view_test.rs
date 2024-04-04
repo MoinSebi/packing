@@ -9,7 +9,7 @@ use std::fs;
 /// Output: pi (index)
 fn view_1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
@@ -37,7 +37,7 @@ fn view_1() -> Result<(), Box<dyn std::error::Error>> {
 /// Output: pi (index)
 fn view_2() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")

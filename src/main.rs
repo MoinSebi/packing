@@ -17,6 +17,7 @@ use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
 use std::io::Write;
+use crate::bit::bit_main::bit_main;
 
 fn main() {
     let matches = App::new("packing")
@@ -104,7 +105,7 @@ fn main() {
                 .about("New name")
                 .takes_value(true)))
 
-        .subcommand(App::new("convert")
+        .subcommand(App::new("normalize")
             .about("Convert VG PACK format for a compact index structure (partially reversible)")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
@@ -157,13 +158,6 @@ fn main() {
                 .about("Adjust your value by standard deviation")
                 .takes_value(true)
                 .display_order(2))
-            // If you normalize, pls use me
-            .arg(Arg::new("normalize")
-                .long("normalize")
-                .about("Normalize the data set (and return a value based pack)")
-                .display_order(3)
-
-            )
             .arg(Arg::new("non-covered")
                 .long("non-covered")
                 .about("Include non-covered entries (nodes or sequences) for dynamic threshold calculations (e.g mean)")
@@ -176,11 +170,6 @@ fn main() {
                 .about("Merge coverage on node level [default: off -> sequence-level]")
                 .display_order(5)
 
-            )
-            .arg(Arg::new("compress")
-                .long("compress")
-                .about("Simply compress the output (ignore everything else)")
-                .display_order(6)
             )
 
             .help_heading("Modification options")
@@ -202,13 +191,6 @@ fn main() {
                 .about("Output name")
                 .takes_value(true)
                 .required(true))
-            .arg(Arg::new("output-pack")
-                .long("output-pack")
-                .about("Output pack file")
-                .takes_value(true))
-            .arg(Arg::new("plain-text")
-                .long("plain-text")
-                .about("Plain-text (non-compressed) output"))
         )
 
 
@@ -283,6 +265,95 @@ fn main() {
             )
         )
 
+        .subcommand(App::new("bit")
+            .about("Convert VG PACK format for a compact index structure (partially reversible)")
+            .version("0.1.0")
+            .setting(AppSettings::ArgRequiredElseHelp)
+            // Input
+            .help_heading("Input options")
+
+            .arg(Arg::new("pack")
+                .short('p')
+                .long("pack")
+                .about("vg pack file")
+                .takes_value(true))
+            .arg(Arg::new("index")
+                .short('i')
+                .long("index")
+                .about("Index file from 'packing index'")
+                .takes_value(true))
+            .arg(Arg::new("pack compressed")
+                .long("compressed")
+                .short('c')
+                .about("Compressed pack file.")
+                .takes_value(true))
+
+
+            .help_heading("Normalization parameters")
+            .arg(Arg::new("absolute-threshold")
+                .short('a')
+                .long("absolute-threshold")
+                .about("Presence-absence according to absolute threshold")
+                .takes_value(true)
+                .display_order(0))
+            // Modification
+            .arg(Arg::new("method")
+                .short('m')
+                .long("method")
+                .about("Normalization method (mean|median|percentile|nothing) [default: nothing]")
+                .takes_value(true)
+                .display_order(1)
+            )
+
+            .arg(Arg::new("fraction")
+                .short('f')
+                .long("fraction")
+                .about("Percentile (can be combined with 'normalize' flag")
+                .takes_value(true)
+                .display_order(2)
+            )
+            .arg(Arg::new("standard-deviation")
+                .short('s')
+                .long("std")
+                .about("Adjust your value by standard deviation")
+                .takes_value(true)
+                .display_order(3))
+            .arg(Arg::new("non-covered")
+                .long("non-covered")
+                .about("Include non-covered entries (nodes or sequences) for dynamic threshold calculations (e.g mean)")
+                .display_order(4)
+
+            )
+            .arg(Arg::new("node")
+                .short('n')
+                .long("node")
+                .about("Merge coverage on node level [default: off -> sequence-level]")
+                .display_order(5)
+
+            )
+
+            .help_heading("Modification options")
+            .arg(Arg::new("name")
+                .long("name")
+                .about("Name of the sample [default: name of the file]")
+                .takes_value(true))
+
+
+            //Output
+            // As you might get mutiple file, takes value for everythin
+            // Alternative only one run per process
+            // ReaderBit and u16 with stats function
+            // You iterate and lose information directly
+            .help_heading("Output options")
+            .arg(Arg::new("out")
+                .short('o')
+                .long("out")
+                .about("Output name")
+                .takes_value(true)
+                .required(true))
+        )
+
+
 
         .get_matches();
 
@@ -348,5 +419,9 @@ fn main() {
     }
     if let Some(matches) = matches.subcommand_matches("stats") {
         stats_main(matches);
+    }
+
+    if let Some(matches) = matches.subcommand_matches("bit") {
+        bit_main(matches);
     }
 }

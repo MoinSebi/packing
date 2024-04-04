@@ -1,12 +1,9 @@
-use crate::convert::convert_helper::Method;
-use crate::convert::helper::{
-    calculate_std_deviation, mean, mean_vec_u16_f64, median, median_vec_u16_16,
-    remove_zero, remove_zero_f32, transform_u32_to_array_of_u8,
-};
+use crate::normalize::convert_helper::Method;
+use crate::normalize::helper::{calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median, median_vec_u16_16, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8};
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
-use log::{info, warn};
+use log::{debug, info, warn};
 
 #[derive(PartialEq)]
 pub enum DataType {
@@ -163,27 +160,28 @@ impl PackCompact {
 
             let mut a_std = 0.0;
             if std != 0.0 {
-                a_std = calculate_std_deviation(&work_on) as f32
+                a_std = calculate_std_deviation(&work_on) as f32 * std
             }
+
 
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
                 work_on.sort();
                 thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize] as f32;
-                info!("{}% Percentile is {}", relative, thresh);
-                info!("Working threshold is {}", thresh);
+                debug!("{}% Percentile is {}", relative, thresh);
+                debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
                 thresh = mean_vec_u16_f64(&work_on) as f32;
-                info!("Mean is {}", thresh);
+                debug!("Mean is {}", thresh);
             } else if tt == Method::Median {
                 thresh = median_vec_u16_16(&work_on) as f32;
-                info!("Median is {}", thresh);
+                debug!("Median is {}", thresh);
             }
-            thresh -= std;
-            info!("Working threshold is {}", thresh);
+            debug!("Std is {}", a_std);
+            thresh -= a_std;
             thresh *= relative;
-            info!("Working threshold is {}", thresh);
+            debug!("Working threshold is {}", thresh);
 
             thresh
         } else {
@@ -197,29 +195,55 @@ impl PackCompact {
             if !include_all {
                 remove_zero_f32(&mut work_on)
             }
+            let mut a_std = 0.0;
+            if std != 0.0 {
+                a_std = calculate_std_deviation_f32(&work_on) as f32 * std
+            }
 
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
                 work_on.sort_by(|a, b| a.partial_cmp(b).unwrap());
                 thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize];
-                info!("{}% Percentile is {}", relative, thresh);
-                info!("Working threshold is {}", thresh);
+                debug!("{}% Percentile is {}", relative, thresh);
+                debug!("Working threshold is {}", thresh);
                 return thresh;
             } else if tt == Method::Mean {
                 thresh = mean(&work_on) as f32;
-                info!("Mean is {}", thresh);
-                info!("Working threshold is {}", thresh);
+                debug!("Mean is {}", thresh);
+                debug!("Working threshold is {}", thresh);
             } else if tt == Method::Median {
                 thresh = median(&mut work_on) as f32;
-                info!("Median is {}", thresh);
-                info!("Working threshold is {}", thresh);
+                debug!("Median is {}", thresh);
+                debug!("Working threshold is {}", thresh);
             }
-            thresh -= std;
-            info!("Working threshold is {}", thresh);
+            debug!("Std is {}", a_std);
+
+            thresh -= a_std;
             thresh *= relative;
-            info!("Working threshold is {}", thresh);
+            debug!("Working threshold is {}", thresh);
 
             thresh
         }
+    }
+
+
+    pub fn print_meta(&self){
+        info!("Entry type: {}", if self.is_sequence { "Sequence" } else { "Node" });
+        info!(
+        "Data type: {}",
+        if self.is_binary == DataType::TypeBit {
+            "Binary"
+        } else if self.is_binary == DataType::TypeU16 {
+            "Value (u16)"
+        } else {
+            "Value (f32)"
+        }
+    );
+        info!("Method: {}", self.method.to_string());
+        info!("Fraction: {}", self.fraction);
+        info!("Real threshold: {}", self.threshold);
+        info!("Entries: {}", self.length);
+        info!("Header bytes: {}", 95);
+        info!("Name: {}\n", self.name);
     }
 }

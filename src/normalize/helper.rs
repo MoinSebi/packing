@@ -108,27 +108,23 @@ pub fn byte_to_string(input: &[u8]) -> String {
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<f32> {
-    if absolute_thresh == &0.0 {
-        return input_vec.iter().map(|a| (*a).into()).collect();
-    }
+pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<u8> {
+
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push((*item as f32) / *absolute_thresh)
     }
-    new_vec
+    vec_f32_to_u8(&new_vec)
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<f32> {
-    if absolute_thresh == &0.0 {
-        return input_vec.iter().copied().collect();
-    }
+pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<u8> {
+
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push(*item / *absolute_thresh)
     }
-    new_vec
+    vec_f32_to_u8(&new_vec)
 }
 
 /// Create binary vector
@@ -185,6 +181,14 @@ pub fn remove_prefix_filename(filename: &str) -> String {
 }
 
 pub fn calculate_std_deviation(data: &[u16]) -> f64 {
+    let mean = data.iter().map(|&x| x as f64).sum::<f64>() / data.len() as f64;
+
+    let variance = data.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>() / data.len() as f64;
+
+    variance.sqrt()
+}
+
+pub fn calculate_std_deviation_f32(data: &[f32]) -> f64 {
     let mean = data.iter().map(|&x| x as f64).sum::<f64>() / data.len() as f64;
 
     let variance = data.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>() / data.len() as f64;

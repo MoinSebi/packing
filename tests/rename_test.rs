@@ -10,7 +10,7 @@ use predicates::prelude::predicate;
 /// Output: pi (index)
 fn rename1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
-    cmd.arg("convert")
+    cmd.arg("normalize")
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")

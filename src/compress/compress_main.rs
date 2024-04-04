@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use log::info;
-use packing_lib::convert::convert_helper::Method;
-use packing_lib::convert::helper::{vec_u16_to_u8};
+use packing_lib::normalize::convert_helper::Method;
+use packing_lib::normalize::helper::{vec_u16_to_u8};
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use packing_lib::core::writer::writer_compress_zlib;

@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use log::info;
-use packing_lib::convert::helper::{mean_vec_u16_f64, median_vec_u16_16, remove_zero_new};
+use packing_lib::normalize::helper::{mean_vec_u16_f64, median_vec_u16_16, remove_zero_new};
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use std::fs::File;

@@ -1,4 +1,4 @@
-use crate::convert::convert_helper::Method;
+use crate::normalize::convert_helper::Method;
 use crate::core::core::{DataType, PackCompact};
 use byteorder::{BigEndian, ByteOrder};
 use std::fs::File;
@@ -86,12 +86,8 @@ impl PackCompact {
         let mut buffer: Vec<u8> = vec![53, 56];
 
         // Is node?
-        if sequence_out {
-            buffer.push(1);
-        } else {
-            buffer.push(0);
-        }
 
+        buffer.push(if sequence_out {1} else {0});
         // Is binary?
         buffer.push(is_binary.toU8());
 

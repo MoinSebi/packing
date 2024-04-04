@@ -34,9 +34,11 @@ pub fn info_compressed(filename: &str) {
     );
     info!("Method: {}", meta.2.to_string());
     info!("Relative threshold: {}", meta.3);
-    info!("Real threshold: {}", meta.4);
-    info!("Bytes: {}", meta.5);
-    info!("Entries: {}", meta.6);
-    info!("Header bytes: {}", 77);
-    info!("Name: {}", meta.7);
+    info!("Standard deviation: {}", meta.4);
+    info!("Real threshold: {}", meta.5);
+    info!("Bytes: {}", meta.6);
+    info!("Entries: {}", meta.7);
+    info!("Header bytes: {}", 95);
+    info!("Name: {}", meta.8);
 }
+

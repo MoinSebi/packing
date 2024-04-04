@@ -1,6 +1,6 @@
-use crate::convert::convert_helper::Method;
+use crate::normalize::convert_helper::Method;
 
-use crate::convert::helper::{byte_to_string, remove_prefix_filename};
+use crate::normalize::helper::{byte_to_string, remove_prefix_filename};
 use crate::core::core::{DataType, PackCompact};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
@@ -85,9 +85,9 @@ pub fn read_index(filename: &str) -> Vec<u32> {
 /// Wrapper for meta + coverage combination
 /// https://stackoverflow.com/questions/29445026/converting-number-primitives-i32-f64-etc-to-byte-representations
 pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
-    let nodes = read_index(file_index);
     let mut p = PackCompact::read_wrapper(file_pc);
-    p.node_index = nodes;
+    p.node_index =  read_index(file_index);
+    p.print_meta();
     p
 }
 
@@ -193,10 +193,13 @@ impl PackCompact {
             }
         }
         pc.name = remove_prefix_filename(filename);
+        pc.is_sequence = true;
+        pc.length = pc.coverage.len() as u32;
         info!(
             "{} entries have been truncated (have a coverage above 65,535).",
             count
         );
+        pc.print_meta();
         pc
     }
 
@@ -217,7 +220,7 @@ impl PackCompact {
         let (_kind, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
         debug!("Name1 {}", name);
-        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[77..]);
+        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[95..]);
         for _i in length as usize..bv.len() {
             bv.pop();
         }
@@ -242,8 +245,8 @@ impl PackCompact {
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0; buffer[77..].len() / 2];
-        BigEndian::read_u16_into(&buffer[77..], &mut data);
+        let mut data = vec![0; buffer[95..].len() / 2];
+        BigEndian::read_u16_into(&buffer[95..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),
@@ -265,8 +268,8 @@ impl PackCompact {
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0.0; buffer[77..].len() / 4];
-        BigEndian::read_f32_into(&buffer[77..], &mut data);
+        let mut data = vec![0.0; buffer[95..].len() / 4];
+        BigEndian::read_f32_into(&buffer[95..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),
