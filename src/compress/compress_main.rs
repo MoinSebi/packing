@@ -9,7 +9,7 @@ use std::process;
 
 /// How to compress a pack file
 pub fn compress_main(matches: &ArgMatches) {
-    let (mut pc, index_present) = read_input(matches);
+    let (mut pc, _index_present) = read_input(matches);
 
     if pc.is_binary != DataType::TypeU16{
         info!("Your input is not a plain-text coverage file");

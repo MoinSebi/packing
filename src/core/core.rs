@@ -1,6 +1,6 @@
 use crate::convert::convert_helper::Method;
 use crate::convert::helper::{
-    calculate_std_deviation, mean, mean_vec_u16_f64, mean_vec_u16_u16, median, median_vec_u16_16,
+    calculate_std_deviation, mean, mean_vec_u16_f64, median, median_vec_u16_16,
     remove_zero, remove_zero_f32, transform_u32_to_array_of_u8,
 };
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
@@ -113,21 +113,39 @@ impl PackCompact {
     /// - Add to struct
     /// - Always average method
     pub fn calc_node_cov(&mut self) {
-        let mut node_id = self.node_index[0];
-        let mut node_mean: Vec<u16> = Vec::new();
-        let mut result: Vec<u16> = Vec::new();
-        for x in 0..self.coverage.len() {
-            if self.node_index[x] != node_id {
-                result.push(mean_vec_u16_u16(&node_mean));
+        if self.normalized_coverage.is_empty(){
+            let mut node_id = self.node_index[0];
+            let mut node_mean: Vec<u16> = Vec::new();
+            let mut result: Vec<f32> = Vec::new();
+            for x in 0..self.coverage.len() {
+                if self.node_index[x] != node_id {
+                    result.push(mean(&node_mean) as f32);
 
-                node_id = self.node_index[x];
-                node_mean = vec![self.coverage[x]];
-            } else {
-                node_mean.push(self.coverage[x])
+                    node_id = self.node_index[x];
+                    node_mean = vec![self.coverage[x]];
+                } else {
+                    node_mean.push(self.coverage[x])
+                }
             }
+            result.push(mean(&node_mean) as f32);
+            self.normalized_coverage = result
+        } else {
+            let mut node_id = self.node_index[0];
+            let mut node_mean: Vec<f32> = Vec::new();
+            let mut result: Vec<f32> = Vec::new();
+            for x in 0..self.normalized_coverage.len() {
+                if self.node_index[x] != node_id {
+                    result.push(mean(&node_mean) as f32);
+
+                    node_id = self.node_index[x];
+                    node_mean = vec![self.normalized_coverage[x]];
+                } else {
+                    node_mean.push(self.normalized_coverage[x])
+                }
+            }
+            result.push(mean(&node_mean) as f32);
+            self.normalized_coverage = result
         }
-        result.push(mean_vec_u16_u16(&node_mean));
-        self.coverage = result
     }
 
     pub fn get_threshold(&self, include_all: bool, relative: f32, std: f32, tt: Method) -> f32 {
@@ -183,7 +201,7 @@ impl PackCompact {
             let mut thresh: f32 = 0.0;
             if tt == Method::Percentile {
                 work_on.sort_by(|a, b| a.partial_cmp(b).unwrap());
-                thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize] as f32;
+                thresh = work_on[((work_on.len() as f32 - 1.0) * relative).round() as usize];
                 info!("{}% Percentile is {}", relative, thresh);
                 info!("Working threshold is {}", thresh);
                 return thresh;

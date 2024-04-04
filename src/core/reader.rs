@@ -1,5 +1,5 @@
 use crate::convert::convert_helper::Method;
-use crate::convert::convert_helper::OutputType::Pack;
+
 use crate::convert::helper::{byte_to_string, remove_prefix_filename};
 use crate::core::core::{DataType, PackCompact};
 use bitvec::order::Msb0;
@@ -39,7 +39,7 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
 ///
 pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) =
+    let (_kind, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
         PackCompact::get_meta(buffer);
 
     let chunks = buffer.chunks((bytes + 77) as usize);
@@ -58,7 +58,7 @@ pub fn wrapper_bool(buffer: &Vec<u8>) -> Vec<PackCompact> {
 /// Iterate over each sample
 pub fn wrapper_u16(buffer: &Vec<u8>) -> Vec<PackCompact> {
     // total length 73 + len
-    let (_kind, _bin, _method, _relative, std, _thresh, bytes, _length, _name) =
+    let (_kind, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
         PackCompact::get_meta(buffer);
     let chunks = buffer.chunks((bytes + 77) as usize);
 
@@ -231,7 +231,7 @@ impl PackCompact {
             is_binary: _bin,
             method: _method,
             fraction: _relative,
-            std: std,
+            std,
             threshold: _thresh,
             length,
         }
@@ -252,9 +252,9 @@ impl PackCompact {
             coverage: data,
             is_sequence: _kind,
             is_binary: _bin,
-            method: method,
+            method,
             fraction: _relative,
-            std: std,
+            std,
             threshold: _thresh,
             length,
         }
@@ -275,9 +275,9 @@ impl PackCompact {
             coverage: Vec::new(),
             is_sequence: _kind,
             is_binary: _bin,
-            method: method,
+            method,
             fraction: _relative,
-            std: std,
+            std,
             threshold: _thresh,
             length,
         }

@@ -1,9 +1,9 @@
-use crate::convert::convert_helper::Method;
-use crate::core::core::PackCompact;
+
+
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
-use log::{info, warn};
+
 
 /// u16 vector to u8 vector
 pub fn vec_u16_to_u8(input_vec: &Vec<u16>) -> Vec<u8> {
@@ -53,8 +53,8 @@ where
     let len = data.len();
     if len % 2 == 0 {
         let mid = len / 2;
-        let median = (f64::from(data[mid - 1]) + f64::from(data[mid])) / 2.0;
-        median
+        
+        (f64::from(data[mid - 1]) + f64::from(data[mid])) / 2.0
     } else {
         let mid = len / 2;
         f64::from(data[mid])
@@ -122,11 +122,11 @@ pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<f32
 /// Normalize/scale the vector by a value
 pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<f32> {
     if absolute_thresh == &0.0 {
-        return input_vec.iter().map(|a| (*a).into()).collect();
+        return input_vec.iter().copied().collect();
     }
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
-        new_vec.push((*item as f32) / *absolute_thresh)
+        new_vec.push(*item / *absolute_thresh)
     }
     new_vec
 }
@@ -136,6 +136,19 @@ pub fn vec2binary(vecc: Vec<u16>, absolute_thresh: &f32) -> Vec<u8> {
     let mut bv: BitVec<u8, Msb0> = BitVec::new();
     for x in vecc.iter() {
         if (*x as f32) >= *absolute_thresh {
+            bv.push(true)
+        } else {
+            bv.push(false)
+        }
+    }
+
+    bv.into_vec()
+}
+
+pub fn vec2binary_f32(vecc: Vec<f32>, absolute_thresh: &f32) -> Vec<u8> {
+    let mut bv: BitVec<u8, Msb0> = BitVec::new();
+    for x in vecc.iter() {
+        if *x >= *absolute_thresh {
             bv.push(true)
         } else {
             bv.push(false)

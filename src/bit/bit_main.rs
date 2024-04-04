@@ -1,15 +1,16 @@
 use clap::ArgMatches;
-use log::{debug, info, warn};
+use log::{info, warn};
 use packing_lib::convert::convert_helper::Method;
-use packing_lib::convert::helper::{normalize_u16_f32, vec2binary, vec_u16_to_u8,
-};
+use packing_lib::convert::helper::{vec2binary, vec2binary_f32};
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
-use packing_lib::core::writer::{writer_compress, writer_compress_zlib};
+use packing_lib::core::writer::{writer_compress_zlib};
 use std::process;
 
 pub fn bit_main(matches: &ArgMatches) {
     let (mut pc, index_present) = read_input(matches);
+
+    // Check if the right data
     if pc.is_binary == DataType::TypeBit {
         warn!("You loaded a presence/absence file. You are not able to further convert it.");
         process::exit(0x0100);
@@ -32,12 +33,12 @@ pub fn bit_main(matches: &ArgMatches) {
         pc.name = matches.value_of("name").unwrap().to_string();
     }
 
-    let mut absolute_thresh: u16 = matches
+    let absolute_thresh: u16 = matches
         .value_of("absolute threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let mut relative_thresh: f32 = matches
+    let relative_thresh: f32 = matches
         .value_of("relative threshold")
         .unwrap_or("0")
         .parse()
@@ -49,15 +50,18 @@ pub fn bit_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let node = matches.is_present("node");
 
+
     if !matches.is_present("absolute threshold")
         && method == Method::Nothing
         && matches.is_present("relative threshold")
     {
-        method = Method::Percentile;
+        warn!("The data is empty");
+        process::exit(0x0100);
     }
 
+
     let real_thresh: f32;
-    let mut sequence_out = matches.is_present("node");
+    let sequence_out = matches.is_present("node");
 
     // Checking the output base (sequence, nodes) or pack file
     info!(
@@ -76,7 +80,7 @@ pub fn bit_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
 
-    if matches.is_present("node") {
+    if matches.is_present("node") && !pc.is_sequence {
         pc.calc_node_cov();
     }
 
@@ -97,24 +101,30 @@ pub fn bit_main(matches: &ArgMatches) {
     // The vector we work with
 
 
-    let number_entries = pc.coverage.len();
-    let buffer: Vec<u8> = vec2binary(pc.coverage, &real_thresh);
+
+    let number_entries = pc.normalized_coverage.len();
+    let mut buffer = Vec::new();
+    if pc.normalized_coverage.is_empty(){
+        buffer = vec2binary(pc.coverage, &real_thresh);
+    } else {
+        buffer = vec2binary_f32(pc.normalized_coverage, &real_thresh);
+    }
+
+
     let mut bb = PackCompact::file_header(
         sequence_out,
         DataType::TypeBit,
         method,
         relative_thresh,
         std,
-        real_thresh as f32,
+        real_thresh,
         number_entries as u32,
         &pc.name,
     );
     bb.extend(buffer);
     println!("{}", bb.len());
 
-    if matches.is_present("non-compressed") {
-        writer_compress(&bb, matches.value_of("out").unwrap());
-    } else {
-        writer_compress_zlib(&bb, matches.value_of("out").unwrap());
-    }
+
+    writer_compress_zlib(&bb, matches.value_of("out").unwrap());
+
 }

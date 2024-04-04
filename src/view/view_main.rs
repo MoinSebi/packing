@@ -90,19 +90,17 @@ pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
                 writeln!(f, "{}", x).expect("Can not write file");
             }
         }
+    } else if pc.is_binary == DataType::TypeBit {
+        for x in pc.bin_coverage.iter() {
+            writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
+        }
+    } else if pc.is_binary == DataType::TypeU16 {
+        for x in pc.coverage.iter() {
+            writeln!(f, "{}", x).expect("Can not write file");
+        }
     } else {
-        if pc.is_binary == DataType::TypeBit {
-            for x in pc.bin_coverage.iter() {
-                writeln!(f, "{}", if *x { 1 } else { 0 }).expect("Can not write file");
-            }
-        } else if pc.is_binary == DataType::TypeU16 {
-            for x in pc.coverage.iter() {
-                writeln!(f, "{}", x).expect("Can not write file");
-            }
-        } else {
-            for x in pc.normalized_coverage.iter() {
-                writeln!(f, "{}", x).expect("Can not write file");
-            }
+        for x in pc.normalized_coverage.iter() {
+            writeln!(f, "{}", x).expect("Can not write file");
         }
     }
 }

@@ -1,5 +1,5 @@
 use log::info;
-use packing_lib::convert::convert_helper::Method;
+
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::{read_index, unpack_zstd_to_byte};
 use std::collections::HashSet;

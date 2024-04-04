@@ -1,6 +1,6 @@
 use crate::convert::convert_helper::Method;
 use crate::convert::helper::{
-    normalize_f32_f32, normalize_u16_f32, vec2binary, vec_f32_to_u8, vec_u16_to_u8,
+    normalize_f32_f32, normalize_u16_f32, vec_f32_to_u8,
 };
 use crate::core::reader::read_input;
 use crate::core::writer::{writer_compress, writer_compress_zlib};
@@ -8,7 +8,7 @@ use clap::ArgMatches;
 use log::{debug, info, warn};
 
 use crate::core::core::PackCompact;
-use half::f16;
+
 use std::process;
 
 pub fn normalize_main(matches: &ArgMatches) {
@@ -46,7 +46,7 @@ pub fn normalize_main(matches: &ArgMatches) {
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let mut relative_thresh: u16 = matches
+    let relative_thresh: u16 = matches
         .value_of("relative threshold")
         .unwrap_or("0")
         .parse()
@@ -57,13 +57,13 @@ pub fn normalize_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let compress = matches.is_present("compress");
     let node = matches.is_present("node");
-    let std = matches.value_of("std").unwrap_or("0");
+    let _std = matches.value_of("std").unwrap_or("0");
     if node && !pc.is_sequence {
         info!("Input is node-based, output should be sequence. This does not work");
         process::exit(0x0100)
     }
 
-    let bin = !matches.is_present("normalization") || !matches.is_present("compress");
+    let _bin = !matches.is_present("normalization") || !matches.is_present("compress");
 
     if !matches.is_present("absolute threshold")
         && method == Method::Nothing
@@ -138,10 +138,10 @@ pub fn normalize_main(matches: &ArgMatches) {
         pc.normalized_coverage = normalize_f32_f32(&pc.normalized_coverage, &real_thresh)
     }
 
-    let number_entries = pc.coverage.len();
-    let buffer: Vec<u8>;
+    let _number_entries = pc.coverage.len();
+    
 
-    buffer = vec_f32_to_u8(&pc.normalized_coverage);
+    let buffer: Vec<u8> = vec_f32_to_u8(&pc.normalized_coverage);
 
     let mut bb = Vec::new();
     bb.extend(buffer);
