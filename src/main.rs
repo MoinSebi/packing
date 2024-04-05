@@ -5,6 +5,7 @@ mod info;
 mod rename;
 mod stats;
 mod view;
+mod comp;
 
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
@@ -19,6 +20,7 @@ use log::{info, LevelFilter};
 use crate::bit::bit_main::bit_main;
 use packing_lib::normalize::normalize_main::normalize_main;
 use std::io::Write;
+use crate::comp::comp_main::comp_main;
 use crate::compress::compress_main::compress_main;
 
 fn main() {
@@ -268,6 +270,20 @@ fn main() {
             )
         )
 
+        .subcommand(App::new("compare")
+            .about("Compare to pack files and check if they made based on the same stats")
+            .setting(AppSettings::ArgRequiredElseHelp)
+            .arg(Arg::new("pack1")
+                .long("pack1")
+                .takes_value(true)
+                .required(true))
+            .arg(Arg::new("pack2")
+                .long("pack2")
+                .takes_value(true)
+                .required(true))
+
+        )
+
         .subcommand(App::new("bit")
             .about("Convert VG PACK format for a compact index structure (partially reversible)")
             .version("0.1.0")
@@ -428,5 +444,8 @@ fn main() {
     }
     if let Some(matches) = matches.subcommand_matches("compress") {
         compress_main(matches);
+    }
+    if let Some(matches) = matches.subcommand_matches("compare") {
+        comp_main(matches);
     }
 }

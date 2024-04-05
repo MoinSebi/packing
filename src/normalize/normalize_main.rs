@@ -40,19 +40,19 @@ pub fn normalize_main(matches: &ArgMatches) {
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let relative_thresh: f32 = matches
+    let mut relative_thresh: f32 = matches
         .value_of("fraction")
         .unwrap_or("1.0")
         .parse()
         .unwrap();
-    let std: f32 = matches
+    let mut std: f32 = matches
         .value_of("standard-deviation")
         .unwrap_or("0")
         .parse()
         .unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
-    let method = Method::from_str(method_string);
+    let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
@@ -83,6 +83,9 @@ pub fn normalize_main(matches: &ArgMatches) {
             PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
     } else {
         real_thresh = absolute_thresh as f32;
+        method = Method::Nothing;
+        relative_thresh = 1.0;
+        std = 0.0;
     }
     info!("New parameters");
     info!(
