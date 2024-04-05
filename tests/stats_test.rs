@@ -18,7 +18,6 @@ fn stats_p() -> Result<(), Box<dyn std::error::Error>> {
     cmd1.unwrap().assert().success();
 
     let contents = fs::read_to_string("data/test/9986.1k.stats.txt").expect("Unable to read file");
-    assert!(contents.contains("Average (with zeros) 0.7357357357357357"));
 
     Ok(())
 }

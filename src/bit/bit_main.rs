@@ -50,8 +50,8 @@ pub fn bit_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
-    if matches.is_present("absolute-threshold") && method == Method::Nothing {
-        absolute_thresh = 0;
+    if !matches.is_present("absolute-threshold") && method == Method::Nothing {
+        absolute_thresh = 1;
     }
 
     let real_thresh: f32;
