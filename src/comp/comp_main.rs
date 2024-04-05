@@ -1,10 +1,10 @@
-use std::fs::File;
+
 use clap::ArgMatches;
 use log::info;
 use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::{read_input, unpack_zstd_to_byte};
+use packing_lib::core::reader::{unpack_zstd_to_byte};
 use packing_lib::normalize::convert_helper::Method;
-use crate::stats::stats_main::stats_wrapper;
+
 
 pub fn comp_main(matches: &ArgMatches) {
     info!("Compare main");
@@ -16,10 +16,12 @@ pub fn comp_main(matches: &ArgMatches) {
     let g: Vec<u8> = unpack_zstd_to_byte(filename2);
     let meta2 = PackCompact::get_meta(&g);
     compare_meta(&meta1, &meta2);
-
 }
 
-fn compare_meta(meta1: &(bool, DataType, Method, f32, f32, f32, u32, u32, String), meta2: &(bool, DataType, Method, f32, f32, f32, u32, u32, String)) {
+fn compare_meta(
+    meta1: &(bool, DataType, Method, f32, f32, f32, u32, u32, String),
+    meta2: &(bool, DataType, Method, f32, f32, f32, u32, u32, String),
+) {
     let mut all_good = true;
     if meta1.0 != meta2.0 {
         all_good = false;
@@ -55,7 +57,7 @@ fn compare_meta(meta1: &(bool, DataType, Method, f32, f32, f32, u32, u32, String
 
         info!("Entries is different");
     }
-    if all_good{
+    if all_good {
         info!("Meta data is the same");
     }
 }

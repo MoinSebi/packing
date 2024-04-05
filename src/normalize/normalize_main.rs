@@ -77,9 +77,7 @@ pub fn normalize_main(matches: &ArgMatches) {
         pc.calc_node_cov();
     }
 
-    if matches.is_present("absolute-threshold")
-        && method == Method::Nothing
-    {
+    if matches.is_present("absolute-threshold") && method == Method::Nothing {
         absolute_thresh = 0;
     }
 

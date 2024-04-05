@@ -200,8 +200,8 @@ pub fn remove_prefix_filename(filename: &str) -> String {
 }
 
 pub fn calculate_std_deviation<T>(data: &[T]) -> f64
-    where
-        T: Into<f64> + Copy,
+where
+    T: Into<f64> + Copy,
 {
     let sum: f64 = data.iter().map(|&x| x.into()).sum();
     let mean = sum / data.len() as f64;

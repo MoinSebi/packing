@@ -50,9 +50,7 @@ pub fn bit_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
-    if matches.is_present("absolute-threshold")
-        && method == Method::Nothing
-    {
+    if matches.is_present("absolute-threshold") && method == Method::Nothing {
         absolute_thresh = 0;
     }
 
@@ -71,10 +69,6 @@ pub fn bit_main(matches: &ArgMatches) {
     if want_sequence && !pc.is_sequence {
         pc.calc_node_cov();
     }
-
-
-
-
 
     // Absolute threshold is adjusted is made with thresh
     if !matches.is_present("absolute-threshold") {

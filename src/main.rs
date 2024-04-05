@@ -1,11 +1,11 @@
 mod bit;
+mod comp;
 mod compress;
 mod index;
 mod info;
 mod rename;
 mod stats;
 mod view;
-mod comp;
 
 use crate::index::index_main::index_main;
 use crate::info::info_main::info_main;
@@ -18,10 +18,10 @@ use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
 use crate::bit::bit_main::bit_main;
-use packing_lib::normalize::normalize_main::normalize_main;
-use std::io::Write;
 use crate::comp::comp_main::comp_main;
 use crate::compress::compress_main::compress_main;
+use packing_lib::normalize::normalize_main::normalize_main;
+use std::io::Write;
 
 fn main() {
     let matches = App::new("packing")
