@@ -199,10 +199,21 @@ pub fn remove_prefix_filename(filename: &str) -> String {
     return s2.last().unwrap().parse().unwrap();
 }
 
-pub fn calculate_std_deviation(data: &[u16]) -> f64 {
-    let mean = data.iter().map(|&x| x as f64).sum::<f64>() / data.len() as f64;
+pub fn calculate_std_deviation<T>(data: &[T]) -> f64
+    where
+        T: Into<f64> + Copy,
+{
+    let sum: f64 = data.iter().map(|&x| x.into()).sum();
+    let mean = sum / data.len() as f64;
 
-    let variance = data.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>() / data.len() as f64;
+    let variance = data
+        .iter()
+        .map(|&x| {
+            let x_f64: f64 = x.into();
+            (x_f64 - mean).powi(2)
+        })
+        .sum::<f64>()
+        / data.len() as f64;
 
     variance.sqrt()
 }
