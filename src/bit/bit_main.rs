@@ -33,29 +33,27 @@ pub fn bit_main(matches: &ArgMatches) {
         pc.name = matches.value_of("name").unwrap().to_string();
     }
 
-    let absolute_thresh: u16 = matches
+    let mut absolute_thresh: u16 = matches
         .value_of("absolute-threshold")
         .unwrap_or("0")
         .parse()
         .unwrap();
-    let relative_thresh: f32 = matches.value_of("fraction").unwrap_or("0").parse().unwrap();
-    let std: f32 = matches
+    let mut relative_thresh: f32 = matches.value_of("fraction").unwrap_or("0").parse().unwrap();
+    let mut std: f32 = matches
         .value_of("standard-deviation")
         .unwrap_or("0")
         .parse()
         .unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
-    let method = Method::from_str(method_string);
+    let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
     let want_sequence = !matches.is_present("node");
 
-    if !matches.is_present("absolute-threshold")
+    if matches.is_present("absolute-threshold")
         && method == Method::Nothing
-        && matches.is_present("fraction")
     {
-        warn!("The data is empty");
-        process::exit(0x0100);
+        absolute_thresh = 0;
     }
 
     let real_thresh: f32;
@@ -74,12 +72,19 @@ pub fn bit_main(matches: &ArgMatches) {
         pc.calc_node_cov();
     }
 
+
+
+
+
     // Absolute threshold is adjusted is made with thresh
     if !matches.is_present("absolute-threshold") {
         real_thresh =
             PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
     } else {
         real_thresh = absolute_thresh as f32;
+        method = Method::Nothing;
+        relative_thresh = 1.0;
+        std = 0.0;
     }
 
     info!("New parameters");

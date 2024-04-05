@@ -35,7 +35,7 @@ pub fn normalize_main(matches: &ArgMatches) {
         pc.name = matches.value_of("name").unwrap().to_string();
     }
 
-    let absolute_thresh: u16 = matches
+    let mut absolute_thresh: u16 = matches
         .value_of("absolute-threshold")
         .unwrap_or("0")
         .parse()
@@ -75,6 +75,12 @@ pub fn normalize_main(matches: &ArgMatches) {
 
     if matches.is_present("node") && pc.is_sequence {
         pc.calc_node_cov();
+    }
+
+    if matches.is_present("absolute-threshold")
+        && method == Method::Nothing
+    {
+        absolute_thresh = 0;
     }
 
     // Absolute threshold is adjusted is made with thresh
