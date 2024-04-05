@@ -4,7 +4,7 @@ use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use packing_lib::normalize::helper::{
     calculate_std_deviation, mean, median, remove_zero,
-    remove_zero_f32, remove_zero_new,
+    remove_zero_f32,
 };
 
 use std::fs::File;
@@ -67,7 +67,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
             let mut workon = pc.coverage.clone();
             chaotic_input(file2, &mut workon, true, true);
 
-            remove_zero_new(&workon);
+            remove_zero(&mut workon);
             chaotic_input(file2, &mut workon, false, true);
         } else {
             let mut workon = pc.coverage.clone();

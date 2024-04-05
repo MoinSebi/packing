@@ -185,9 +185,7 @@ pub fn remove_zero_f32(vecc: &mut Vec<f32>) {
     vecc.retain(|&x| x != 0.0);
 }
 
-pub fn remove_zero_new(vecc: &Vec<u16>) -> Vec<u16> {
-    vecc.iter().cloned().filter(|x| *x != 0).collect::<Vec<_>>()
-}
+
 
 /// Get the name of the file
 ///

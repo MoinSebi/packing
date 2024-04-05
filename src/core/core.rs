@@ -179,7 +179,6 @@ impl PackCompact {
                 thresh = median_vec_u16_16(&work_on) as f32;
                 debug!("Median is {}", thresh);
             }
-            println!("dasdasjdkja");
             debug!("Std is {}", a_std);
             thresh -= a_std;
             thresh *= relative;

@@ -54,15 +54,9 @@ pub fn normalize_main(matches: &ArgMatches) {
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
-    let want_sequence = !matches.is_present("node");
+    let mut want_sequence = !matches.is_present("node");
 
-    if !matches.is_present("absolute-threshold")
-        && method == Method::Nothing
-        && matches.is_present("fraction")
-    {
-        warn!("The data is empty");
-        process::exit(0x0100);
-    }
+
 
     let real_thresh: f32;
 
@@ -82,7 +76,7 @@ pub fn normalize_main(matches: &ArgMatches) {
     }
 
     // Absolute threshold is adjusted is made with thresh
-    if !matches.is_present("absolute-threshold") {
+    if absolute_thresh == 0 {
         real_thresh =
             PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
     } else {
@@ -91,6 +85,10 @@ pub fn normalize_main(matches: &ArgMatches) {
         relative_thresh = 1.0;
         std = 0.0;
     }
+    if !pc.is_sequence {
+        want_sequence = false;
+    }
+
     info!("New parameters");
     info!(
         "Feature: {}",
@@ -105,7 +103,7 @@ pub fn normalize_main(matches: &ArgMatches) {
 
     // The vector we work with
 
-    let mut number_entries = 0;
+    let number_entries;
     let mut buffer = Vec::new();
     if pc.normalized_coverage.is_empty() {
         buffer.extend(normalize_u16_f32(&pc.coverage, &real_thresh));

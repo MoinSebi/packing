@@ -1,4 +1,4 @@
-use crate::info::info::{info_compressed, info_index};
+use crate::info::info_helper::{info_compressed, info_index};
 use clap::ArgMatches;
 
 pub fn info_main(matches: &ArgMatches) {

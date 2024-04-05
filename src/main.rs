@@ -27,7 +27,7 @@ fn main() {
     let matches = App::new("packing")
         .version("0.1.0")
         .author("Sebastian V")
-        .about("Compressing VG Pack files")
+        .about("Working with coverage (pack) files")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .arg(Arg::new("verbose")
             .short('v')
@@ -61,7 +61,7 @@ fn main() {
 
 
         .subcommand(App::new("index")
-            .about("Index a graph (gfa or VG pack)")
+            .about("Index a GFA or plain-text coverage file")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
             .help_heading("Input options")
@@ -69,12 +69,12 @@ fn main() {
                 .display_order(1)
                 .short('g')
                 .long("gfa")
-                .about("Graphical Fragment Assembly file")
+                .about("Graphical Fragment Assembly (GFA) file")
                 .takes_value(true))
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
-                .about("pack format after alignment")
+                .about("Pack coverage file (plain-text)")
                 .takes_value(true))
             .help_heading("Output options")
             .arg(Arg::new("output")
@@ -86,7 +86,7 @@ fn main() {
 
 
         .subcommand(App::new("rename")
-            .about("Change the name in the header of pc or pa")
+            .about("Change the name of a pack file (plain-text excluded)")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
@@ -94,12 +94,12 @@ fn main() {
                 .short('i')
                 .long("input")
                 .required(true)
-                .about("Either pa or pc file")
+                .about("Pack file input")
                 .takes_value(true))
             .arg(Arg::new("output")
                 .short('o')
                  .long("output")
-                 .about("Output")
+                 .about("Output file")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::new("name")
@@ -110,7 +110,7 @@ fn main() {
                 .takes_value(true)))
 
         .subcommand(App::new("normalize")
-            .about("Convert VG PACK format for a compact index structure (partially reversible)")
+            .about("Normalize a pack file with a custom threshold")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
             // Input
@@ -119,7 +119,7 @@ fn main() {
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
-                .about("vg pack file")
+                .about("Pack file")
                 .takes_value(true))
             .arg(Arg::new("index")
                 .short('i')
@@ -129,7 +129,7 @@ fn main() {
             .arg(Arg::new("pack compressed")
                 .long("compressed")
                 .short('c')
-                .about("Compressed pack file.")
+                .about("Compressed or normalized pack file")
                 .takes_value(true))
 
 
@@ -137,7 +137,7 @@ fn main() {
             .arg(Arg::new("absolute-threshold")
                 .short('a')
                 .long("absolute-threshold")
-                .about("Presence-absence according to absolute threshold")
+                .about("Set a absolute threshold")
                 .takes_value(true)
                 .display_order(0))
             // Modification
@@ -152,14 +152,14 @@ fn main() {
             .arg(Arg::new("fraction")
                 .short('f')
                 .long("fraction")
-                .about("Percentile (can be combined with 'normalize' flag")
+                .about("Fraction")
                 .takes_value(true)
                 .display_order(2)
             )
             .arg(Arg::new("standard-deviation")
                 .short('s')
                 .long("std")
-                .about("Adjust your value by standard deviation")
+                .about("Adjust your threshold by decreasing if by X * standard deviation")
                 .takes_value(true)
                 .display_order(2))
             .arg(Arg::new("non-covered")
@@ -171,7 +171,7 @@ fn main() {
             .arg(Arg::new("node")
                 .short('n')
                 .long("node")
-                .about("Merge coverage on node level [default: off -> sequence-level]")
+                .about("Merge coverage on node level [default: off -> sequence-level]. The default will adjust if input is already node-level.")
                 .display_order(5)
             )
 
@@ -198,7 +198,7 @@ fn main() {
 
 
         .subcommand(App::new("view")
-            .about("Shows the compressed binary data in plain text")
+            .about("View the compressed pack data in plain text")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
@@ -251,7 +251,7 @@ fn main() {
 
         )
         .subcommand(App::new("compress")
-            .about("Compress a plain-text file")
+            .about("Compress a plain-text coverage file")
             .setting(AppSettings::ArgRequiredElseHelp)
             .arg(Arg::new("pack")
                 .short('p')
@@ -271,7 +271,7 @@ fn main() {
         )
 
         .subcommand(App::new("compare")
-            .about("Compare to pack files and check if they made based on the same stats")
+            .about("Compare two pack files and check if they made based on the same stats")
             .setting(AppSettings::ArgRequiredElseHelp)
             .arg(Arg::new("pack1")
                 .long("pack1")
@@ -285,7 +285,7 @@ fn main() {
         )
 
         .subcommand(App::new("bit")
-            .about("Convert VG PACK format for a compact index structure (partially reversible)")
+            .about("Convert a pack file to a presence-absence file (binary) using custom threshold")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
             // Input
@@ -308,7 +308,7 @@ fn main() {
                 .takes_value(true))
 
 
-            .help_heading("Normalization parameters")
+            .help_heading("Threshold parameters")
             .arg(Arg::new("absolute-threshold")
                 .short('a')
                 .long("absolute-threshold")

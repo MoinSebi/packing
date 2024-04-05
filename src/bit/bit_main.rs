@@ -48,7 +48,7 @@ pub fn bit_main(matches: &ArgMatches) {
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("non-covered");
-    let want_sequence = !matches.is_present("node");
+    let mut want_sequence = !matches.is_present("node");
 
     if !matches.is_present("absolute-threshold") && method == Method::Nothing {
         absolute_thresh = 1;
@@ -58,20 +58,20 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // Checking the output base (sequence, nodes) or pack file
 
-    if !matches.is_present("absolute-threshold")
-        && method == Method::Nothing
-        && relative_thresh == 0.0
-    {
-        warn!("Nothing here");
-        process::exit(0x0100);
-    }
+
 
     if want_sequence && !pc.is_sequence {
         pc.calc_node_cov();
     }
 
+    if !pc.is_sequence {
+        want_sequence = false;
+    }
+
+
+
     // Absolute threshold is adjusted is made with thresh
-    if !matches.is_present("absolute-threshold") {
+    if absolute_thresh == 0 {
         real_thresh =
             PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
     } else {
@@ -84,7 +84,7 @@ pub fn bit_main(matches: &ArgMatches) {
     info!("New parameters");
     info!(
         "Feature: {}",
-        if want_sequence { "node" } else { "sequence" }
+        if want_sequence { "sequence" } else { "node" }
     );
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
@@ -95,8 +95,8 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // The vector we work with
 
-    let mut number_entries = 0;
-    let mut buffer = Vec::new();
+    let number_entries;
+    let buffer;
 
     if pc.normalized_coverage.is_empty() {
         info!("Number of samples: {}", pc.coverage.len());
@@ -120,7 +120,5 @@ pub fn bit_main(matches: &ArgMatches) {
         &pc.name,
     );
     bb.extend(buffer);
-    println!("{}", bb.len());
-
     writer_compress_zlib(&bb, matches.value_of("out").unwrap());
 }
