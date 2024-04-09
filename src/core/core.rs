@@ -1,9 +1,6 @@
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
 use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{
-    calculate_std_deviation, calculate_std_deviation_f32, mean, mean_vec_u16_f64, median,
-    median_vec_u16_16, percentile, remove_zero, remove_zero_f32, transform_u32_to_array_of_u8,
-};
+use crate::normalize::helper::{calculate_std_deviation, mean, median, percentile, remove_zeros, transform_u32_to_array_of_u8};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use log::{debug, info, warn};
@@ -152,79 +149,59 @@ impl PackCompact {
         if self.normalized_coverage.is_empty() {
             // "work_on" is the current data we do the normalizcation on
             let mut work_on: Vec<u16> = self.coverage.clone();
-            // relative is 0
-            if relative == 0.0 {
-                warn!("Relative threshold is 0");
-                return 0.0;
-            }
-            if !include_all {
-                remove_zero(&mut work_on)
-            }
-
-            let mut a_std = 0.0;
-            if std != 0.0 {
-                a_std = calculate_std_deviation(&work_on) as f32 * std
-            }
-
-            let mut thresh: f32 = 0.0;
-            if tt == Method::Percentile {
-                thresh = percentile(&work_on, relative as f64) as f32;
-                debug!("{} % Percentile is {}", relative * 100.0, thresh);
-                debug!("Working threshold is {}", thresh);
-                return thresh;
-            } else if tt == Method::Mean {
-                thresh = mean_vec_u16_f64(&work_on) as f32;
-                debug!("Mean is {}", thresh);
-            } else if tt == Method::Median {
-                thresh = median_vec_u16_16(&work_on) as f32;
-                debug!("Median is {}", thresh);
-            }
-            debug!("Std is {}", a_std);
-            thresh -= a_std;
-            thresh *= relative;
-            debug!("Working threshold is {}", thresh);
-
-            thresh
+            PackCompact::threshold(&mut work_on, include_all, relative, std, tt)
         } else {
             let mut work_on: Vec<f32> = self.normalized_coverage.clone();
             // relative is 0
-            if relative == 0.0 {
-                warn!("Relative threshold is 0");
-                return 0.0;
-            }
-
-            if !include_all {
-                remove_zero_f32(&mut work_on)
-            }
-            let mut a_std = 0.0;
-            if std != 0.0 {
-                a_std = calculate_std_deviation_f32(&work_on) as f32 * std
-            }
-
-            let mut thresh: f32 = 0.0;
-            if tt == Method::Percentile {
-                thresh = percentile(&work_on, relative as f64) as f32;
-
-                debug!("{} % Percentile is {}", relative * 100.0, thresh);
-                debug!("Working threshold is {}", thresh);
-                return thresh;
-            } else if tt == Method::Mean {
-                thresh = mean(&work_on) as f32;
-                debug!("Mean is {}", thresh);
-                debug!("Working threshold is {}", thresh);
-            } else if tt == Method::Median {
-                thresh = median(&mut work_on) as f32;
-                debug!("Median is {}", thresh);
-                debug!("Working threshold is {}", thresh);
-            }
-            debug!("Std is {}", a_std);
-
-            thresh -= a_std;
-            thresh *= relative;
-            debug!("Working threshold is {}", thresh);
-
-            thresh
+            PackCompact::threshold(&mut work_on, include_all, relative, std, tt)
         }
+    }
+
+    pub fn threshold<T>(a: &mut Vec<T>,  include_all: bool, relative: f32, std: f32, tt: Method) -> f32
+        where
+        T: PartialOrd + Copy + std::default::Default,
+        f64: From<T>,
+        T: std::ops::Add<Output = T> + std::convert::From<u8> + Copy,
+        f64: std::convert::From<T>,
+
+        {
+        // relative is 0
+        if relative == 0.0 {
+            warn!("Relative threshold is 0");
+            return 0.0;
+        }
+
+        if !include_all {
+            remove_zeros(a)
+        }
+        let mut a_std = 0.0;
+        if std != 0.0 {
+            a_std = calculate_std_deviation(a) as f32 * std
+        }
+
+        let mut thresh: f32 = 0.0;
+        if tt == Method::Percentile {
+            thresh = percentile(a, relative as f64) as f32;
+
+            debug!("{} % Percentile is {}", relative * 100.0, thresh);
+            debug!("Working threshold is {}", thresh);
+            return thresh;
+        } else if tt == Method::Mean {
+            thresh = mean(a) as f32;
+            debug!("Mean is {}", thresh);
+            debug!("Working threshold is {}", thresh);
+        } else if tt == Method::Median {
+            thresh = median(a) as f32;
+            debug!("Median is {}", thresh);
+            debug!("Working threshold is {}", thresh);
+        }
+        debug!("Std is {}", a_std);
+
+        thresh -= a_std;
+        thresh *= relative;
+        debug!("Working threshold is {}", thresh);
+
+        thresh
     }
 
     pub fn print_meta(&self) {

@@ -185,7 +185,12 @@ pub fn remove_zero_f32(vecc: &mut Vec<f32>) {
     vecc.retain(|&x| x != 0.0);
 }
 
-
+pub fn remove_zeros<T>(vector: &mut Vec<T>)
+    where
+        T: PartialEq + Default + Copy,
+{
+    vector.retain(|&x| x != T::default());
+}
 
 /// Get the name of the file
 ///

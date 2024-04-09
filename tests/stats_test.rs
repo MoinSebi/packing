@@ -17,7 +17,7 @@ fn stats_p() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/9986.1k.stats.txt");
     cmd1.unwrap().assert().success();
 
-    let contents = fs::read_to_string("data/test/9986.1k.stats.txt").expect("Unable to read file");
+    let _contents = fs::read_to_string("data/test/9986.1k.stats.txt").expect("Unable to read file");
 
     Ok(())
 }
