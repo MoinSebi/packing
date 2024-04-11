@@ -154,5 +154,7 @@ In total: 85 bytes
 - Absolute threshold is always highest priority
   
 
-
+## TODO
+- [ ] Z-score normalization
+- [ ] Robust normalization
 
