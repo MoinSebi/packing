@@ -38,37 +38,26 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
 ///
 ///
 pub fn wrapper_bool(buffer: &[u8]) -> Vec<PackCompact> {
-    // total length 73 + len
+    // total length 85 + len
     let (_kind, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
         PackCompact::get_meta(buffer);
 
-    let chunks = buffer.chunks((bytes + 77) as usize);
+    let chunks = buffer.chunks((bytes + 85) as usize);
     let mut result: Vec<PackCompact> = Vec::new();
     info!("Number of samples: {}", chunks.len());
 
     for chunk in chunks.into_iter() {
-        result.push(PackCompact::read_bin_coverage(chunk));
+        if _bin == DataType::TypeU16{
+            result.push(PackCompact::read_u16(chunk));
+        } else if _bin == DataType::TypeBit {
+            result.push(PackCompact::read_bin_coverage(chunk));
+        } else {
+            result.push(PackCompact::read_f32(chunk))
+        }
     }
     result
 }
 
-#[allow(dead_code)]
-/// Parse multiple files
-///
-/// Iterate over each sample
-pub fn wrapper_u16(buffer: &[u8]) -> Vec<PackCompact> {
-    // total length 73 + len
-    let (_kind, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
-        PackCompact::get_meta(buffer);
-    let chunks = buffer.chunks((bytes + 77) as usize);
-
-    info!("Number of samples: {}", chunks.len());
-    let mut result: Vec<PackCompact> = Vec::new();
-    for chunk in chunks.into_iter() {
-        result.push(PackCompact::read_u16(chunk));
-    }
-    result
-}
 
 /// Reads the index file
 ///
@@ -264,6 +253,7 @@ impl PackCompact {
             length,
         }
     }
+
 
     pub fn read_f32(buffer: &[u8]) -> Self {
         let (_kind, _bin, method, _relative, std, _thresh, _bytes, length, name) =

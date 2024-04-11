@@ -166,7 +166,6 @@ fn main() {
                 .long("non-covered")
                 .about("Include non-covered entries (nodes or sequences) for dynamic threshold calculations (e.g mean)")
                 .display_order(4)
-
             )
             .arg(Arg::new("node")
                 .short('n')
