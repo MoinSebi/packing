@@ -173,12 +173,23 @@ fn main() {
                 .about("Merge coverage on node level [default: off -> sequence-level]. The default will adjust if input is already node-level.")
                 .display_order(5)
             )
+            .help_heading("Preset normalization")
+            .arg(Arg::new("z-score")
+                .long("z-score")
+                .about("Normalize with z-score")
+                .display_order(6)
+            )
+
+
+
 
             .help_heading("Modification options")
             .arg(Arg::new("name")
                 .long("name")
                 .about("Name of the sample [default: name of the file]")
                 .takes_value(true))
+
+
 
 
             //Output
