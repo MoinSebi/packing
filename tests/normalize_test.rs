@@ -8,7 +8,7 @@ use assert_cmd::Command;
 /// Output: pt
 /// Type: sequence
 /// Threshold: 1
-fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -28,7 +28,7 @@ fn convert_pt_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Output: pt
 /// Type: sequence
 /// Threshold: 1
-fn convert_pt_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -75,7 +75,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
 /// Type: sequence
 /// Modifier:
 ///     - absolute threshold: 2
-fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -99,7 +99,7 @@ fn convert_pt_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// Output: pt
 /// Type: sequence
 /// Threshold: 1
-fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_node_a1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -120,7 +120,7 @@ fn convert_pt_node_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Output: pt
 /// Type: sequence
 /// Threshold: 1
-fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_node_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -142,7 +142,7 @@ fn convert_pt_node_a3() -> Result<(), Box<dyn std::error::Error>> {
 /// -r (relative threshold) 50
 /// -s (stats) median
 /// -b (binary) (compress)
-fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_node_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -169,7 +169,7 @@ fn convert_pt_node_median() -> Result<(), Box<dyn std::error::Error>> {
 /// Type: sequence
 /// Modifier:
 ///     - absolute threshold: 2
-fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_node_r50() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
@@ -191,7 +191,7 @@ fn convert_pt_node_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// -t (type) sequences
 /// -r (relative threshold) 50
 /// --normalize (u16)
-fn convert_pt_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
+fn normalize_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
