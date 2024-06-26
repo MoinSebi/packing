@@ -42,11 +42,11 @@ fn main() {
 
 
         .subcommand(App::new("info")
-            .about("Information about index or binary files (not compressed pack)")
+            .about("Information about index or compressed files. 'Normal' packs are excluded")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
-            .help_heading("Input options")
 
+            .help_heading("Input options")
             .arg(Arg::new("pack compressed")
                 .short('c')
                 .long("compressed")
@@ -61,9 +61,10 @@ fn main() {
 
 
         .subcommand(App::new("index")
-            .about("Index a GFA or plain-text coverage file")
+            .about("Index a GFA or plain-text coverage file (pack format)")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
+
             .help_heading("Input options")
             .arg(Arg::new("gfa")
                 .display_order(1)
@@ -76,6 +77,7 @@ fn main() {
                 .long("pack")
                 .about("Pack coverage file (plain-text)")
                 .takes_value(true))
+
             .help_heading("Output options")
             .arg(Arg::new("output")
                 .short('o')
@@ -86,40 +88,45 @@ fn main() {
 
 
         .subcommand(App::new("rename")
-            .about("Change the name of a pack file (plain-text excluded)")
+            .about("Change the name of a compressed pack file. 'Normal' packs are excluded")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
+            .help_heading("Input options")
             .arg(Arg::new("input")
                 .short('i')
                 .long("input")
                 .required(true)
                 .about("Pack file input")
                 .takes_value(true))
-            .arg(Arg::new("output")
-                .short('o')
-                 .long("output")
-                 .about("Output file")
-                 .required(true)
-                 .takes_value(true))
+
+            .help_heading("Modification options")
             .arg(Arg::new("name")
                 .short('n')
                 .long("name")
                 .required(true)
                 .about("New name")
-                .takes_value(true)))
+                .takes_value(true))
+
+            .help_heading("Output options")
+            .arg(Arg::new("output")
+                .short('o')
+                 .long("output")
+                 .about("Output file")
+                 .required(true)
+                 .takes_value(true)))
+
 
         .subcommand(App::new("normalize")
-            .about("Normalize a pack file with a custom threshold")
+            .about("Normalize (compress) a pack file with a custom threshold")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
-            // Input
-            .help_heading("Input options")
 
+            .help_heading("Input options")
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
-                .about("Pack file")
+                .about("Input pack file (plain-text)")
                 .takes_value(true))
             .arg(Arg::new("index")
                 .short('i')
@@ -173,6 +180,7 @@ fn main() {
                 .about("Merge coverage on node level [default: off -> sequence-level]. The default will adjust if input is already node-level.")
                 .display_order(5)
             )
+
             .help_heading("Preset normalization")
             .arg(Arg::new("z-score")
                 .long("z-score")
@@ -181,22 +189,12 @@ fn main() {
             )
 
 
-
-
             .help_heading("Modification options")
             .arg(Arg::new("name")
                 .long("name")
-                .about("Name of the sample [default: name of the file]")
+                .about("Change the name of the sample using this value [default: name of the file]")
                 .takes_value(true))
 
-
-
-
-            //Output
-            // As you might get mutiple file, takes value for everythin
-            // Alternative only one run per process
-            // ReaderBit and u16 with stats function
-            // You iterate and lose information directly
             .help_heading("Output options")
             .arg(Arg::new("out")
                 .short('o')
@@ -212,6 +210,7 @@ fn main() {
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
+            .help_heading("Input options")
             .arg(Arg::new("pack compressed")
                 .short('c')
                 .long("compressed")
@@ -223,6 +222,8 @@ fn main() {
                 .long("index")
                 .about("Index file")
                 .takes_value(true))
+
+            .help_heading("Output options")
             .arg(Arg::new("output")
                 .short('o')
                 .long("output")
@@ -231,7 +232,7 @@ fn main() {
         )
 
         .subcommand(App::new("stats")
-            .about("Statistics on pack files")
+            .about("Statistics on pack files (simple and dumb)")
             .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
@@ -239,20 +240,20 @@ fn main() {
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
-                .about("vg pack file")
+                .about("Plain text pack file")
                 .takes_value(true))
             .arg(Arg::new("index")
                 .short('i')
                 .long("index")
                 .about("Index file from 'packing index'")
                 .takes_value(true))
-
             .arg(Arg::new("pack compressed")
                 .long("compressed")
                 .short('c')
                 .about("Compressed pack file. Original can only be accessed if the file is not normalized.")
                 .takes_value(true))
 
+            .help_heading("Output options")
             .arg(Arg::new("output")
                 .short('o')
                 .long("output")
@@ -261,36 +262,48 @@ fn main() {
 
         )
         .subcommand(App::new("compress")
-            .about("Compress a plain-text coverage file")
+            .about("Compress a plain-text coverage file to reduce memory")
             .setting(AppSettings::ArgRequiredElseHelp)
+
+            .help_heading("Input options")
             .arg(Arg::new("pack")
                 .short('p')
                 .long("pack")
-                .takes_value(true)
-                .required(true))
-            .arg(Arg::new("output")
-                .short('o')
-                .long("output")
-                .takes_value(true)
-                .required(true))
+                .about("Plain text pack file")
+                .takes_value(true))
+
+            .help_heading("Modification options")
             .arg(Arg::new("name")
                 .short('n')
                 .long("name")
+                .about("Name of the sample [default: name of the file]")
                 .takes_value(true)
             )
+
+            .help_heading("Output options")
+            .arg(Arg::new("output")
+                .short('o')
+                .long("output")
+                .about("Output file name")
+                .takes_value(true)
+                .required(true))
         )
 
         .subcommand(App::new("compare")
-            .about("Compare two pack files and check if they made based on the same stats")
+            .about("Compare two compressed pack files and check if they made based on the same stats")
             .setting(AppSettings::ArgRequiredElseHelp)
-            .arg(Arg::new("pack1")
-                .long("pack1")
-                .takes_value(true)
-                .required(true))
-            .arg(Arg::new("pack2")
-                .long("pack2")
-                .takes_value(true)
-                .required(true))
+
+            .help_heading("Input options")
+            .arg(Arg::new("pack compressed1")
+                .long("compressed1")
+                .about("Compressed pack file (1)")
+                .takes_value(true))
+
+            .arg(Arg::new("pack compressed2")
+                .long("compressed2")
+                .about("Compressed pack file (2)")
+                .takes_value(true))
+
 
         )
 

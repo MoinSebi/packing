@@ -8,8 +8,8 @@ use packing_lib::normalize::convert_helper::Method;
 
 pub fn comp_main(matches: &ArgMatches) {
     info!("Compare main");
-    let filename1 = matches.value_of("pack1").unwrap();
-    let filename2 = matches.value_of("pack2").unwrap();
+    let filename1 = matches.value_of("pack compressed1").unwrap();
+    let filename2 = matches.value_of("pack compressed2").unwrap();
     let g: Vec<u8> = unpack_zstd_to_byte(filename1);
     let meta1 = PackCompact::get_meta(&g);
 
@@ -46,6 +46,11 @@ fn compare_meta(
         all_good = false;
 
         info!("Standard deviation is different");
+    }
+    if meta1.5 != meta2.5 {
+        all_good = false;
+
+        info!("Real threshold is different");
     }
     if meta1.6 != meta2.6 {
         all_good = false;
