@@ -2,7 +2,7 @@ use crate::core::reader::read_input;
 use crate::core::writer::writer_compress_zlib;
 use crate::normalize::convert_helper::Method;
 use crate::normalize::helper::{
-    calculate_std_deviation, mean, normalize_f32_f32, normalize_u16_f32,
+    normalize_f32_f32, normalize_u16_f32,
 };
 use clap::ArgMatches;
 use log::{info, warn};
