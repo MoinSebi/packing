@@ -47,7 +47,7 @@ pub fn wrapper_bool(buffer: &[u8]) -> Vec<PackCompact> {
     info!("Number of samples: {}", chunks.len());
 
     for chunk in chunks.into_iter() {
-        if _bin == DataType::TypeU16{
+        if _bin == DataType::TypeU16 {
             result.push(PackCompact::read_u16(chunk));
         } else if _bin == DataType::TypeBit {
             result.push(PackCompact::read_bin_coverage(chunk));
@@ -57,7 +57,6 @@ pub fn wrapper_bool(buffer: &[u8]) -> Vec<PackCompact> {
     }
     result
 }
-
 
 /// Reads the index file
 ///
@@ -129,7 +128,20 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
 impl PackCompact {
     /// Get the meta data from the binary pack file (73 bytes)
     /// Outputs sequence/Node, length, thresh, name
-    pub fn get_meta(buffer: &[u8]) -> (bool, bool, DataType, Method, f32, f32, f32, u32, u32, String) {
+    pub fn get_meta(
+        buffer: &[u8],
+    ) -> (
+        bool,
+        bool,
+        DataType,
+        Method,
+        f32,
+        f32,
+        f32,
+        u32,
+        u32,
+        String,
+    ) {
         let is_sequence = buffer[2];
         let include_all = buffer[3];
         let bin = DataType::from_u8(buffer[4]);
@@ -255,7 +267,6 @@ impl PackCompact {
             length,
         }
     }
-
 
     pub fn read_f32(buffer: &[u8]) -> Self {
         let (_kind, _include_all, _bin, method, _relative, std, _thresh, _bytes, length, name) =

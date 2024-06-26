@@ -59,7 +59,6 @@ fn stats_p4() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
 #[test]
 /// Test stats
 ///

@@ -3,8 +3,7 @@ use log::info;
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::read_input;
 use packing_lib::normalize::helper::{
-    calculate_std_deviation, mean, median, remove_zero,
-    remove_zero_f32,
+    calculate_std_deviation, mean, median, remove_zero, remove_zero_f32,
 };
 
 use std::fs::File;
@@ -41,8 +40,7 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
         &format!("Input {}", if pc.is_sequence { "Sequence" } else { "Node" }),
     )
     .expect("dasjdka");
-    write_to_file_or_stdout(file2, "Stats\tZeros\tN/S\tValue")
-        .expect("Can not write file");
+    write_to_file_or_stdout(file2, "Stats\tZeros\tN/S\tValue").expect("Can not write file");
     if pc.data_type == DataType::TypeBit {
         info!("Is bit!");
         write_to_file_or_stdout(

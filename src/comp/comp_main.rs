@@ -1,10 +1,8 @@
-
 use clap::ArgMatches;
 use log::info;
 use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::{unpack_zstd_to_byte};
+use packing_lib::core::reader::unpack_zstd_to_byte;
 use packing_lib::normalize::convert_helper::Method;
-
 
 pub fn comp_main(matches: &ArgMatches) {
     info!("Compare main");
@@ -19,8 +17,30 @@ pub fn comp_main(matches: &ArgMatches) {
 }
 
 fn compare_meta(
-    meta1: &(bool, bool, DataType, Method, f32, f32, f32, u32, u32, String),
-    meta2: &(bool, bool, DataType, Method, f32, f32, f32, u32, u32, String),
+    meta1: &(
+        bool,
+        bool,
+        DataType,
+        Method,
+        f32,
+        f32,
+        f32,
+        u32,
+        u32,
+        String,
+    ),
+    meta2: &(
+        bool,
+        bool,
+        DataType,
+        Method,
+        f32,
+        f32,
+        f32,
+        u32,
+        u32,
+        String,
+    ),
 ) {
     let mut all_good = true;
     if meta1.0 != meta2.0 {

@@ -18,7 +18,6 @@ pub fn rename_main1(matches: &ArgMatches) {
 
     let _p = PackCompact::read_wrapper(filename);
 
-
     let bin = meta.2;
 
     let mut header = PackCompact::file_header(

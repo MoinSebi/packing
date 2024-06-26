@@ -186,8 +186,8 @@ pub fn remove_zero_f32(vecc: &mut Vec<f32>) {
 }
 
 pub fn remove_zeros<T>(vector: &mut Vec<T>)
-    where
-        T: PartialEq + Default + Copy,
+where
+    T: PartialEq + Default + Copy,
 {
     vector.retain(|&x| x != T::default());
 }

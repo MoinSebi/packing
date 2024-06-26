@@ -17,12 +17,12 @@ fn compare() -> Result<(), Box<dyn std::error::Error>> {
         .arg("--compressed2")
         .arg("data/example/9986.1k.a2.pt");
     cmd.assert().success();
-    cmd.assert().stderr(predicate::str::contains("Real threshold is different"));
+    cmd.assert()
+        .stderr(predicate::str::contains("Real threshold is different"));
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
-
 
 #[test]
 /// Test normalize subcommand with
@@ -40,7 +40,8 @@ fn compare2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("--compressed2")
         .arg("data/example/9986.1k.a1.pt");
     cmd.assert().success();
-    cmd.assert().stderr(predicate::str::contains("Meta data is the same"));
+    cmd.assert()
+        .stderr(predicate::str::contains("Meta data is the same"));
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));

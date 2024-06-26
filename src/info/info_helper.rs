@@ -22,7 +22,7 @@ pub fn info_compressed(filename: &str) {
     let meta = PackCompact::get_meta(&g);
 
     info!("Entry type: {}", if meta.0 { "Sequence" } else { "Node" });
-    info!("Entry type: {}", if meta.1 { "Include all" } else { "Not Include all" });
+    info!("Include all {}", if meta.1 { "Yes" } else { "No" });
 
     info!(
         "Data type: {}",

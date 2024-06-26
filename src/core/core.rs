@@ -1,6 +1,8 @@
 use crate::core::core::DataType::{TypeBit, TypeF32, TypeU16};
 use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{calculate_std_deviation, mean, median, percentile, remove_zeros, transform_u32_to_array_of_u8};
+use crate::normalize::helper::{
+    calculate_std_deviation, mean, median, percentile, remove_zeros, transform_u32_to_array_of_u8,
+};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use log::{debug, info, warn};
@@ -157,14 +159,19 @@ impl PackCompact {
         }
     }
 
-    pub fn threshold<T>(a: &mut Vec<T>,  include_all: bool, relative: f32, std: f32, tt: Method) -> f32
-        where
+    pub fn threshold<T>(
+        a: &mut Vec<T>,
+        include_all: bool,
+        relative: f32,
+        std: f32,
+        tt: Method,
+    ) -> f32
+    where
         T: PartialOrd + Copy + std::default::Default,
         f64: From<T>,
         T: std::ops::Add<Output = T> + std::convert::From<u8> + Copy,
         f64: std::convert::From<T>,
-
-        {
+    {
         // relative is 0
         if relative == 0.0 {
             warn!("Relative threshold is 0");
@@ -224,14 +231,23 @@ impl PackCompact {
 
     pub fn zscore_run<T>(&mut self, a: &mut Vec<T>)
     where
-        T: Copy + std::convert::From<u8> + std::ops::Add<Output = T>, f64: std::convert::From<T>,
+        T: Copy + std::convert::From<u8> + std::ops::Add<Output = T>,
+        f64: std::convert::From<T>,
     {
         let mean = mean(a) as f32;
         let std = calculate_std_deviation(a) as f32;
         if self.normalized_coverage.is_empty() {
-            self.normalized_coverage = self.coverage.iter().map(|x| (*x as f64 - mean as f64) as f32 / std).collect();
+            self.normalized_coverage = self
+                .coverage
+                .iter()
+                .map(|x| (*x as f64 - mean as f64) as f32 / std)
+                .collect();
         } else {
-            self.normalized_coverage = self.normalized_coverage.iter().map(|x| (x - mean) / std).collect();
+            self.normalized_coverage = self
+                .normalized_coverage
+                .iter()
+                .map(|x| (x - mean) / std)
+                .collect();
         }
     }
 

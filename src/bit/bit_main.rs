@@ -58,8 +58,6 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // Checking the output base (sequence, nodes) or pack file
 
-
-
     if want_sequence && !pc.is_sequence {
         pc.calc_node_cov();
     }
@@ -67,8 +65,6 @@ pub fn bit_main(matches: &ArgMatches) {
     if !pc.is_sequence {
         want_sequence = false;
     }
-
-
 
     // Absolute threshold is adjusted is made with thresh
     if absolute_thresh == 0 {

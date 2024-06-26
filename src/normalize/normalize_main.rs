@@ -1,7 +1,9 @@
 use crate::core::reader::read_input;
 use crate::core::writer::writer_compress_zlib;
 use crate::normalize::convert_helper::Method;
-use crate::normalize::helper::{calculate_std_deviation, mean, normalize_f32_f32, normalize_u16_f32};
+use crate::normalize::helper::{
+    calculate_std_deviation, mean, normalize_f32_f32, normalize_u16_f32,
+};
 use clap::ArgMatches;
 use log::{info, warn};
 
@@ -56,13 +58,15 @@ pub fn normalize_main(matches: &ArgMatches) {
     let include_all = matches.is_present("non-covered");
     let mut want_sequence = !matches.is_present("node");
 
-
-
     let real_thresh: f32;
 
     // Checking the output base (sequence, nodes) or pack file
 
-    if matches.is_present("fraction") && relative_thresh == 0.0 && std == 0.0 && !matches.is_present("z-score"){
+    if matches.is_present("fraction")
+        && relative_thresh == 0.0
+        && std == 0.0
+        && !matches.is_present("z-score")
+    {
         warn!("Relative threshold is 0");
         process::exit(0x0100);
     }
@@ -75,16 +79,14 @@ pub fn normalize_main(matches: &ArgMatches) {
         method = Method::Zscore;
         real_thresh = 1.0;
         if matches.is_present("absolute-threshold") {
-            absolute_thresh = matches.value_of("absolute-threshold").unwrap().parse().unwrap();
+            absolute_thresh = matches
+                .value_of("absolute-threshold")
+                .unwrap()
+                .parse()
+                .unwrap();
         }
         pc.z_score(include_all);
-
-
-
-
-
-    }
-    else {
+    } else {
         if !matches.is_present("absolute-threshold") && method == Method::Nothing {
             absolute_thresh = 1;
         }
@@ -105,9 +107,9 @@ pub fn normalize_main(matches: &ArgMatches) {
 
         info!("New parameters");
         info!(
-        "Feature: {}",
-        if want_sequence { "sequence" } else { "node" }
-    );
+            "Feature: {}",
+            if want_sequence { "sequence" } else { "node" }
+        );
         info!("Method: {}", method.to_string());
         info!("Absolute threshold: {}", absolute_thresh);
         info!("Relative threshold: {}", relative_thresh);
@@ -115,7 +117,7 @@ pub fn normalize_main(matches: &ArgMatches) {
         info!("Standard deviation {}", std);
         info!("Real threshold: {}", real_thresh);
     }
-        // The vector we work with
+    // The vector we work with
 
     let number_entries;
     let mut buffer = Vec::new();
