@@ -132,6 +132,7 @@ pub fn normalize_main(matches: &ArgMatches) {
 
     let mut bb = PackCompact::file_header(
         want_sequence,
+        include_all,
         DataType::TypeF32,
         method,
         relative_thresh,

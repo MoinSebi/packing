@@ -111,6 +111,7 @@ pub fn bit_main(matches: &ArgMatches) {
 
     let mut bb = PackCompact::file_header(
         want_sequence,
+        include_all,
         DataType::TypeBit,
         method,
         relative_thresh,

@@ -11,7 +11,22 @@ Can either be used for reduced storage or in combination with [gfa2bin](https://
 
 I use .pc "pack compressed", .pi "pack index" and pb "pack binary" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
+### Base input: Pack file (coverage information)
+Tab-separated file with ID, Node ID, Offset and Coverage.
 
+Example (from data/example_data/9986.1k.txt)
+
+| ID  | Node ID | Off-set (0-based) | coverage |
+|-----|---------|-------------------|----------|
+| 423 | 30      | 61                | 6        |
+| 424 | 30      | 62                | 0        |
+| 425 | 30      | 63                | 2        |
+| 426 | 30      | 64                | 2        |
+| 427 | 31      | 0                 | 1        |
+| 428 | 32      | 0                 | 1        |
+| 429 | 33      | 0                 | 1        |
+| 430 | 33      | 1                 | 1        |
+| 431 | 33      | 2                 | 0        |
 
 ___ 
 ## Install: 
@@ -128,28 +143,28 @@ Compare two pack files. This function is helpful if you want to know if two norm
 
 ## PC - Pack Compressed - Header explained
 ### Magic bytes explained (in this order): 
-The header of the file is also compressed, therefore you can only read it which ```packing info``` or ```packing view```.
+The header of the file is also compressed (with zstd), therefore you can only read it which ```packing info``` or ```packing view```.
 
-| Field          | Description                    | Possible values                                 | Bytes |
-|----------------|--------------------------------|-------------------------------------------------|-------|
-| MB             | Magic bytes                    | [35, 38]                                        | 2     |
-| Sequence       | Is sequence                    | 1 (sequence), 0 (node)                          | 1     |
-| PA             | DataType                       | 0 = Bit, 1 = Compress, 2 = Normalized           | 1     |
-| Method         | Normalization method           | 0 (Nothing), 1 (Mean), 2(Median), 3(Percentile) | 1     |
-| fraction       | Fraction                       | Float (f32)                                     | 4     |
-| Std            | Standard deviation multiplier  | Float (f32)                                     | 4     |
-| real_threshold | Real threshold                 | Float (f32)                                     | 4     |
-| length         | Number of entries              | -                                               | 4     |
-| name           | Name of the sample             | -                                               | 64    |
+| Field          | Description                   | Possible values                                 | Bytes |
+|----------------|-------------------------------|-------------------------------------------------|-------|
+| MB             | Magic bytes                   | [35, 38]                                        | 2     |
+| Sequence       | Is sequence                   | 1 (sequence), 0 (node)                          | 1     |
+| Include_all    | Include all entries           | 1 (yes), 0 (no)                                 | 1     |
+| PA             | DataType                      | 0 = Bit, 1 = Compress, 2 = Normalized           | 1     |
+| Method         | Normalization method          | 0 (Nothing), 1 (Mean), 2(Median), 3(Percentile) | 1     |
+| fraction       | Fraction                      | Float (f32)                                     | 4     |
+| Std            | Standard deviation multiplier | Float (f32)                                     | 4     |
+| real_threshold | Real threshold                | Float (f32)                                     | 4     |
+| length         | Number of entries             | -                                               | 4     |
+| name           | Name of the sample            | -                                               | 64    |
 
 
 
-In total: 85 bytes
+In total: 86 bytes
 
 ### Additional information:
 - If method == Nothing but a relative real threshold was set -> Absolute method
-- Compressed == 
-- If you are binary, the "real" threshold is enforced: x > threshold
+- If you are presence/absence, the "real" threshold is enforced: x > threshold
 - If the method == Nothing but there is a threshold, it was computed by the "absolute threshold"
 - Absolute threshold is always highest priority
   

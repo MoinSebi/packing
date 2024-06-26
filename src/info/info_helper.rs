@@ -22,22 +22,24 @@ pub fn info_compressed(filename: &str) {
     let meta = PackCompact::get_meta(&g);
 
     info!("Entry type: {}", if meta.0 { "Sequence" } else { "Node" });
+    info!("Entry type: {}", if meta.1 { "Include all" } else { "Not Include all" });
+
     info!(
         "Data type: {}",
-        if meta.1 == DataType::TypeBit {
+        if meta.2 == DataType::TypeBit {
             "Binary"
-        } else if meta.1 == DataType::TypeU16 {
+        } else if meta.2 == DataType::TypeU16 {
             "Value (u16)"
         } else {
             "Value (f32)"
         }
     );
-    info!("Method: {}", meta.2.to_string());
-    info!("Relative threshold: {}", meta.3);
-    info!("Standard deviation: {}", meta.4);
-    info!("Real threshold: {}", meta.5);
-    info!("Bytes: {}", meta.6);
-    info!("Entries: {}", meta.7);
-    info!("Header bytes: {}", 85);
-    info!("Name: {}", meta.8);
+    info!("Method: {}", meta.3.to_string());
+    info!("Relative threshold: {}", meta.4);
+    info!("Standard deviation: {}", meta.5);
+    info!("Real threshold: {}", meta.6);
+    info!("Bytes: {}", meta.7);
+    info!("Entries: {}", meta.8);
+    info!("Header bytes: {}", 86);
+    info!("Name: {}", meta.9);
 }

@@ -107,6 +107,7 @@ impl PackCompact {
     /// - name
     pub fn file_header(
         want_sequence: bool,
+        include_all: bool,
         is_binary: DataType,
         method: Method,
         relative: f32,
@@ -120,6 +121,7 @@ impl PackCompact {
         // Is node?
 
         buffer.push(if want_sequence { 1 } else { 0 });
+        buffer.push(if include_all { 1 } else { 0 });
         // Is binary?
         buffer.push(is_binary.to_u8());
 

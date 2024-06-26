@@ -7,19 +7,23 @@ use packing_lib::core::writer::writer_compress_zlib;
 
 pub fn rename_main1(matches: &ArgMatches) {
     info!("Renaming");
-    eprintln!("Renaming matches {:?}", matches.is_present("input"));
     let filename = matches.value_of("input").unwrap();
     let new_name = matches.value_of("name").unwrap();
     let out = matches.value_of("output").unwrap();
     let g: Vec<u8> = unpack_zstd_to_byte(filename);
+    info!("Renaming");
+
     let meta = PackCompact::get_meta(&g);
+    info!("Renaming");
+
     let _p = PackCompact::read_wrapper(filename);
 
-    let bin = meta.1;
+
+    let bin = meta.2;
 
     let mut header = PackCompact::file_header(
-        meta.0, bin, meta.2, meta.3, meta.4, meta.5, meta.6, new_name,
+        meta.0, meta.1, bin, meta.3, meta.4, meta.5, meta.6, meta.7, new_name,
     );
-    header.extend(&g[77..]);
+    header.extend(&g[86..]);
     writer_compress_zlib(&header, out);
 }

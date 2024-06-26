@@ -39,7 +39,7 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
 ///
 pub fn wrapper_bool(buffer: &[u8]) -> Vec<PackCompact> {
     // total length 85 + len
-    let (_kind, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
+    let (_kind, _include_all, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
         PackCompact::get_meta(buffer);
 
     let chunks = buffer.chunks((bytes + 85) as usize);
@@ -129,14 +129,15 @@ pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
 impl PackCompact {
     /// Get the meta data from the binary pack file (73 bytes)
     /// Outputs sequence/Node, length, thresh, name
-    pub fn get_meta(buffer: &[u8]) -> (bool, DataType, Method, f32, f32, f32, u32, u32, String) {
+    pub fn get_meta(buffer: &[u8]) -> (bool, bool, DataType, Method, f32, f32, f32, u32, u32, String) {
         let is_sequence = buffer[2];
-        let bin = DataType::from_u8(buffer[3]);
-        let method = buffer[4];
-        let r = BigEndian::read_f32(&buffer[5..9]);
-        let aaa = BigEndian::read_f32(&buffer[9..13]);
-        let thresh = BigEndian::read_f32(&buffer[13..17]);
-        let length = BigEndian::read_u32(&buffer[17..21]);
+        let include_all = buffer[3];
+        let bin = DataType::from_u8(buffer[4]);
+        let method = buffer[5];
+        let r = BigEndian::read_f32(&buffer[6..10]);
+        let aaa = BigEndian::read_f32(&buffer[10..14]);
+        let thresh = BigEndian::read_f32(&buffer[14..18]);
+        let length = BigEndian::read_u32(&buffer[18..22]);
 
         let mut bytes = length * 2;
         if bin == DataType::TypeBit {
@@ -145,12 +146,13 @@ impl PackCompact {
             bytes *= 2;
         }
 
-        let mut name = byte_to_string(&buffer[21..85]);
+        let mut name = byte_to_string(&buffer[22..86]);
         name = name.trim_matches(char::from(0)).to_string();
         name = name.trim_end().to_string();
 
         (
             is_sequence == 1,
+            include_all == 1,
             bin,
             Method::from_u8(method),
             r,
@@ -198,9 +200,9 @@ impl PackCompact {
     pub fn read_wrapper(file_pc: &str) -> Self {
         let buff = unpack_zstd_to_byte(file_pc);
         let meta = PackCompact::get_meta(&buff);
-        if meta.1 == DataType::TypeBit {
+        if meta.2 == DataType::TypeBit {
             Self::read_bin_coverage(&buff)
-        } else if DataType::TypeU16 == meta.1 {
+        } else if DataType::TypeU16 == meta.2 {
             Self::read_u16(&buff)
         } else {
             Self::read_f32(&buff)
@@ -208,10 +210,10 @@ impl PackCompact {
     }
 
     pub fn read_bin_coverage(buffer: &[u8]) -> Self {
-        let (_kind, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
+        let (_kind, _include_all, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
         debug!("Name1 {}", name);
-        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[85..]);
+        let mut bv: BitVec<u8, Msb0> = BitVec::from_slice(&buffer[86..]);
         for _i in length as usize..bv.len() {
             bv.pop();
         }
@@ -232,12 +234,12 @@ impl PackCompact {
     }
 
     pub fn read_u16(buffer: &[u8]) -> Self {
-        let (_kind, _bin, method, _relative, std, _thresh, _bytes, length, name) =
+        let (_kind, _include_all, _bin, method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0; buffer[85..].len() / 2];
-        BigEndian::read_u16_into(&buffer[85..], &mut data);
+        let mut data = vec![0; buffer[86..].len() / 2];
+        BigEndian::read_u16_into(&buffer[86..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),
@@ -256,12 +258,12 @@ impl PackCompact {
 
 
     pub fn read_f32(buffer: &[u8]) -> Self {
-        let (_kind, _bin, method, _relative, std, _thresh, _bytes, length, name) =
+        let (_kind, _include_all, _bin, method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
 
         debug!("Name {}", name);
-        let mut data = vec![0.0; buffer[85..].len() / 4];
-        BigEndian::read_f32_into(&buffer[85..], &mut data);
+        let mut data = vec![0.0; buffer[86..].len() / 4];
+        BigEndian::read_f32_into(&buffer[86..], &mut data);
         PackCompact {
             name,
             node_index: Vec::new(),

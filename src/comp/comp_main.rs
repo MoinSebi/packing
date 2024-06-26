@@ -19,8 +19,8 @@ pub fn comp_main(matches: &ArgMatches) {
 }
 
 fn compare_meta(
-    meta1: &(bool, DataType, Method, f32, f32, f32, u32, u32, String),
-    meta2: &(bool, DataType, Method, f32, f32, f32, u32, u32, String),
+    meta1: &(bool, bool, DataType, Method, f32, f32, f32, u32, u32, String),
+    meta2: &(bool, bool, DataType, Method, f32, f32, f32, u32, u32, String),
 ) {
     let mut all_good = true;
     if meta1.0 != meta2.0 {
@@ -30,34 +30,40 @@ fn compare_meta(
     if meta1.1 != meta2.1 {
         all_good = false;
 
-        info!("Data type is different");
+        info!("Include all not the same");
     }
+
     if meta1.2 != meta2.2 {
         all_good = false;
 
-        info!("Method is different");
+        info!("Data type is different");
     }
     if meta1.3 != meta2.3 {
         all_good = false;
 
-        info!("Relative threshold is different");
+        info!("Method is different");
     }
     if meta1.4 != meta2.4 {
         all_good = false;
 
-        info!("Standard deviation is different");
+        info!("Relative threshold is different");
     }
     if meta1.5 != meta2.5 {
         all_good = false;
 
-        info!("Real threshold is different");
+        info!("Standard deviation is different");
     }
     if meta1.6 != meta2.6 {
         all_good = false;
 
-        info!("Bytes is different");
+        info!("Real threshold is different");
     }
     if meta1.7 != meta2.7 {
+        all_good = false;
+
+        info!("Bytes is different");
+    }
+    if meta1.8 != meta2.8 {
         all_good = false;
 
         info!("Entries is different");

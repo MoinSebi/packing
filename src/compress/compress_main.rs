@@ -31,6 +31,7 @@ pub fn compress_main(matches: &ArgMatches) {
     let num_entries = pc.coverage.len();
     let mut buffer = PackCompact::file_header(
         true,
+        true,
         DataType::TypeU16,
         Method::Nothing,
         0.0,
