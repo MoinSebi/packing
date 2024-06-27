@@ -37,12 +37,12 @@ pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
 /// Reading multiple files at the same time
 ///
 ///
-pub fn wrapper_bool(buffer: &[u8]) -> Vec<PackCompact> {
+pub fn wrapper_reader(buffer: &[u8]) -> Vec<PackCompact> {
     // total length 85 + len
     let (_kind, _include_all, _bin, _method, _relative, _std, _thresh, bytes, _length, _name) =
         PackCompact::get_meta(buffer);
 
-    let chunks = buffer.chunks((bytes + 85) as usize);
+    let chunks = buffer.chunks((bytes + 86) as usize);
     let mut result: Vec<PackCompact> = Vec::new();
     info!("Number of samples: {}", chunks.len());
 
