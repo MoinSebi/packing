@@ -1,5 +1,3 @@
-use assert_cmd::Command;
-use packing_lib::core::core::PackCompact;
 use packing_lib::core::reader::{unpack_zstd_to_byte, wrapper_reader};
 
 #[test]
