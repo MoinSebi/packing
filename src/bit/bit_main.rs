@@ -58,7 +58,8 @@ pub fn bit_main(matches: &ArgMatches) {
 
     // Checking the output base (sequence, nodes) or pack file
 
-    if want_sequence && !pc.is_sequence {
+
+    if !want_sequence && pc.is_sequence {
         pc.calc_node_cov();
     }
 
