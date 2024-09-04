@@ -1,15 +1,15 @@
 # Packing - Compressing table-like pack format
 Tool for compressed representation of coverage information from a tabular (plain-text) pack file (e.g. VG pack).
-Can either be used for reduced storage or in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
+Can either be used for reduced storage or/and in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
 
 **Data fromats**  
 - ```pc``` pack compressed: Compressed representation of a pack file (```compress```. 
-- ```pn``` pack normalized: Compressed represenation of pack file after normalization (```normalize```).
-- ```pb``` pack binary: Represents presence-absence information (from ```bit``` subcommand). 
-- ```pi```pack index: Index of the graph structure (```index```).  
+- ```pn``` pack normalized: Compressed representation of pack file after normalization (```gfa2bin normalize```).
+- ```pb``` pack binary: Represents presence-absence information (from ```gfa2bin bit``` subcommand). 
+- ```pi```pack index: Index of the graph structure (```gfa2bin index```).  
 
-
-I use .pc "pack compressed", .pi "pack index" and pb "pack binary" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
+**Note**  
+I use ```*.pc``` "pack compressed", .pi "pack index" and pb "pack binary" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
 
 ### Base input: Pack file (coverage information)
 Tab-separated file with ID, Node ID, Offset and Coverage.
@@ -48,7 +48,7 @@ OR:
 ./packing index -p test.pack -o test.pi 
 ```
 ### Compress
-This is the command if you want to compress your plain-text coverage file. 
+Compress a plain-text coverage file to "pack compressed". Mainly used to reduce the storage size of the coverage file. Maximum coverage in the compression file is 65535, can be lossy if coverage is higher.   
 
 ``` 
 ./packing compress -p pack.pack -o pack.pc 
@@ -109,7 +109,7 @@ Include zeros:
 
 
 ### Info
-Information about the index or binary file.
+Information about the index or binary/compressed file.
 ``` 
 ./packing info -i test.pi 
 ./packing info -c test.pc
@@ -118,7 +118,7 @@ Information about the index or binary file.
 
 
 ### View
-Show the compressed file in plain text. If the input is a compressed pack and a index, you receive a plain-text pack file (comparable with the original pack file). If you don't provide an index, there will be no sequence/node information, just a plain vector. 
+Show/convert the compressed file in plain text. If the input is a compressed pack and an index (see example), you receive a plain-text pack file (comparable with the original pack file). If you don't provide an index, there will be no sequence/node information, just a plain vector. 
 ``` 
 ./packing view -c test.pc -o test.pc.txt
 ./packing view -c test.pt -o test.pt.txt
@@ -126,7 +126,7 @@ Show the compressed file in plain text. If the input is a compressed pack and a 
 ```
 
 ### Stats
-Calculate some stats of (plain-text) pack files, compressed pack or threshold packs. Returns information about mean, median, standard deviation with and without zeros. If the input is sequence level, the output also includes node-level coverage information. 
+Calculate some stats of (plain-text) pack files, compressed pack or threshold packs. Returns information about mean, median, standard deviation and if zeros were removed or not. If the input is sequence level, the output also includes node-level coverage information. 
 ``` 
 ./packing stats -p test.pack -o test.packstats
 ./packing stats -c test.pc -i test.pi -o test.full.stats
@@ -149,7 +149,7 @@ The header of the file is also compressed (with zstd), therefore you can only re
 |----------------|-------------------------------|-------------------------------------------------|-------|
 | MB             | Magic bytes                   | [35, 38]                                        | 2     |
 | Sequence       | Is sequence                   | 1 (sequence), 0 (node)                          | 1     |
-| Include_all    | Include all entries           | 1 (yes), 0 (no)                                 | 1     |
+| Keep-zeros     | Keep-zeros                    | 1 (yes), 0 (no)                                 | 1     |
 | PA             | DataType                      | 0 = Bit, 1 = Compress, 2 = Normalized           | 1     |
 | Method         | Normalization method          | 0 (Nothing), 1 (Mean), 2(Median), 3(Percentile) | 1     |
 | fraction       | Fraction                      | Float (f32)                                     | 4     |

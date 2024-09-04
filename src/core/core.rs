@@ -177,7 +177,6 @@ impl PackCompact {
             warn!("Relative threshold is 0");
             return 0.0;
         }
-
         if !include_all {
             remove_zeros(a)
         }
@@ -190,8 +189,8 @@ impl PackCompact {
         if tt == Method::Percentile {
             thresh = percentile(a, relative as f64) as f32;
 
-            debug!("{} % Percentile is {}", relative * 100.0, thresh);
-            debug!("Working threshold is {}", thresh);
+            info!("{} % Percentile is {}", relative * 100.0, thresh);
+            info!("Working threshold is {}", thresh);
             return thresh;
         } else if tt == Method::Mean {
             thresh = mean(a) as f32;
