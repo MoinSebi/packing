@@ -5,8 +5,8 @@ pub enum Method {
     Mean,
     Median,
     Percentile,
-    Zscore,
     Nothing,
+    Absolute,
 }
 
 impl Method {
@@ -16,7 +16,7 @@ impl Method {
             "median" => Method::Median,
             "nothing" => Method::Nothing,
             "percentile" => Method::Percentile,
-            "zscore" => Method::Zscore,
+            "absolute" => Method::Absolute,
             _ => {
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
@@ -31,7 +31,7 @@ impl Method {
             1 => Method::Mean,
             2 => Method::Median,
             3 => Method::Percentile,
-            4 => Method::Zscore,
+            4 => Method::Absolute,
             _ => {
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
@@ -46,7 +46,7 @@ impl Method {
             Method::Median => "Median".to_string(),
             Method::Nothing => "Nothing".to_string(),
             Method::Percentile => "Percentile".to_string(),
-            Method::Zscore => "Zscore".to_string(),
+            Method::Absolute => "Absolute".to_string(),
         }
     }
 }

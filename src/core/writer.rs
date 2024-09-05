@@ -130,7 +130,7 @@ impl PackCompact {
             Method::Mean => buffer.push(1),
             Method::Median => buffer.push(2),
             Method::Percentile => buffer.push(3),
-            Method::Zscore => buffer.push(4),
+            Method::Absolute => buffer.push(4),
         }
 
         // Relative threshold

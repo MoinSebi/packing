@@ -32,7 +32,7 @@ fn normalize_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a1.pt")
         .arg("-a")
@@ -53,7 +53,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.sequence.a3.pt")
         .arg("-f")
@@ -124,7 +124,7 @@ fn normalize_node_a3() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.node.a3.pc")
         .arg("--node")
@@ -146,7 +146,7 @@ fn normalize_node_median() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.node.median.pc")
         .arg("--node")
@@ -173,7 +173,7 @@ fn normalize_node_r50() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.node.r50.pc")
         .arg("--node")
@@ -195,9 +195,11 @@ fn normalize_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
         .arg("-p")
-        .arg("data/example/9986.100k.txt")
+        .arg("data/example/9986.1k.txt")
         .arg("-o")
         .arg("data/test/9986.node.norm.r50.pc")
+        .arg("-m")
+        .arg("percentile")
         .arg("-f")
         .arg("0.50")
         .arg("-v");

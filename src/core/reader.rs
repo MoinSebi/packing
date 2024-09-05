@@ -5,11 +5,12 @@ use crate::normalize::helper::{byte_to_string, remove_prefix_filename};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
-use log::{debug, info};
+use log::{debug, info, warn};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::{fs, process};
+use clap::ArgMatches;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -79,50 +80,42 @@ pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
     p
 }
 
-pub fn read_input(matches: &clap::ArgMatches) -> (PackCompact, bool) {
-    let mut p: PackCompact = PackCompact::new();
-    let mut no_file = false;
-    let mut index_present = false;
-    // Determine Input format
+pub fn get_input_args(args: &ArgMatches, input: &str) -> String{
+    let a: String = args.value_of(input).unwrap_or("").parse().unwrap();
+    a
+}
 
-    if matches.is_present("pack")
-        | (matches.is_present("index") & matches.is_present("pack compressed"))
-        | matches.is_present("pack compressed")
-    {
-        // READ "NORMAL" PACK FILE
-        if matches.is_present("pack") {
-            if Path::new(matches.value_of("pack").unwrap()).exists() {
-                p = PackCompact::parse_pack(matches.value_of("pack").unwrap());
-                index_present = true;
-            } else {
-                no_file = true;
-            }
-        }
-        //READ COVERAGE AND META
-        else if matches.is_present("index") && matches.is_present("pack compressed") {
-            if Path::new(matches.value_of("index").unwrap()).exists()
-                & Path::new(matches.value_of("pack compressed").unwrap()).exists()
-            {
-                p = wrapper_compressed(
-                    matches.value_of("index").unwrap(),
-                    matches.value_of("pack compressed").unwrap(),
-                );
-                index_present = true;
-            }
-        } else if Path::new(matches.value_of("pack compressed").unwrap()).exists() {
-            p = PackCompact::read_wrapper(matches.value_of("pack compressed").unwrap());
+pub fn read_input2(pack_file: &str, index_file: &str, pc_file: &str) -> (PackCompact, bool) {
+    let mut p: PackCompact = PackCompact::new();
+
+    if !pack_file.is_empty(){
+        if Path::new(pack_file).exists(){
+            p = PackCompact::parse_pack(pack_file);
+            (p, true)
         } else {
-            no_file = true;
+            warn!("Pack file does not exist");
+            panic!("[-h, --help] for help information");
         }
-    } else {
-        no_file = true;
+    } else if !index_file.is_empty() && !pc_file.is_empty(){
+        if Path::new(index_file).exists() && Path::new(pc_file).exists(){
+            p = wrapper_compressed(index_file, pc_file);
+            (p, true)
+        } else {
+            warn!("Index or PC file does not exist");
+            panic!("[-h, --help] for help information");
+        }
+    } else if !pc_file.is_empty() {
+        if Path::new(pc_file).exists() {
+            p = PackCompact::read_wrapper(pc_file);
+            (p, false)
+        } else {
+            warn!("PC file does not exist");
+            panic!("[-h, --help] for help information");
+        }
+    }else {
+        warn!("No input file");
+        panic!("[-h, --help] for help information");
     }
-    if no_file {
-        info!("There is no input file");
-        info!("[-h, --help] for help information");
-        process::exit(0x0100);
-    }
-    (p, index_present)
 }
 
 impl PackCompact {

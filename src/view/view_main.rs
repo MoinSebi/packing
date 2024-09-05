@@ -6,11 +6,15 @@ use log::info;
 use std::io::Write;
 
 use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::read_input;
+use packing_lib::core::reader::{get_input_args, read_input2};
 
 pub fn view_main(matches: &ArgMatches) {
     info!("View main");
-    let (mut pc, index_present) = read_input(matches);
+    let input_pack = get_input_args(matches, "pack");
+    let input_index = get_input_args(matches, "index");
+    let input_pc = get_input_args(matches, "pack compressed");
+
+    let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
     let output = matches.value_of("output").unwrap_or("output.txt");
 
     view_wrapper(&mut pc, index_present, output);

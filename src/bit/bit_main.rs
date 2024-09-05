@@ -1,14 +1,18 @@
 use clap::ArgMatches;
 use log::{info, warn};
 use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::read_input;
+use packing_lib::core::reader::{get_input_args, read_input2};
 use packing_lib::core::writer::writer_compress_zlib;
 use packing_lib::normalize::convert_helper::Method;
 use packing_lib::normalize::helper::{vec2binary, vec2binary_f32};
 use std::process;
 
 pub fn bit_main(matches: &ArgMatches) {
-    let (mut pc, index_present) = read_input(matches);
+    let input_pack = get_input_args(matches, "pack");
+    let input_index = get_input_args(matches, "index");
+    let input_pc = get_input_args(matches, "pc");
+
+    let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
 
     // Check if the right data
     if pc.data_type == DataType::TypeBit {
@@ -39,19 +43,15 @@ pub fn bit_main(matches: &ArgMatches) {
         .parse()
         .unwrap();
     let mut relative_thresh: f32 = matches.value_of("fraction").unwrap_or("0").parse().unwrap();
-    let mut std: f32 = matches
-        .value_of("standard-deviation")
-        .unwrap_or("0")
-        .parse()
-        .unwrap();
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
-    let include_all = matches.is_present("non-covered");
+    let include_all = matches.is_present("keep-zeros");
     let mut want_sequence = !matches.is_present("node");
 
-    if !matches.is_present("absolute-threshold") && method == Method::Nothing {
-        absolute_thresh = 1;
+    if !matches.is_present("absolute-threshold") && method == Method::Nothing && relative_thresh == 0.0{
+        method = Method::Percentile;
+        relative_thresh = 0.1;
     }
 
     let real_thresh: f32;
@@ -70,12 +70,11 @@ pub fn bit_main(matches: &ArgMatches) {
     // Absolute threshold is adjusted is made with thresh
     if absolute_thresh == 0 {
         real_thresh =
-            PackCompact::get_threshold(&mut pc, include_all, relative_thresh, std, method);
+            PackCompact::get_threshold(&mut pc, include_all, relative_thresh, 0.0, method);
     } else {
         real_thresh = absolute_thresh as f32;
         method = Method::Nothing;
-        relative_thresh = 1.0;
-        std = 0.0;
+        relative_thresh = 0.0;
     }
 
     info!("New parameters");
@@ -87,7 +86,7 @@ pub fn bit_main(matches: &ArgMatches) {
     info!("Absolute threshold: {}", absolute_thresh);
     info!("Relative threshold: {}", relative_thresh);
     info!("Include all: {}", include_all);
-    info!("Standard deviation {}", std);
+    info!("Standard deviation {}", 0.0);
     info!("Real threshold: {}", real_thresh);
 
     // The vector we work with
@@ -112,7 +111,7 @@ pub fn bit_main(matches: &ArgMatches) {
         DataType::TypeBit,
         method,
         relative_thresh,
-        std,
+        0.0,
         real_thresh,
         number_entries as u32,
         &pc.name,

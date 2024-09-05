@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use log::info;
 use packing_lib::core::core::{DataType, PackCompact};
-use packing_lib::core::reader::read_input;
+use packing_lib::core::reader::{get_input_args, read_input2};
 use packing_lib::normalize::helper::{
     calculate_std_deviation, mean, median, remove_zero, remove_zero_f32,
 };
@@ -11,7 +11,11 @@ use std::io::{self, Write};
 
 pub fn stats_main(matches: &ArgMatches) {
     info!("Stats main");
-    let (mut pc, index_present) = read_input(matches);
+    let input_pack = get_input_args(matches, "pack");
+    let input_index = get_input_args(matches, "index");
+    let input_pc = get_input_args(matches, "pack compressed");
+
+    let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
     let output = matches.value_of("output").unwrap_or("-");
     if output == "-" {
         stats_wrapper(&mut pc, index_present, &mut None);
