@@ -7,6 +7,7 @@ pub enum Method {
     Percentile,
     Nothing,
     Absolute,
+    Compress,
 }
 
 impl Method {
@@ -14,9 +15,10 @@ impl Method {
         match s {
             "mean" => Method::Mean,
             "median" => Method::Median,
-            "nothing" => Method::Nothing,
+            "compress" => Method::Compress,
             "percentile" => Method::Percentile,
             "absolute" => Method::Absolute,
+            "nothing" => Method::Nothing,
             _ => {
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
@@ -32,6 +34,7 @@ impl Method {
             2 => Method::Median,
             3 => Method::Percentile,
             4 => Method::Absolute,
+            5 => Method::Compress,
             _ => {
                 warn!("Not one of the available methods");
                 warn!("Using default value: nothing");
@@ -47,6 +50,7 @@ impl Method {
             Method::Nothing => "Nothing".to_string(),
             Method::Percentile => "Percentile".to_string(),
             Method::Absolute => "Absolute".to_string(),
+            Method::Compress => "Compress".to_string(),
         }
     }
 }

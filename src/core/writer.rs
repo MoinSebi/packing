@@ -131,6 +131,7 @@ impl PackCompact {
             Method::Median => buffer.push(2),
             Method::Percentile => buffer.push(3),
             Method::Absolute => buffer.push(4),
+            Method::Compress => buffer.push(5),
         }
 
         // Relative threshold

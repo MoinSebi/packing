@@ -37,7 +37,7 @@ pub fn compress_main(matches: &ArgMatches) {
         true,
         true,
         DataType::TypeU16,
-        Method::Nothing,
+        Method::Compress,
         0.0,
         0.0,
         0.0,

@@ -41,42 +41,61 @@ pub fn bit_main(matches: &ArgMatches) {
         .value_of("absolute-threshold")
         .unwrap_or("0")
         .parse()
+        .expect("Failed to parse absolute threshold");
+    let mut fraction: f32 = matches
+        .value_of("fraction")
+        .unwrap_or("0.0")
+        .parse()
         .unwrap();
-    let mut relative_thresh: f32 = matches.value_of("fraction").unwrap_or("0").parse().unwrap();
+    if fraction < 0.0  {
+        warn!("Fraction is negative");
+        panic!("Exiting");
+    }
 
     let method_string = matches.value_of("method").unwrap_or("nothing");
     let mut method = Method::from_str(method_string);
     let include_all = matches.is_present("keep-zeros");
-    let mut want_sequence = !matches.is_present("node");
 
-    if !matches.is_present("absolute-threshold") && method == Method::Nothing && relative_thresh == 0.0{
-        method = Method::Percentile;
-        relative_thresh = 0.1;
-    }
+    let mut want_sequence = !matches.is_present("node");
 
     let real_thresh: f32;
 
-    // Checking the output base (sequence, nodes) or pack file
+    // This is default
+    if !matches.is_present("fraction") && method == Method::Nothing && !matches.is_present("absolute")  {
+        info!("No method or fraction given, using default");
+        method = Method::Percentile;
+        fraction = 0.1;
+    }
+    // Check is absolute threshold is given
+    if absolute_thresh > 0{
+        method = Method::Absolute;
+        fraction = 0.0;
+        real_thresh = absolute_thresh as f32;
+        // if not, give method and fraction
+    } else {
+        if method == Method::Nothing && fraction != 0.0 {
+            warn!("No method or fraction given");
+            panic!("Exiting");
+        } else if fraction == 0.0 {
+            warn!("Relative threshold is 0");
+            panic!("Exiting");
+        } else if method == Method::Nothing{
+            warn!("No method or fraction given");
+            panic!("Exiting");
+        } else {
+            real_thresh =
+                PackCompact::get_threshold(&mut pc, include_all, fraction, 0.0, method);
+        }
+    }
 
 
-    if !want_sequence && pc.is_sequence {
+    if matches.is_present("node") && pc.is_sequence {
         pc.calc_node_cov();
     }
 
     if !pc.is_sequence {
         want_sequence = false;
     }
-
-    // Absolute threshold is adjusted is made with thresh
-    if absolute_thresh == 0 {
-        real_thresh =
-            PackCompact::get_threshold(&mut pc, include_all, relative_thresh, 0.0, method);
-    } else {
-        real_thresh = absolute_thresh as f32;
-        method = Method::Nothing;
-        relative_thresh = 0.0;
-    }
-
     info!("New parameters");
     info!(
         "Feature: {}",
@@ -84,7 +103,7 @@ pub fn bit_main(matches: &ArgMatches) {
     );
     info!("Method: {}", method.to_string());
     info!("Absolute threshold: {}", absolute_thresh);
-    info!("Relative threshold: {}", relative_thresh);
+    info!("Relative threshold: {}", fraction);
     info!("Include all: {}", include_all);
     info!("Standard deviation {}", 0.0);
     info!("Real threshold: {}", real_thresh);
@@ -110,7 +129,7 @@ pub fn bit_main(matches: &ArgMatches) {
         include_all,
         DataType::TypeBit,
         method,
-        relative_thresh,
+        fraction,
         0.0,
         real_thresh,
         number_entries as u32,
