@@ -13,7 +13,7 @@ pub fn compress_main(matches: &ArgMatches) {
     let input_index = get_input_args(matches, "index");
     let input_pc = get_input_args(matches, "pc");
 
-    let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
+    let (mut pc, _index_present) = read_input2(&input_pack, &input_index, &input_pc);
 
     if pc.data_type != DataType::TypeU16 {
         info!("Your input is not a plain-text coverage file");
