@@ -6,7 +6,7 @@ use std::io::{BufWriter, Write};
 
 #[allow(dead_code)]
 /// Just writing bytes to a file
-pub fn writer_compress(buf: &Vec<u8>, filename: &str) {
+pub fn writer_compress(buf: &[u8], filename: &str) {
     let mut file = File::create(filename).expect("Not able to write ");
     file.write_all(buf).expect("Not able to write ");
 }

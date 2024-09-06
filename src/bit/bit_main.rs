@@ -37,7 +37,7 @@ pub fn bit_main(matches: &ArgMatches) {
         pc.name = matches.value_of("name").unwrap().to_string();
     }
 
-    let mut absolute_thresh: u16 = matches
+    let absolute_thresh: u16 = matches
         .value_of("absolute-threshold")
         .unwrap_or("0")
         .parse()
@@ -47,7 +47,7 @@ pub fn bit_main(matches: &ArgMatches) {
         .unwrap_or("0.0")
         .parse()
         .unwrap();
-    if fraction < 0.0  {
+    if fraction < 0.0 {
         warn!("Fraction is negative");
         panic!("Exiting");
     }
@@ -61,33 +61,32 @@ pub fn bit_main(matches: &ArgMatches) {
     let real_thresh: f32;
 
     // This is default
-    if !matches.is_present("fraction") && method == Method::Nothing && !matches.is_present("absolute")  {
+    if !matches.is_present("fraction")
+        && method == Method::Nothing
+        && !matches.is_present("absolute")
+    {
         info!("No method or fraction given, using default");
         method = Method::Percentile;
         fraction = 0.1;
     }
     // Check is absolute threshold is given
-    if absolute_thresh > 0{
+    if absolute_thresh > 0 {
         method = Method::Absolute;
         fraction = 0.0;
         real_thresh = absolute_thresh as f32;
         // if not, give method and fraction
+    } else if method == Method::Nothing && fraction != 0.0 {
+        warn!("No method or fraction given");
+        panic!("Exiting");
+    } else if fraction == 0.0 {
+        warn!("Relative threshold is 0");
+        panic!("Exiting");
+    } else if method == Method::Nothing {
+        warn!("No method or fraction given");
+        panic!("Exiting");
     } else {
-        if method == Method::Nothing && fraction != 0.0 {
-            warn!("No method or fraction given");
-            panic!("Exiting");
-        } else if fraction == 0.0 {
-            warn!("Relative threshold is 0");
-            panic!("Exiting");
-        } else if method == Method::Nothing{
-            warn!("No method or fraction given");
-            panic!("Exiting");
-        } else {
-            real_thresh =
-                PackCompact::get_threshold(&mut pc, include_all, fraction, 0.0, method);
-        }
+        real_thresh = PackCompact::get_threshold(&pc, include_all, fraction, 0.0, method);
     }
-
 
     if matches.is_present("node") && pc.is_sequence {
         pc.calc_node_cov();

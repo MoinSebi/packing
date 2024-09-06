@@ -210,45 +210,8 @@ impl PackCompact {
         thresh
     }
 
-    pub fn z_score(&mut self, include_all: bool) {
-        if self.normalized_coverage.is_empty() {
-            // "work_on" is the current data we do the normalizcation on
-            let mut work_on: Vec<u16> = self.coverage.clone();
-            if !include_all {
-                remove_zeros(&mut work_on);
-            }
-            self.zscore_run(&mut work_on)
-        } else {
-            let mut work_on: Vec<f32> = self.normalized_coverage.clone();
-            if !include_all {
-                remove_zeros(&mut work_on);
-            }
-            // relative is 0
-            self.zscore_run(&mut work_on)
-        }
-    }
 
-    pub fn zscore_run<T>(&mut self, a: &mut Vec<T>)
-    where
-        T: Copy + std::convert::From<u8> + std::ops::Add<Output = T>,
-        f64: std::convert::From<T>,
-    {
-        let mean = mean(a) as f32;
-        let std = calculate_std_deviation(a) as f32;
-        if self.normalized_coverage.is_empty() {
-            self.normalized_coverage = self
-                .coverage
-                .iter()
-                .map(|x| (*x as f64 - mean as f64) as f32 / std)
-                .collect();
-        } else {
-            self.normalized_coverage = self
-                .normalized_coverage
-                .iter()
-                .map(|x| (x - mean) / std)
-                .collect();
-        }
-    }
+
 
     pub fn print_meta(&self) {
         info!(

@@ -5,12 +5,12 @@ use crate::normalize::helper::{byte_to_string, remove_prefix_filename};
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
+use clap::ArgMatches;
 use log::{debug, info, warn};
+use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
-use std::{fs, process};
-use clap::ArgMatches;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -80,24 +80,24 @@ pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
     p
 }
 
-pub fn get_input_args(args: &ArgMatches, input: &str) -> String{
+pub fn get_input_args(args: &ArgMatches, input: &str) -> String {
     let a: String = args.value_of(input).unwrap_or("").parse().unwrap();
     a
 }
 
 pub fn read_input2(pack_file: &str, index_file: &str, pc_file: &str) -> (PackCompact, bool) {
-    let mut p: PackCompact = PackCompact::new();
+    let p: PackCompact;
 
-    if !pack_file.is_empty(){
-        if Path::new(pack_file).exists(){
+    if !pack_file.is_empty() {
+        if Path::new(pack_file).exists() {
             p = PackCompact::parse_pack(pack_file);
             (p, true)
         } else {
             warn!("Pack file does not exist");
             panic!("[-h, --help] for help information");
         }
-    } else if !index_file.is_empty() && !pc_file.is_empty(){
-        if Path::new(index_file).exists() && Path::new(pc_file).exists(){
+    } else if !index_file.is_empty() && !pc_file.is_empty() {
+        if Path::new(index_file).exists() && Path::new(pc_file).exists() {
             p = wrapper_compressed(index_file, pc_file);
             (p, true)
         } else {
@@ -112,7 +112,7 @@ pub fn read_input2(pack_file: &str, index_file: &str, pc_file: &str) -> (PackCom
             warn!("PC file does not exist");
             panic!("[-h, --help] for help information");
         }
-    }else {
+    } else {
         warn!("No input file");
         panic!("[-h, --help] for help information");
     }

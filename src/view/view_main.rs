@@ -22,7 +22,6 @@ pub fn view_main(matches: &ArgMatches) {
         panic!("[-h, --help] for help information");
     }
 
-
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
     let output = matches.value_of("output").unwrap_or("output.txt");
     println!("{:?}", pc.node_index[0]);
@@ -42,23 +41,27 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
     if pc.is_sequence {
         if pc.data_type == DataType::TypeBit {
             let mut node = 0;
+            writeln!(f, "seq.pos\tnode.id\tnode.offset\tcoverage")
+                .expect("Can not write view file (header)");
             writeln!(
                 f,
                 "{}\t{}\t{}\t{}",
-                "seq.pos", "node.id", "node.offset", "coverage"
-            ).expect("Can not write view file (header)");
-            writeln!(
-                f,
-                "{}\t{}\t{}\t{}",
-                0, pc.node_index[0], node, if {pc.bin_coverage[0] == true} {1} else {0}
-            );
+                0,
+                pc.node_index[0],
+                node,
+                if pc.bin_coverage[0] { 1 } else { 0 }
+            )
+            .expect("Can not write file");
             for x in 1..pc.bin_coverage.len() {
                 if pc.node_index[x] == pc.node_index[x - 1] {
                     node += 1;
                     writeln!(
                         f,
                         "{}\t{}\t{}\t{}",
-                        x, pc.node_index[x], node, if {pc.bin_coverage[x] == true} {1} else {0}
+                        x,
+                        pc.node_index[x],
+                        node,
+                        if pc.bin_coverage[x] { 1 } else { 0 }
                     )
                     .expect("Can not write file");
                 } else {
@@ -66,7 +69,10 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
                     writeln!(
                         f,
                         "{}\t{}\t{}\t{}",
-                        x, pc.node_index[x], node, if {pc.bin_coverage[x] == true} {1} else {0}
+                        x,
+                        pc.node_index[x],
+                        node,
+                        if pc.bin_coverage[x] { 1 } else { 0 }
                     )
                     .expect("Can not write file");
                 }
@@ -75,16 +81,14 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
             pc.write_pack(outfile);
         } else {
             let mut node = 0;
-            writeln!(
-                f,
-                "{}\t{}\t{}\t{}",
-                "seq.pos", "node.id", "node.offset", "coverage"
-            ).expect("Can not write view file (header)");
+            writeln!(f, "seq.pos\tnode.id\tnode.offset\tcoverage")
+                .expect("Can not write view file (header)");
             writeln!(
                 f,
                 "{}\t{}\t{}\t{}",
                 0, pc.node_index[0], node, pc.normalized_coverage[0]
-            ).expect("Can not write file");
+            )
+            .expect("Can not write file");
             for x in 1..pc.normalized_coverage.len() {
                 if pc.node_index[x] == pc.node_index[x - 1] {
                     node += 1;
@@ -93,7 +97,7 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
                         "{}\t{}\t{}\t{}",
                         x, pc.node_index[x], node, pc.normalized_coverage[x]
                     )
-                        .expect("Can not write file");
+                    .expect("Can not write file");
                 } else {
                     node = 0;
                     writeln!(
@@ -101,7 +105,7 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
                         "{}\t{}\t{}\t{}",
                         x, pc.node_index[x], node, pc.normalized_coverage[x]
                     )
-                        .expect("Can not write file");
+                    .expect("Can not write file");
                 }
             }
         }
@@ -111,11 +115,7 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
         let nodes: HashSet<_> = pc.node_index.iter().collect();
         let mut nodes: Vec<_> = nodes.into_iter().collect();
         nodes.sort();
-        writeln!(
-            f,
-            "{}\t{}",
-            "node", "coverage"
-        ).expect("Can not write view file (header)");
+        writeln!(f, "node\tcoverage").expect("Can not write view file (header)");
         if pc.data_type == DataType::TypeBit {
             for (i, x) in nodes.iter().enumerate() {
                 writeln!(f, "{}\t{}", x, pc.coverage[i]).expect("Can not write file");
@@ -126,10 +126,8 @@ pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
             }
         } else {
             for (i, x) in nodes.iter().enumerate() {
-                writeln!(f, "{}\t{}", x, pc.normalized_coverage[i])
-                    .expect("Can not write file");
+                writeln!(f, "{}\t{}", x, pc.normalized_coverage[i]).expect("Can not write file");
             }
         }
     }
-
 }

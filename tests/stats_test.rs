@@ -1,6 +1,5 @@
 use assert_cmd::assert::OutputAssertExt;
 use assert_cmd::Command;
-use predicates::prelude::predicate;
 use std::fs;
 
 #[test]
@@ -17,7 +16,6 @@ fn stats_p() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc");
     cmd.assert().success();
 
-
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
         .arg("-p")
@@ -26,7 +24,8 @@ fn stats_p() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc,stats");
     cmd1.unwrap().assert().success();
 
-    let _contents = fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
+    let _contents =
+        fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
 
     Ok(())
 }
@@ -44,7 +43,6 @@ fn stats_p3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc");
     cmd.assert().success();
 
-
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
         .arg("-p")
@@ -53,7 +51,8 @@ fn stats_p3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc,stats");
     cmd1.unwrap().assert().success();
 
-    let _contents = fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
+    let _contents =
+        fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
 
     Ok(())
 }
@@ -72,7 +71,6 @@ fn stats_p4() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc");
     cmd.assert().success();
 
-
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
         .arg("-p")
@@ -81,7 +79,8 @@ fn stats_p4() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc,stats");
     cmd1.unwrap().assert().success();
 
-    let _contents = fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
+    let _contents =
+        fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
 
     Ok(())
 }
@@ -100,7 +99,6 @@ fn stats_p2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc");
     cmd.assert().success();
 
-
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
         .arg("-p")
@@ -109,7 +107,8 @@ fn stats_p2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.stats.pc,stats");
     cmd1.unwrap().assert().success();
 
-    let _contents = fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
+    let _contents =
+        fs::read_to_string("data/test/packing.stats.pc,stats").expect("Unable to read file");
 
     Ok(())
 }

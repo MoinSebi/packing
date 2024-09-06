@@ -28,7 +28,6 @@ fn view_1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/9986.1k.pi");
     cmd1.unwrap().assert().success();
 
-
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("view")
         .arg("-c")
@@ -59,7 +58,6 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-a")
         .arg("3");
     cmd.assert().success();
-
 
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("index")

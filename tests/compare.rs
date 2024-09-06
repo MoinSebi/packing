@@ -1,6 +1,6 @@
-use std::fs;
 use assert_cmd::Command;
 use predicates::prelude::predicate;
+use std::fs;
 
 #[test]
 /// Test normalize subcommand with
@@ -35,7 +35,6 @@ fn compare_diff() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("compare")
         .arg("--compressed1")
@@ -48,7 +47,6 @@ fn compare_diff() -> Result<(), Box<dyn std::error::Error>> {
 
     fs::remove_file("data/test/packing.compare1.9986.node.a1.pc")?;
     fs::remove_file("data/test/packing.compare1.9986.node.a2.pc")?;
-
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
@@ -63,7 +61,6 @@ fn compare_diff() -> Result<(), Box<dyn std::error::Error>> {
 /// Modifier:
 ///     - absolute threshold: 2
 fn compare_same() -> Result<(), Box<dyn std::error::Error>> {
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("bit")
         .arg("-p")
@@ -76,8 +73,6 @@ fn compare_same() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
-
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("compare")
         .arg("--compressed1")
@@ -89,8 +84,6 @@ fn compare_same() -> Result<(), Box<dyn std::error::Error>> {
         .stderr(predicate::str::contains("Meta data is the same"));
 
     fs::remove_file("data/test/packing.compare2.9986.node.a2.pc")?;
-
-
 
     Ok(())
 

@@ -1,9 +1,6 @@
-use assert_cmd::assert::OutputAssertExt;
-use assert_cmd::Command;
-use std::fs;
-use std::io::Stderr;
-use std::process::{Command as c2, Stdio};
 use assert_cmd::cargo::CommandCargoExt;
+use assert_cmd::Command;
+use std::process::{Command as c2, Stdio};
 
 #[test]
 /// Test stats
@@ -23,9 +20,13 @@ fn info_v1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
-    let mut output = c2::cargo_bin("packing")?
-        .arg("info").arg("-c").arg("data/test/packing.info.9986.node.a2.pc").stderr(Stdio::piped()).stdout(Stdio::piped()).output()?;
+    let output = c2::cargo_bin("packing")?
+        .arg("info")
+        .arg("-c")
+        .arg("data/test/packing.info.9986.node.a2.pc")
+        .stderr(Stdio::piped())
+        .stdout(Stdio::piped())
+        .output()?;
 
     let as1 = String::from_utf8(output.stderr).unwrap();
     assert!(as1.contains("Bytes: 9\n"));
@@ -50,12 +51,15 @@ fn info_v2() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
-
-    let mut output = c2::cargo_bin("packing")?
-        .arg("info").arg("-c").arg("data/test/packing.info.9986.node.a2.pn").stderr(Stdio::piped()).stdout(Stdio::piped()).output()?;
+    let output = c2::cargo_bin("packing")?
+        .arg("info")
+        .arg("-c")
+        .arg("data/test/packing.info.9986.node.a2.pn")
+        .stderr(Stdio::piped())
+        .stdout(Stdio::piped())
+        .output()?;
 
     let as1 = String::from_utf8(output.stderr).unwrap();
     assert!(as1.contains("Entries: 67\n"));
     Ok(())
 }
-

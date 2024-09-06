@@ -18,7 +18,9 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     cmd1.unwrap().assert().success();
 
     let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info").arg("-i").arg("data/test/packing.index1.pi");
+    cmd2.arg("info")
+        .arg("-i")
+        .arg("data/test/packing.index1.pi");
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 67"));
     cmd2.assert()

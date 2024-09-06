@@ -99,8 +99,8 @@ pub fn mean_vec_u16_u16(val: &Vec<u16>) -> u16 {
 ///
 /// - u16 in
 /// - u16 out
-pub fn median_vec_u16_16(numbers: &Vec<u16>) -> f64 {
-    let mut num = numbers.clone();
+pub fn median_vec_u16_16(numbers: &[u16]) -> f64 {
+    let mut num: Vec<u16> = numbers.to_vec();
     num.sort();
     let mid = num.len() / 2;
     num[mid] as f64
@@ -129,7 +129,7 @@ pub fn byte_to_string(input: &[u8]) -> String {
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<u8> {
+pub fn normalize_u16_f32(input_vec: &[u16], absolute_thresh: &f32) -> Vec<u8> {
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push((*item as f32) / *absolute_thresh)
@@ -138,7 +138,7 @@ pub fn normalize_u16_f32(input_vec: &Vec<u16>, absolute_thresh: &f32) -> Vec<u8>
 }
 
 /// Normalize/scale the vector by a value
-pub fn normalize_f32_f32(input_vec: &Vec<f32>, absolute_thresh: &f32) -> Vec<u8> {
+pub fn normalize_f32_f32(input_vec: &[f32], absolute_thresh: &f32) -> Vec<u8> {
     let mut new_vec: Vec<f32> = Vec::new();
     for item in input_vec.iter() {
         new_vec.push(*item / *absolute_thresh)
