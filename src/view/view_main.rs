@@ -30,11 +30,11 @@ pub fn view_main(matches: &ArgMatches) {
         warn!("There is no index file.");
         panic!("Exiting");
     } else {
-        view_wrapper(&mut pc, index_present, output);
+        view_wrapper(&mut pc, output);
     }
 }
 
-pub fn view_wrapper(pc: &mut PackCompact, index_present: bool, outfile: &str) {
+pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
     let mut f = File::create(outfile).expect("Unable to create file");
     pc.print_meta();
     info!("View wrapper");

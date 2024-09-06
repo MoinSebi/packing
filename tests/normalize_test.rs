@@ -5,7 +5,7 @@ use assert_cmd::Command;
 /// Test normalize subcommand with
 ///
 /// Input: pack
-/// Output: pt
+/// Output: pn
 /// Type: sequence
 /// Threshold: 1
 fn normalize_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
@@ -14,7 +14,7 @@ fn normalize_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.a1.pt")
+        .arg("data/test/packing.normalize.9986.sequence.default.pn")
         .arg("-v");
     cmd.assert().success();
 
@@ -25,7 +25,7 @@ fn normalize_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Test normalize subcommand with
 ///
 /// Input: pack
-/// Output: pt
+/// Output: pn
 /// Type: sequence
 /// Threshold: 1
 fn normalize_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,7 +34,7 @@ fn normalize_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.a1.pt")
+        .arg("data/test/packing.normalize.9986.sequence.a3.pn")
         .arg("-a")
         .arg("3")
         .arg("-v");
@@ -55,7 +55,7 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.a3.pt")
+        .arg("data/test/packing.normalize.9986.sequence.median.f050.pn")
         .arg("-f")
         .arg("0.50")
         .arg("-m")
@@ -81,7 +81,7 @@ fn normalize_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.sequence.r50.pt")
+        .arg("data/test/packing.normalize.9986.sequence.a2.pn")
         .arg("-a")
         .arg("2")
         .arg("-v");
@@ -96,7 +96,7 @@ fn normalize_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
 /// Test normalize subcommand with
 ///
 /// Input: pack
-/// Output: pt
+/// Output: pn
 /// Type: sequence
 /// Threshold: 1
 fn normalize_node_a1() -> Result<(), Box<dyn std::error::Error>> {
@@ -105,7 +105,7 @@ fn normalize_node_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.a1.pt")
+        .arg("data/test/packing.normalize.9986.node.a1.pn")
         .arg("--node")
         .arg("-v");
     cmd.assert().success();
@@ -117,7 +117,7 @@ fn normalize_node_a1() -> Result<(), Box<dyn std::error::Error>> {
 /// Test normalize subcommand with
 ///
 /// Input: pack
-/// Output: pt
+/// Output: pn
 /// Type: sequence
 /// Threshold: 1
 fn normalize_node_a3() -> Result<(), Box<dyn std::error::Error>> {
@@ -126,7 +126,7 @@ fn normalize_node_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.a3.pc")
+        .arg("data/test/packing.normalize.9986.node.a3.pc")
         .arg("--node")
         .arg("-a")
         .arg("3")
@@ -148,7 +148,7 @@ fn normalize_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.median.pc")
+        .arg("data/test/packing.normalize.9986.node.median.f050.pc")
         .arg("--node")
         .arg("-f")
         .arg("0.5")
@@ -175,7 +175,7 @@ fn normalize_node_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.r50.pc")
+        .arg("data/test/packing.normalize.9986.node.a2.pc")
         .arg("--node")
         .arg("-a")
         .arg("2")
@@ -197,11 +197,11 @@ fn normalize_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.node.norm.r50.pc")
-        .arg("-m")
-        .arg("percentile")
+        .arg("data/test/packing.normalize.9986.node.norm.f050.pc")
         .arg("-f")
         .arg("0.50")
+        .arg("-m")
+        .arg("percentile")
         .arg("-v");
     cmd.assert().success();
     Ok(())

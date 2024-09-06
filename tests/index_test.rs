@@ -14,17 +14,17 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/9986.1k.pi");
+        .arg("data/test/packing.index1.pi");
     cmd1.unwrap().assert().success();
 
     let mut cmd2 = Command::cargo_bin("packing")?;
-    cmd2.arg("info").arg("-i").arg("data/test/9986.1k.pi");
+    cmd2.arg("info").arg("-i").arg("data/test/packing.index1.pi");
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 67"));
     cmd2.assert()
         .stderr(predicate::str::contains("Number of entries: 999"));
     cmd2.unwrap().assert().success();
-    fs::remove_file("data/test/9986.1k.pi")?;
+    fs::remove_file("data/test/packing.index1.pi")?;
 
     Ok(())
 }
@@ -40,17 +40,17 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-g")
         .arg("data/example/testGraph2.gfa")
         .arg("-o")
-        .arg("data/test/testGraph_complex.test.pi");
+        .arg("data/test/packing.index2.pi");
     cmd1.unwrap().assert().success();
 
     let mut cmd2 = Command::cargo_bin("packing")?;
     cmd2.arg("info")
         .arg("-i")
-        .arg("data/test/testGraph_complex.test.pi");
+        .arg("data/test/packing.index2.pi");
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 9"));
     cmd2.unwrap().assert().success();
-    fs::remove_file("data/test/testGraph_complex.test.pi")?;
+    fs::remove_file("data/test/packing.index2.pi")?;
 
     Ok(())
 }
