@@ -1,3 +1,4 @@
+use std::fmt::format;
 use crate::normalize::convert_helper::Method;
 
 use crate::core::core::{DataType, PackCompact};
@@ -25,7 +26,7 @@ pub fn zstd_decode(bytes: Vec<u8>) -> Vec<u8> {
 ///
 /// Check if file is available and readable. Returns buffer
 pub fn unpack_zstd_to_byte(filename: &str) -> Vec<u8> {
-    let mut file = File::open(filename).expect("no file found");
+    let mut file = File::open(filename).expect(format!("No file found {}", filename).as_str());
     let metadata = fs::metadata(filename).expect("unable to read metadata");
     let mut buffer = vec![0; metadata.len() as usize];
     // THIS IS A FUCKING JOKE

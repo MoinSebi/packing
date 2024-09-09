@@ -30,7 +30,7 @@ fn rename1() -> Result<(), Box<dyn std::error::Error>> {
 
     cmd3.arg("info")
         .arg("-c")
-        .arg("data/test/data/test/packing.rename.rename.pc");
+        .arg("data/test/packing.rename.rename.pc");
     cmd3.unwrap().assert().success();
     cmd3.assert().stderr(predicate::str::contains("test321313"));
 

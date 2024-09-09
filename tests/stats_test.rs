@@ -18,7 +18,7 @@ fn stats_p() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
-        .arg("-p")
+        .arg("-c")
         .arg("data/test/packing.stats.pc")
         .arg("-o")
         .arg("data/test/packing.stats.pc,stats");
@@ -45,7 +45,7 @@ fn stats_p3() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
-        .arg("-p")
+        .arg("-c")
         .arg("data/test/packing.stats.pc")
         .arg("-o")
         .arg("data/test/packing.stats.pc,stats");
@@ -73,7 +73,7 @@ fn stats_p4() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
-        .arg("-p")
+        .arg("-c")
         .arg("data/test/packing.stats.pc")
         .arg("-o")
         .arg("data/test/packing.stats.pc,stats");
@@ -101,7 +101,7 @@ fn stats_p2() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("stats")
-        .arg("-p")
+        .arg("-c")
         .arg("data/test/packing.stats.pc")
         .arg("-o")
         .arg("data/test/packing.stats.pc,stats");

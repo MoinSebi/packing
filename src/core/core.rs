@@ -145,11 +145,12 @@ impl PackCompact {
             result.push(mean(&node_mean) as f32);
             self.normalized_coverage = result
         }
+        self.length = self.normalized_coverage.len() as u32;
     }
 
     pub fn get_threshold(&self, include_all: bool, relative: f32, std: f32, tt: Method) -> f32 {
         if self.normalized_coverage.is_empty() {
-            // "work_on" is the current data we do the normalizcation on
+            // "work_on" is the current data we do the normalization on
             let mut work_on: Vec<u16> = self.coverage.clone();
             PackCompact::threshold(&mut work_on, include_all, relative, std, tt)
         } else {

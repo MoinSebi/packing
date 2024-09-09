@@ -59,11 +59,10 @@ pub fn bit_main(matches: &ArgMatches) {
     let mut want_sequence = !matches.is_present("node");
 
     let real_thresh: f32;
-
     // This is default
     if !matches.is_present("fraction")
         && method == Method::Nothing
-        && !matches.is_present("absolute")
+        && !matches.is_present("absolute-threshold")
     {
         info!("No method or fraction given, using default");
         method = Method::Percentile;
@@ -74,6 +73,9 @@ pub fn bit_main(matches: &ArgMatches) {
         method = Method::Absolute;
         fraction = 0.0;
         real_thresh = absolute_thresh as f32;
+        if matches.is_present("node") && pc.is_sequence {
+            pc.calc_node_cov();
+        }
         // if not, give method and fraction
     } else if method == Method::Nothing && fraction != 0.0 {
         warn!("No method or fraction given");
@@ -85,11 +87,10 @@ pub fn bit_main(matches: &ArgMatches) {
         warn!("No method or fraction given");
         panic!("Exiting");
     } else {
+        if matches.is_present("node") && pc.is_sequence {
+            pc.calc_node_cov();
+        }
         real_thresh = PackCompact::get_threshold(&pc, include_all, fraction, 0.0, method);
-    }
-
-    if matches.is_present("node") && pc.is_sequence {
-        pc.calc_node_cov();
     }
 
     if !pc.is_sequence {
