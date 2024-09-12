@@ -1,6 +1,6 @@
-use std::fs;
 use assert_cmd::Command;
-use packing_lib::core::reader::{unpack_zstd_to_byte, zstd_decode};
+use packing_lib::core::reader::unpack_zstd_to_byte;
+use std::fs;
 
 //--------------------------------------------------------------------------------------
 #[test]
@@ -209,7 +209,6 @@ fn bit_node_r50() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(a.len(), 9 + 86);
     fs::remove_file("data/test/packing.bit.9986.node.a2.pt")?;
 
-
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
@@ -237,7 +236,6 @@ fn bit_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(a.len(), 125 + 86);
 
     fs::remove_file("data/test/packing.bit.9986.node.norm.f050.pt")?;
-
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));

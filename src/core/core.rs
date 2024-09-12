@@ -211,9 +211,6 @@ impl PackCompact {
         thresh
     }
 
-
-
-
     pub fn print_meta(&self) {
         info!(
             "Entry type: {}",

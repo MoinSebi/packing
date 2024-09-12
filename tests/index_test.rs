@@ -27,7 +27,6 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
         .stderr(predicate::str::contains("Number of entries: 999"));
     cmd2.unwrap().assert().success();
 
-
     fs::remove_file("data/test/packing.index1.pi")?;
 
     Ok(())
@@ -54,7 +53,6 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 9"));
     cmd2.unwrap().assert().success();
-
 
     fs::remove_file("data/test/packing.index2.pi")?;
 

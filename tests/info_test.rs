@@ -1,6 +1,6 @@
-use std::fs;
 use assert_cmd::cargo::CommandCargoExt;
 use assert_cmd::Command;
+use std::fs;
 use std::process::{Command as c2, Stdio};
 
 #[test]
@@ -33,7 +33,6 @@ fn info_v1() -> Result<(), Box<dyn std::error::Error>> {
     assert!(as1.contains("Bytes: 9\n"));
 
     fs::remove_file("data/test/packing.info.9986.node.a2.pc")?;
-
 
     Ok(())
 }

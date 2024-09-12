@@ -39,7 +39,8 @@ fn view_1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.view.9986.1k.pi");
     cmd1.unwrap().assert().success();
 
-    let contents = fs::read_to_string("data/test/packing.view.9986.1k.view.txt").expect("Unable to read file");
+    let contents =
+        fs::read_to_string("data/test/packing.view.9986.1k.view.txt").expect("Unable to read file");
     assert!(contents.contains("354\t28\t0\t1"));
     fs::remove_file("data/test/packing.view.9986.sequence.a1.pt")?;
     fs::remove_file("data/test/packing.view.9986.1k.view.txt")?;
@@ -87,7 +88,6 @@ fn view_2() -> Result<(), Box<dyn std::error::Error>> {
     fs::remove_file("data/test/9986.1k.view2.txt")?;
     fs::remove_file("data/test/packing.view.9986.sequence.pn")?;
     fs::remove_file("data/test/packing.view.9986.1k2.pi")?;
-
 
     Ok(())
 }

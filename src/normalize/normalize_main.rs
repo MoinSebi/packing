@@ -95,7 +95,6 @@ pub fn normalize_main(matches: &ArgMatches) {
         real_thresh = PackCompact::get_threshold(&pc, include_all, fraction, 0.0, method);
     }
 
-
     if !pc.is_sequence {
         want_sequence = false;
     }
