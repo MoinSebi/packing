@@ -4,10 +4,10 @@ use predicates::prelude::predicate;
 use std::fs;
 
 #[test]
-/// Test info subcommand
+/// Test index subcommand
 ///
-/// Input: pack
-/// Output: pi (index)
+/// Index a pack file
+/// Then check by info command
 fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("index")
@@ -26,16 +26,18 @@ fn index_pack() -> Result<(), Box<dyn std::error::Error>> {
     cmd2.assert()
         .stderr(predicate::str::contains("Number of entries: 999"));
     cmd2.unwrap().assert().success();
+
+
     fs::remove_file("data/test/packing.index1.pi")?;
 
     Ok(())
 }
 
 #[test]
-/// Test info subcommand
+/// Test index subcommand
 ///
-/// Input: gfa
-/// Output: pi (index)
+/// Index a gfa file
+/// Then check by info command
 fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("packing")?;
     cmd1.arg("index")
@@ -52,6 +54,8 @@ fn index_gfa() -> Result<(), Box<dyn std::error::Error>> {
     cmd2.assert()
         .stderr(predicate::str::contains("Number of nodes: 9"));
     cmd2.unwrap().assert().success();
+
+
     fs::remove_file("data/test/packing.index2.pi")?;
 
     Ok(())

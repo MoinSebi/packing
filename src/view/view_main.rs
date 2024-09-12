@@ -23,7 +23,7 @@ pub fn view_main(matches: &ArgMatches) {
     }
 
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
-    let output = matches.value_of("output").unwrap_or("output.txt");
+    let output = matches.value_of("output").unwrap_or("full_pack.pack");
     println!("{:?}", pc.node_index[0]);
     if !index_present {
         warn!("There is no index file.");

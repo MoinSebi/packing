@@ -1,4 +1,6 @@
+use std::fs;
 use assert_cmd::Command;
+use packing_lib::core::reader::unpack_zstd_to_byte;
 
 //--------------------------------------------------------------------------------------
 #[test]
@@ -17,7 +19,9 @@ fn normalize_sequence_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("data/test/packing.normalize.9986.sequence.default.pn")
         .arg("-v");
     cmd.assert().success();
-
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.sequence.default.pn");
+    assert_eq!(a.len(), 999*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.sequence.default.pn")?;
     Ok(())
 }
 
@@ -39,6 +43,9 @@ fn normalize_sequence_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("3")
         .arg("-v");
     cmd.assert().success();
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.sequence.a3.pn");
+    assert_eq!(a.len(), 999*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.sequence.a3.pn")?;
 
     Ok(())
 }
@@ -62,7 +69,9 @@ fn convert_pack_sequence_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("median")
         .arg("-v");
     cmd.assert().success();
-
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.sequence.median.f050.pn");
+    assert_eq!(a.len(), 999*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.sequence.median.f050.pn")?;
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
@@ -87,6 +96,10 @@ fn normalize_sequence_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.sequence.a2.pn");
+    assert_eq!(a.len(), 999*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.sequence.a2.pn")?;
+
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }
@@ -110,6 +123,10 @@ fn normalize_node_a1() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-v");
     cmd.assert().success();
 
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.node.a1.pn");
+    assert_eq!(a.len(), 67*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.node.a1.pn")?;
+
     Ok(())
 }
 
@@ -126,12 +143,16 @@ fn normalize_node_a3() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/packing.normalize.9986.node.a3.pc")
+        .arg("data/test/packing.normalize.9986.node.a3.pn")
         .arg("--node")
         .arg("-a")
         .arg("3")
         .arg("-v");
     cmd.assert().success();
+
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.node.a3.pn");
+    assert_eq!(a.len(), 67*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.node.a3.pn")?;
 
     Ok(())
 }
@@ -148,7 +169,7 @@ fn normalize_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/packing.normalize.9986.node.median.f050.pc")
+        .arg("data/test/packing.normalize.9986.node.median.f050.pn")
         .arg("--node")
         .arg("-f")
         .arg("0.5")
@@ -156,6 +177,10 @@ fn normalize_node_median() -> Result<(), Box<dyn std::error::Error>> {
         .arg("median")
         .arg("-v");
     cmd.assert().success();
+
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.node.median.f050.pn");
+    assert_eq!(a.len(), 67*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.node.median.f050.pn")?;
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
@@ -175,12 +200,16 @@ fn normalize_node_r50() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/packing.normalize.9986.node.a2.pc")
+        .arg("data/test/packing.normalize.9986.node.a2.pn")
         .arg("--node")
         .arg("-a")
         .arg("2")
         .arg("-v");
     cmd.assert().success();
+
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.node.a2.pn");
+    assert_eq!(a.len(), 67*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.node.a2.pn")?;
 
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
@@ -197,13 +226,19 @@ fn normalize_nodes_norm() -> Result<(), Box<dyn std::error::Error>> {
         .arg("-p")
         .arg("data/example/9986.1k.txt")
         .arg("-o")
-        .arg("data/test/packing.normalize.9986.node.norm.f050.pc")
+        .arg("data/test/packing.normalize.9986.node.norm.f050.pn")
         .arg("-f")
         .arg("0.50")
         .arg("-m")
         .arg("percentile")
-        .arg("-v");
+        .arg("-v")
+        .arg("--node");
     cmd.assert().success();
+
+    let a = unpack_zstd_to_byte("data/test/packing.normalize.9986.node.norm.f050.pn");
+    assert_eq!(a.len(), 67*4 + 86);
+    fs::remove_file("data/test/packing.normalize.9986.node.norm.f050.pn")?;
+
     Ok(())
     //    cmd.assert().stdout(predicate::str::contains("Number of entries: 99999"));
 }

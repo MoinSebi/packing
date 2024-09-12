@@ -1,12 +1,10 @@
+use std::fs;
 use assert_cmd::assert::OutputAssertExt;
 use assert_cmd::Command;
 use predicates::prelude::predicate;
 
 #[test]
-/// Test stats
-///
-/// Input: gfa
-/// Output: pi (index)
+/// Test rename subcommand
 fn rename1() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("packing")?;
     cmd.arg("normalize")
@@ -34,8 +32,8 @@ fn rename1() -> Result<(), Box<dyn std::error::Error>> {
     cmd3.unwrap().assert().success();
     cmd3.assert().stderr(predicate::str::contains("test321313"));
 
-    //fs::remove_file("data/test/9986.1k.sequence.rename.pc")?;
-    //fs::remove_file("data/test/9986.sequence.pc")?;
+    fs::remove_file("data/test/packing.rename.pc")?;
+    fs::remove_file("data/test/packing.rename.rename.pc")?;
 
     Ok(())
 }

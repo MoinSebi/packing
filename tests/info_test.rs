@@ -1,3 +1,4 @@
+use std::fs;
 use assert_cmd::cargo::CommandCargoExt;
 use assert_cmd::Command;
 use std::process::{Command as c2, Stdio};
@@ -27,9 +28,13 @@ fn info_v1() -> Result<(), Box<dyn std::error::Error>> {
         .stderr(Stdio::piped())
         .stdout(Stdio::piped())
         .output()?;
-
     let as1 = String::from_utf8(output.stderr).unwrap();
+    assert!(as1.contains("Entries: 67\n"));
     assert!(as1.contains("Bytes: 9\n"));
+
+    fs::remove_file("data/test/packing.info.9986.node.a2.pc")?;
+
+
     Ok(())
 }
 
@@ -61,5 +66,9 @@ fn info_v2() -> Result<(), Box<dyn std::error::Error>> {
 
     let as1 = String::from_utf8(output.stderr).unwrap();
     assert!(as1.contains("Entries: 67\n"));
+    assert!(as1.contains("Bytes: 268\n"));
+
+    fs::remove_file("data/test/packing.info.9986.node.a2.pn")?;
+
     Ok(())
 }

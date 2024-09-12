@@ -29,6 +29,7 @@ fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::R
     match file {
         Some(f) => {
             f.write_all(content.as_bytes())?;
+            f.write_all(b"\n")?;
         }
         None => {
             println!("{}", content);
