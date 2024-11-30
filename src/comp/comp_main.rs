@@ -5,7 +5,7 @@ use packing_lib::core::reader::unpack_zstd_to_byte;
 use packing_lib::normalize::convert_helper::Method;
 
 pub fn comp_main(matches: &ArgMatches) {
-    info!("Compare main");
+    info!("Running 'packing comp'");
     let filename1 = matches.value_of("pack compressed1").unwrap();
     let filename2 = matches.value_of("pack compressed2").unwrap();
     let g: Vec<u8> = unpack_zstd_to_byte(filename1);
@@ -13,6 +13,8 @@ pub fn comp_main(matches: &ArgMatches) {
 
     let g: Vec<u8> = unpack_zstd_to_byte(filename2);
     let meta2 = PackCompact::get_meta(&g);
+
+    info!("Comparing meta data");
     compare_meta(&meta1, &meta2);
 }
 

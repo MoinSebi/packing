@@ -9,6 +9,7 @@ use std::process;
 
 /// How to compress a pack file
 pub fn compress_main(matches: &ArgMatches) {
+    info!("Running 'packing compress'");
     let input_pack = get_input_args(matches, "pack");
     let input_index = get_input_args(matches, "index");
     let input_pc = get_input_args(matches, "pc");
@@ -32,6 +33,7 @@ pub fn compress_main(matches: &ArgMatches) {
         process::exit(0x0100);
     }
 
+    info!("Compressing coverage file");
     let num_entries = pc.coverage.len();
     let mut buffer = PackCompact::file_header(
         true,
@@ -45,7 +47,9 @@ pub fn compress_main(matches: &ArgMatches) {
         &pc.name,
     );
 
+
     buffer.extend(vec_u16_to_u8(&pc.coverage));
 
+    info!("Writing compressed file");
     writer_compress_zlib(&buffer, matches.value_of("output").unwrap());
 }
