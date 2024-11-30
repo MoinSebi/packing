@@ -171,11 +171,8 @@ impl PackCompact {
         )
     }
 
-
     /// # Parse pack file
     pub fn parse_pack(filename: &str) -> Self {
-
-        let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
         let path = Path::new(filename);
 
         // Determine the reader based on the file extension
@@ -191,7 +188,6 @@ impl PackCompact {
 
         // Wrap the reader in a BufReader
         let reader = BufReader::new(reader);
-
 
         let mut pc: PackCompact = PackCompact::new();
         let mut count = 0;

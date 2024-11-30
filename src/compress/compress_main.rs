@@ -47,7 +47,6 @@ pub fn compress_main(matches: &ArgMatches) {
         &pc.name,
     );
 
-
     buffer.extend(vec_u16_to_u8(&pc.coverage));
 
     info!("Writing compressed file");

@@ -8,8 +8,6 @@ use std::io::Write;
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::{get_input_args, read_input2};
 
-
-
 /// # View main function
 pub fn view_main(matches: &ArgMatches) {
     info!("Running 'packing view'");
@@ -28,7 +26,6 @@ pub fn view_main(matches: &ArgMatches) {
     info!("Reading input files");
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
     let output = matches.value_of("output").unwrap_or("full_pack.pack");
-
 
     if !index_present {
         warn!("There is no index file.");

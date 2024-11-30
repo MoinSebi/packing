@@ -28,7 +28,6 @@ pub fn stats_main(matches: &ArgMatches) {
     }
 }
 
-
 /// Read input files
 fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::Result<()> {
     match file {
@@ -42,7 +41,6 @@ fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::R
     }
     Ok(())
 }
-
 
 /// # Stats wrapper
 pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Option<&mut File>) {
@@ -94,26 +92,24 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
                 chaotic_input(file2, &mut workon2, false, true);
             }
         }
+    } else if !pc.is_sequence {
+        let mut workon = pc.normalized_coverage.clone();
+        chaotic_input(file2, &mut workon, true, true);
+
+        remove_zero_f32(&mut workon);
+        chaotic_input(file2, &mut workon, false, true);
     } else {
-        if !pc.is_sequence {
-            let mut workon = pc.normalized_coverage.clone();
-            chaotic_input(file2, &mut workon, true, true);
+        let mut workon = pc.normalized_coverage.clone();
+        chaotic_input(file2, &mut workon, true, false);
 
-            remove_zero_f32(&mut workon);
-            chaotic_input(file2, &mut workon, false, true);
-        } else {
-            let mut workon = pc.normalized_coverage.clone();
-            chaotic_input(file2, &mut workon, true, false);
-
-            remove_zero_f32(&mut workon);
-            chaotic_input(file2, &mut workon, false, false);
-            if _index_present {
-                pc.calc_node_cov();
-                let mut workon2 = pc.normalized_coverage.clone();
-                chaotic_input(file2, &mut workon2, true, true);
-                remove_zero_f32(&mut workon2);
-                chaotic_input(file2, &mut workon2, false, true);
-            }
+        remove_zero_f32(&mut workon);
+        chaotic_input(file2, &mut workon, false, false);
+        if _index_present {
+            pc.calc_node_cov();
+            let mut workon2 = pc.normalized_coverage.clone();
+            chaotic_input(file2, &mut workon2, true, true);
+            remove_zero_f32(&mut workon2);
+            chaotic_input(file2, &mut workon2, false, true);
         }
     }
 }
