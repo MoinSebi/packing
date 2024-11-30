@@ -4,7 +4,7 @@ use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::{read_index, unpack_zstd_to_byte};
 use std::collections::HashSet;
 
-/// Information about the a index file
+/// Information about the index file
 pub fn info_index(filename: &str) {
     let nodes = read_index(filename);
     let nodes_hs: HashSet<u32> = nodes.iter().cloned().collect();
