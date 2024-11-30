@@ -8,8 +8,11 @@ use std::io::Write;
 use packing_lib::core::core::{DataType, PackCompact};
 use packing_lib::core::reader::{get_input_args, read_input2};
 
+
+
+/// # View main function
 pub fn view_main(matches: &ArgMatches) {
-    info!("View main");
+    info!("Running 'packing view'");
     let input_pack = get_input_args(matches, "pack");
     let input_index = get_input_args(matches, "index");
     let input_pc = get_input_args(matches, "pack compressed");
@@ -22,21 +25,24 @@ pub fn view_main(matches: &ArgMatches) {
         panic!("[-h, --help] for help information");
     }
 
+    info!("Reading input files");
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
     let output = matches.value_of("output").unwrap_or("full_pack.pack");
-    println!("{:?}", pc.node_index[0]);
+
+
     if !index_present {
         warn!("There is no index file.");
         panic!("Exiting");
     } else {
+        info!("Start view wrapper");
         view_wrapper(&mut pc, output);
     }
+    info!("Done")
 }
 
 pub fn view_wrapper(pc: &mut PackCompact, outfile: &str) {
     let mut f = File::create(outfile).expect("Unable to create file");
     pc.print_meta();
-    info!("View wrapper");
 
     if pc.is_sequence {
         if pc.data_type == DataType::TypeBit {
