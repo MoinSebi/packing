@@ -10,12 +10,15 @@ use std::fs::File;
 use std::io::{self, Write};
 
 pub fn stats_main(matches: &ArgMatches) {
-    info!("Stats main");
+    info!("Running 'packing stats'");
     let input_pack = get_input_args(matches, "pack");
     let input_index = get_input_args(matches, "index");
     let input_pc = get_input_args(matches, "pack compressed");
 
+    info!("Reading input files");
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
+
+    info!("Start stats wrapper");
     let output = matches.value_of("output").unwrap_or("-");
     if output == "-" {
         stats_wrapper(&mut pc, index_present, &mut None);
@@ -25,6 +28,8 @@ pub fn stats_main(matches: &ArgMatches) {
     }
 }
 
+
+/// Read input files
 fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::Result<()> {
     match file {
         Some(f) => {
@@ -38,13 +43,15 @@ fn write_to_file_or_stdout(file: &mut Option<&mut File>, content: &str) -> io::R
     Ok(())
 }
 
+
+/// # Stats wrapper
 pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Option<&mut File>) {
     write_to_file_or_stdout(file2, &format!("Name: {}", pc.name)).expect("Can not write file");
     write_to_file_or_stdout(
         file2,
         &format!("Input {}", if pc.is_sequence { "Sequence" } else { "Node" }),
     )
-    .expect("dasjdka");
+    .expect("Not able to write file");
     write_to_file_or_stdout(file2, "Stats\tZeros\tN/S\tValue").expect("Can not write file");
     if pc.data_type == DataType::TypeBit {
         info!("Is bit!");
@@ -88,7 +95,6 @@ pub fn stats_wrapper(pc: &mut PackCompact, _index_present: bool, file2: &mut Opt
             }
         }
     } else {
-        println!("Normalized values");
         if !pc.is_sequence {
             let mut workon = pc.normalized_coverage.clone();
             chaotic_input(file2, &mut workon, true, true);
