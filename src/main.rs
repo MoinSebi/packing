@@ -89,7 +89,6 @@ fn main() {
 
         .subcommand(App::new("rename")
             .about("Change the name of a compressed pack file. 'Normal' packs are excluded")
-            .version("0.1.0")
             .setting(AppSettings::ArgRequiredElseHelp)
 
             .help_heading("Input options")
@@ -97,7 +96,7 @@ fn main() {
                 .short('i')
                 .long("input")
                 .required(true)
-                .about("Pack file input")
+                .about("Input pack file (compressed)")
                 .takes_value(true))
 
             .help_heading("Modification options")
@@ -112,7 +111,7 @@ fn main() {
             .arg(Arg::new("output")
                 .short('o')
                  .long("output")
-                 .about("Output file")
+                 .about("Output pack file")
                  .required(true)
                  .takes_value(true)))
 
