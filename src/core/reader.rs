@@ -11,6 +11,7 @@ use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
+use zstd::Decoder;
 
 /// Helper function for zstd decoder
 /// https://docs.rs/zstd/0.1.9/zstd/struct.Decoder.html
@@ -80,6 +81,7 @@ pub fn wrapper_compressed(file_index: &str, file_pc: &str) -> PackCompact {
     p
 }
 
+/// Get the input arguments
 pub fn get_input_args(args: &ArgMatches, input: &str) -> String {
     let a: String = args.value_of(input).unwrap_or("").parse().unwrap();
     a
@@ -169,9 +171,28 @@ impl PackCompact {
         )
     }
 
+
+    /// # Parse pack file
     pub fn parse_pack(filename: &str) -> Self {
+
         let file = File::open(filename).expect("ERROR: CAN NOT READ FILE\n");
-        let reader = BufReader::new(file);
+        let path = Path::new(filename);
+
+        // Determine the reader based on the file extension
+        let reader: Box<dyn Read> = if path.extension().and_then(|s| s.to_str()) == Some("zst") {
+            // Open the compressed file and create a decoder
+            let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
+            Box::new(Decoder::new(file).expect("ERROR: CAN NOT DECODE FILE\n"))
+        } else {
+            // Open the plain text file
+            let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
+            Box::new(file)
+        };
+
+        // Wrap the reader in a BufReader
+        let reader = BufReader::new(reader);
+
+
         let mut pc: PackCompact = PackCompact::new();
         let mut count = 0;
         for (i, line) in reader.lines().enumerate() {
@@ -201,7 +222,7 @@ impl PackCompact {
         pc
     }
 
-    /// Wrapper for PC reading.
+    /// # Wrapper for PC reading.
     pub fn read_wrapper(file_pc: &str) -> Self {
         let buff = unpack_zstd_to_byte(file_pc);
         let meta = PackCompact::get_meta(&buff);
@@ -214,6 +235,7 @@ impl PackCompact {
         }
     }
 
+    /// # Read the binary pack file
     pub fn read_bin_coverage(buffer: &[u8]) -> Self {
         let (_kind, _include_all, _bin, _method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
@@ -238,6 +260,7 @@ impl PackCompact {
         }
     }
 
+    /// # Read the u16 compressed pack
     pub fn read_u16(buffer: &[u8]) -> Self {
         let (_kind, _include_all, _bin, method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
@@ -261,6 +284,7 @@ impl PackCompact {
         }
     }
 
+    /// # Read the f32 compressed pack
     pub fn read_f32(buffer: &[u8]) -> Self {
         let (_kind, _include_all, _bin, method, _relative, std, _thresh, _bytes, length, name) =
             PackCompact::get_meta(buffer);
