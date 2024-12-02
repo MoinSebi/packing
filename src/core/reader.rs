@@ -7,7 +7,7 @@ use bitvec::vec::BitVec;
 use byteorder::{BigEndian, ByteOrder};
 use clap::ArgMatches;
 use log::{debug, info, warn};
-use std::fs;
+use std::{fs, io};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
@@ -91,13 +91,8 @@ pub fn read_input2(pack_file: &str, index_file: &str, pc_file: &str) -> (PackCom
     let p: PackCompact;
 
     if !pack_file.is_empty() {
-        if Path::new(pack_file).exists() {
-            p = PackCompact::parse_pack(pack_file);
-            (p, true)
-        } else {
-            warn!("Pack file does not exist");
-            panic!("[-h, --help] for help information");
-        }
+        p = PackCompact::parse_pack(pack_file);
+        (p, true)
     } else if !index_file.is_empty() && !pc_file.is_empty() {
         if Path::new(index_file).exists() && Path::new(pc_file).exists() {
             p = wrapper_compressed(index_file, pc_file);
@@ -173,21 +168,30 @@ impl PackCompact {
 
     /// # Parse pack file
     pub fn parse_pack(filename: &str) -> Self {
-        let path = Path::new(filename);
 
-        // Determine the reader based on the file extension
-        let reader: Box<dyn Read> = if path.extension().and_then(|s| s.to_str()) == Some("zst") {
-            // Open the compressed file and create a decoder
-            let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
-            Box::new(Decoder::new(file).expect("ERROR: CAN NOT DECODE FILE\n"))
+        let reader: Box<dyn Read> = if filename == "-" {
+            // Read from standard input
+            Box::new(io::stdin())
         } else {
-            // Open the plain text file
-            let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
-            Box::new(file)
+            let path = Path::new(filename);
+            if path.exists() == false {
+                panic!("ERROR: FILE DOES NOT EXIST\n");
+            }
+
+            // Determine the reader based on the file extension
+            if path.extension().and_then(|s| s.to_str()) == Some("zst") {
+                // Open the compressed file and create a decoder
+                let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
+                Box::new(Decoder::new(file).expect("ERROR: CAN NOT DECODE FILE\n"))
+            } else {
+                // Open the plain text file
+                let file = File::open(path).expect("ERROR: CAN NOT READ FILE\n");
+                Box::new(file)
+            }
         };
 
         // Wrap the reader in a BufReader
-        let reader = BufReader::new(reader);
+        let mut reader = BufReader::new(reader);
 
         let mut pc: PackCompact = PackCompact::new();
         let mut count = 0;
@@ -214,7 +218,6 @@ impl PackCompact {
             "{} entries have been truncated (have a coverage above 65,535).",
             count
         );
-        pc.print_meta();
         pc
     }
 
