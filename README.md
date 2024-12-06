@@ -1,8 +1,26 @@
 # Packing - Compressing table-like pack format
-Tool for compressed representation of coverage information from a tabular (plain-text) pack file (e.g. VG pack).
-Can either be used for reduced storage or/and in combination with [gfa2bin](https://github.com/MoinSebi/gfa2bin).  
+This tool was developed to convert and compress coverage information from a plain-text tabular pack file (e.g. VG pack). The main goal is to reduce the storage size of the coverage information. It is well integrated into [gfa2bin](https://github.com/MoinSebi/gfa2bin) conversion tool for graph-based genome-wide associations studies (GWAS).   
 
-**Data fromats**  
+### Inputs 
+The general input for the ````packing```` is a coverage file in *pack* format. The format is a tab-separated file with sequence position (seq.pos), node ID (node.id), node offset (node.offset, 0-based) and coverage. An example is shown below.  
+Sequence-to-graph alignments in GAF and GAM format can be converted to pack format using [VG](https://github.com/vgteam/vg) or [GAF2PACK](https://github.com/MoinSebi/gaf2pack). There are several methods to align sequences to graphs, for example [VG](https://github.com/vgteam/vg) or [GraphAligner](https://github.com/maickrau/GraphAligner). Alternatively you can align to the collection of sequences and inject [VG command](https://github.com/vgteam/vg) the linear alignments to the graph. 
+
+#### Example (from data/example_data/9986.1k.txt)
+
+| seq.pos | node.id   | node.offset  | coverage |
+|---------|-----------|--------------|----------|
+| 423     | 30        | 61           | 6        |
+| 424     | 30        | 62           | 0        |
+| 425     | 30        | 63           | 2        |
+| 426     | 30        | 64           | 2        |
+| 427     | 31        | 0            | 1        |
+| 428     | 32        | 0            | 1        |
+| 429     | 33        | 0            | 1        |
+| 430     | 33        | 1            | 1        |
+| 431     | 33        | 2            | 0        |
+
+
+**Data formats**  
 - ```pc``` pack compressed: Compressed representation of a pack file (```compress```. 
 - ```pn``` pack normalized: Compressed representation of pack file after normalization (```gfa2bin normalize```).
 - ```pb``` pack binary: Represents presence-absence information (from ```gfa2bin bit``` subcommand). 
