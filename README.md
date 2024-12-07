@@ -20,31 +20,15 @@ Sequence-to-graph alignments in GAF and GAM format can be converted to pack form
 | 431     | 33        | 2            | 0        |
 
 
-**Data formats**  
-- ```pc``` pack compressed: Compressed representation of a pack file (```compress```. 
-- ```pn``` pack normalized: Compressed representation of pack file after normalization (```gfa2bin normalize```).
-- ```pb``` pack binary: Represents presence-absence information (from ```gfa2bin bit``` subcommand). 
-- ```pi```pack index: Index of the graph structure (```gfa2bin index```).  
+**Output data formats**  
+- ```pc``` pack compressed: Compressed representation of a pack file (```packing compress```). 
+- ```pn``` pack normalized: Compressed representation of pack file after normalization (```packing normalize```).
+- ```pb``` pack binary: Represents presence-absence information (from ```packing bit``` subcommand). 
+- ```pi```pack index: Index of the graph structure (```packing index```).  
 
 **Note**  
-I use ```*.pc``` "pack compressed", .pi "pack index" and pb "pack binary" as suffix, but use whatever you want. Please consider the different coverage profiles in graph compared to flat references (see [here](./images/cov_dis.png)). 
-
-### Base input: Pack file (coverage information)
-Tab-separated file with ID, Node ID, Offset and Coverage.
-
-Example (from data/example_data/9986.1k.txt)
-
-| ID  | Node ID | Off-set (0-based) | coverage |
-|-----|---------|-------------------|----------|
-| 423 | 30      | 61                | 6        |
-| 424 | 30      | 62                | 0        |
-| 425 | 30      | 63                | 2        |
-| 426 | 30      | 64                | 2        |
-| 427 | 31      | 0                 | 1        |
-| 428 | 32      | 0                 | 1        |
-| 429 | 33      | 0                 | 1        |
-| 430 | 33      | 1                 | 1        |
-| 431 | 33      | 2                 | 0        |
+1. The suffix is arbitrary, but helped me to distinguish between the different method outputs. 
+2. Please consider that the coverage profiles with graphs is very different flat references. Many parts of the graph are not covered at all (see [here](./images/cov_dis.png)). 
 
 ___ 
 ## Install: 
@@ -54,8 +38,11 @@ git clone https://github.com/MoinSebi/packing
 cd packing
 cargo build --release
 ```
+---
 ___
 ## Usage
+
+---
 ### Index
 
 Index a graph or (plain-text) pack file. Index is needed if you want to convert reconvert from pc to pack.  
@@ -65,60 +52,79 @@ Index a graph or (plain-text) pack file. Index is needed if you want to convert 
 OR: 
 ./packing index -p test.pack -o test.pi 
 ```
+
+---
 ### Compress
-Compress a plain-text coverage file to "pack compressed". Mainly used to reduce the storage size of the coverage file. Maximum coverage in the compression file is 65535, can be lossy if coverage is higher.   
+Compress a plain-text coverage file to "pack compressed". Mainly used to reduce the storage size of the coverage file. Maximum coverage in the resulting files is 65535, higher coverages are truncated.   
 
 ``` 
 ./packing compress -p pack.pack -o pack.pc 
 ```
 
 
-### Conversion 
-#### Bit 
-Create a presence-absence file (binary, ```pb```) based on a custom threshold. Convert a (plain-text) pack file, a compressed pack (```pc```) or a normalized pack (```pn```) to a binary pack (```pt```). An index file is needed if you input other than plain-text file for the conversion. Without any additional parameters expect in and output, the threshold will be set to 1. Values which are equal or above the threshold will be set to 1, all others to 0.
+### Conversion methods
 
-#### Normalization
-Create a normalized coverage file (normalize, ```pn```) based on a custom threshold. Parameters and functionality is similar to the ```bit``` subcommand expect that the output is a value-based pack file (normalized). 
+### General information
+Use a threshold to normalize the coverage or create a presence-absence representation.  
 
-**Thresholds**  
-A threshold is used to perform a normalization or presence-absence conversion. The main modifications of the threshold are  
-- Absolute threshold ````-a````: A plain number, which will be used as a threshold and is the highest priority.
-- Method ```-m```: Dynamic computation of the threshold based on a method [mean, median, percentile]. 
+
+#### Thresholds
+Absolute threshold: 
+- ```-a```: A plain number, which will be used as a threshold and is the highest priority.
+
+Dynamic threshold:   
+- Method ```-m```: Dynamic computation of the threshold based on a method [mean, median, percentile].
 - Fraction ```-f```: A relative threshold (fraction) which will be multiplied with the computed value.
-- Standard deviation ```-s```: Multiplier for the standard deviation.
 
-**Comment**  
-If an absolute threshold is provided, other inputs will be ignored. If a method is provided with ```-m```, we will firstly calculate a value (mean or median) which will later modified by standard deviation and fraction.   
-The standard deviation input is a scaling factor. We calculate the single standard deviation and scale it by ```-s``` input, which will be reduced by the previous calculated mean or median. The result will be scaled by the relative threshold ```-r```. Default values of standard deviation is 0.0, relative threshold is 1.0.If
-
-**Percentile method**  
-Percentile method will be used directly and is only affected by the ```-f``` parameter (f = 0.5 -> 50% percentile)
+**Computation**  
+If an absolute threshold is provided, other inputs will be ignored. If a method is provided with ```-m```, we will firstly calculate the specific value (mean or median) which will then scaled by the fraction ```-f```. 
 
 **Excluding Zeros**  
 Any of these "dynamic" methods can include all entries (default: off, activate with ```--non-covered```) or only the covered entries. The coverage profile on graphs is different compared to flat references, therefore it might be useful to exclude the zeros.
 
+**Nodes and sequence**
+If convert your data can either be on sequence and node level, which is also stored in the header of the file. By default we use the sequence based format, but you can change it with the ```--node``` flag.
 
 **Example computation of threshold**  
 Coverage is: 1, 1, 2, 8, 4, 4  
 Mean: 4  
 Fraction: 0.5
-Standard deviation: 0
-Real threshold: 2  
+Calculated (real) threshold: 2  
 Normalized coverage (e.g. pc): 0, 0, 1, 4, 2, 2  
-Binary version (e.g. pt): 0, 0, 1, 1, 1, 1  
+Binary version (e.g. pt): 0, 0, 1, 1, 1, 1
 
-**Nodes and sequence**
-If convert your data your data can either be on sequence and node level, which is also stored in the header of the file. By default we use the sequence based format, but you can change it with the ```--node``` flag.
+#### Default threshold
+Without any additional parameters, the default is dynamic threshold with 10% percentile. Values which are equal or above the threshold will be set to 1, all others to 0.
+
+#### Inputs
+- ```pack```  Plain-text pack file
+- ```pc``` Compressed pack
+- ```pn```Normalized pack file
+An index file is needed if you input other than plain-text file for the conversion.
+
+---
+### Bit 
+Create a presence-absence file (binary, ```pb```) based on a custom threshold. 
+
+**Example**
+```
+./packing bit -p test.pack -o test.pt -a 5 
+
+On nodes: 
+./packing bit -i test.pi -c test.pc --node -o pack.out
+
+```
+
+---
+### Normalization
+Create a normalized coverage file (normalize, ```pn```) based on a custom threshold. Parameters and functionality is similar to the ```bit``` subcommand expect that the output is a value-based pack file (normalized). 
+
 
 
 
 **Example** 
 ```
-./packing bit -p test.pack -o test.pt -a 5 
 ./packing normlaize -p test.pack -o test.pt -a 5  
-
-On nodes: 
-./packing bit -i test.pi -c test.pc --node -o pack.out
 
 Include zeros:   
 ./packing normalize -i test.pi -c test.pc --non-covered -o pack.out 
