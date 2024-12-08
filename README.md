@@ -40,10 +40,10 @@ cargo build --release
 ```
 ---
 ___
-## Usage
+# Usage
 
 ---
-### Index
+## *Index*
 
 Index a graph or (plain-text) pack file. Index is needed if you want to convert reconvert from pc to pack.  
 
@@ -54,15 +54,15 @@ OR:
 ```
 
 ---
-### Compress
-Compress a plain-text coverage file to "pack compressed". Mainly used to reduce the storage size of the coverage file. Maximum coverage in the resulting files is 65535, higher coverages are truncated.   
+## *Compress*
+Compress a plain-text coverage file to "pack compressed". Mainly used to reduce the storage size of the coverage file. Maximum coverage in these files is 6553. Higher coverages are truncated.   
 
 ``` 
 ./packing compress -p pack.pack -o pack.pc 
 ```
 
-
-### Conversion methods
+---
+## Conversion methods
 
 ### General information
 Use a threshold to normalize the coverage or create a presence-absence representation.  
@@ -103,10 +103,10 @@ Without any additional parameters, the default is dynamic threshold with 10% per
 An index file is needed if you input other than plain-text file for the conversion.
 
 ---
-### Bit 
+## *Bit* 
 Create a presence-absence file (binary, ```pb```) based on a custom threshold. 
 
-**Example**
+**Example usage**
 ```
 ./packing bit -p test.pack -o test.pt -a 5 
 
@@ -116,13 +116,10 @@ On nodes:
 ```
 
 ---
-### Normalization
+## *Normalization*
 Create a normalized coverage file (normalize, ```pn```) based on a custom threshold. Parameters and functionality is similar to the ```bit``` subcommand expect that the output is a value-based pack file (normalized). 
 
-
-
-
-**Example** 
+**Example usage** 
 ```
 ./packing normlaize -p test.pack -o test.pt -a 5  
 
@@ -131,32 +128,38 @@ Include zeros:
 ```
 
 
-
-### Info
-Information about the index or binary/compressed file.
+# Additional methods
+### *Info*
+Information about the index or binary/compressed file. This consists of mostly meta data, e.g. file "type", thresholds and number of entries. 
 ``` 
 ./packing info -i test.pi 
 ./packing info -c test.pc
 ./packing info -c test.pt
 ```
 
-
+---
 ### View
-Show/convert the compressed file in plain text. If the input is a compressed pack and an index (see example), you receive a plain-text pack file (comparable with the original pack file). If you don't provide an index, there will be no sequence/node information, just a plain vector. 
+Show/convert the compressed file in plain text. If the input is a compressed pack (```compress``` output) and an index (see example), you receive a plain-text pack file (comparable with the original pack file). If you don't provide an index, there will be no sequence/node information, just a plain (coverage) vector. 
+
+#### Example usage
 ``` 
 ./packing view -c test.pc -o test.pc.txt
 ./packing view -c test.pt -o test.pt.txt
 ./packing view -c test.pc -i test.pi -o test.pc.full.txt
 ```
 
+---
 ### Stats
-Calculate some stats of (plain-text) pack files, compressed pack or threshold packs. Returns information about mean, median, standard deviation and if zeros were removed or not. If the input is sequence level, the output also includes node-level coverage information. 
+Calculate several stats of ```pack```, ```pc```, ```pt``` and ```pn```. Returns information about mean, median, standard deviation and if zeros were removed or not. If the input is sequence level, the output also includes node-level coverage information. 
+
+#### Example usage
 ``` 
 ./packing stats -p test.pack -o test.packstats
 ./packing stats -c test.pc -i test.pi -o test.full.stats
 ./packing stats -c test.pt -o test.pt.stats
 ```
 
+---
 ### Compare
 Compare two pack files. This function is helpful if you want to know if two normalized or presence-absence files have been processed with the same parameter sets.  
 ```
@@ -194,6 +197,5 @@ In total: 86 bytes
   
 
 ## TODO
-- [ ] Z-score normalization
-- [ ] Robust normalization
+- Node to default in every function
 
