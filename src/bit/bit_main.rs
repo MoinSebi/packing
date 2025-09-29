@@ -10,7 +10,7 @@ use std::process;
 pub fn bit_main(matches: &ArgMatches) {
     let input_pack = get_input_args(matches, "pack");
     let input_index = get_input_args(matches, "index");
-    let input_pc = get_input_args(matches, "pc");
+    let input_pc = get_input_args(matches, "pack compressed");
 
     let (mut pc, index_present) = read_input2(&input_pack, &input_index, &input_pc);
 
